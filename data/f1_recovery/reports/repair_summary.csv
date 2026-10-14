@@ -2,6 +2,6 @@
 sessions.csv,87,0,PASS,0
 drivers.csv,1771,853,PASS,0
 laps.csv,97018,21597,REVIEW,195
-stints.csv,5040,7,REVIEW,318
+stints.csv,5040,7,REVIEW,12
 weather.csv,13928,0,PASS,0
 pit.csv,3029,0,REVIEW,164
