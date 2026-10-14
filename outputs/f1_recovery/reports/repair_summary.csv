@@ -1,0 +1,7 @@
+﻿file,rows,changes,status
+sessions.csv,87,0,UNCHANGED
+drivers.csv,1771,1771,REPAIRED
+laps.csv,97018,21597,REPAIRED
+stints.csv,5040,7,REPAIRED
+weather.csv,13928,0,UNCHANGED
+pit.csv,3029,0,UNCHANGED
