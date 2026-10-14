@@ -18,3 +18,7 @@
 - `compound`는 허용 코드 목록을 사용하고 결측은 `UNKNOWN`으로 표시합니다.
 - 스틴트는 `session_key + driver_number + stint_number`를 기준으로 관리하며 `lap_end < lap_start`와 실제 구간 중첩을 검증합니다.
 - `segments_sector_1~3`은 목록 원문을 보존하며 임의로 JSON으로 변환하지 않습니다.
+
+## 통합 PDF
+
+CSV와 Markdown 내용을 한 번에 확인하려면 [F1 AI 데이터 표준사전 PDF](./F1_AI_data_standard_dictionary.pdf)를 열어보세요.
