@@ -31,3 +31,14 @@
 ## 복구 관리 컬럼
 
 복구 결과에는 `original_*`, `repair_status`, `repair_method`, `repair_confidence`, `repair_reason`을 유지한다. 원본값은 덮어쓰지 않으며, 추정값은 직접 조인값과 구분한다.
+
+## 오염코드 적용 규칙
+
+- 하나의 결함은 `diagnostic_code` 하나로 기록하고, 한 행에 여러 결함이 있으면 진단 상세 테이블에 별도 행으로 기록한다.
+- `MISSING_*`는 결측 자체를 의미하며, 복구 성공 여부는 `diagnostic_status`로 분리한다.
+- `LONG_*`, `INVALID_*`, `OVERLAPPING_*`은 자동으로 정상값으로 바꾸지 않고 검토 이슈로 남긴다.
+- `DQ001` 국가 코드 결측은 동일 `session_key`의 세션 국가 코드로 복구할 수 있을 때만 `REPAIRED`로 처리한다.
+- `DQ003`, `DQ004` 수치 결측은 동일 세션·드라이버 중앙값을 우선하고, 없을 때 세션 중앙값을 사용한다.
+- `DQ008` 컴파운드 결측은 실제 타이어 종류를 추정하지 않고 `UNKNOWN`으로 표시한다.
+- `DQ010`은 `lap_end < lap_start`, `DQ011`은 `next lap_start < previous lap_end`일 때 발생한다.
+- 진단 상태는 `OPEN`(미처리), `REPAIRED`(복구 완료), `ACCEPTED`(오염을 업무상 허용), `WAIVED`(검토 후 제외)로 통제한다.

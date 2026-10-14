@@ -16,3 +16,12 @@ REPAIR_STATUS,REPAIRED,REPAIRED,복구됨,복구 로직으로 값 변경,Y
 CONFIDENCE,HIGH,HIGH,높음,직접 키 조인 또는 명확한 원천값,Y
 CONFIDENCE,MEDIUM,MEDIUM,중간,그룹 통계 기반 추정,Y
 CONFIDENCE,LOW,LOW,낮음,근거 부족 상태의 명시적 표시,Y
+DIAGNOSTIC_STATUS,OPEN,OPEN,미처리,진단 후 조치 전,Y
+DIAGNOSTIC_STATUS,REPAIRED,REPAIRED,복구 완료,복구 로직 적용 완료,Y
+DIAGNOSTIC_STATUS,ACCEPTED,ACCEPTED,허용,오염을 확인했으나 업무상 허용,Y
+DIAGNOSTIC_STATUS,WAIVED,WAIVED,제외,검토 후 품질 대상에서 제외,Y
+REPAIR_METHOD,NONE,NONE,복구 없음,원본값 유지,Y
+REPAIR_METHOD,session_key_join,session_key_join,세션 조인,동일 세션 키로 복구,Y
+REPAIR_METHOD,median_session_driver_or_session,median_session_driver_or_session,중앙값 추정,세션·드라이버 우선 중앙값,Y
+REPAIR_METHOD,explicit_unknown,explicit_unknown,미상 표시,UNKNOWN 코드로 명시,Y
+REPAIR_METHOD,unresolved,unresolved,미복구,근거 부족으로 원본 결측 유지,Y

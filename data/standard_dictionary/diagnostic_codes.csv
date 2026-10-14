@@ -1,0 +1,13 @@
+diagnostic_code,diagnostic_name,korean_name,applies_to,condition,default_action,default_confidence
+DQ001,MISSING_COUNTRY_CODE,국가 코드 결측,drivers.country_code,값이 NULL 또는 공백,session_key 조인 복구,HIGH
+DQ002,MISSING_LAP_DATE_START,랩 시작 시각 결측,laps.date_start,값이 NULL 또는 공백,복구 보류 및 결측 기록,LOW
+DQ003,MISSING_SPEED,속도 측정값 결측,laps.i1_speed|laps.i2_speed|laps.st_speed,값이 NULL 또는 공백,세션·드라이버 중앙값 복구,MEDIUM
+DQ004,MISSING_SECTOR_DURATION,섹터 소요시간 결측,laps.duration_sector_1|laps.duration_sector_2|laps.duration_sector_3,값이 NULL 또는 공백,세션·드라이버 중앙값 복구,MEDIUM
+DQ005,MISSING_SEGMENT_STATUS,미니 섹터 상태 결측,laps.segments_sector_1|laps.segments_sector_2|laps.segments_sector_3,값이 NULL 또는 공백,원문 결측 유지,LOW
+DQ006,LONG_LAP_DURATION,비정상 장시간 랩,laps.lap_duration,값이 300초 초과,자동 수정 없이 검토 이슈 기록,LOW
+DQ007,LONG_PIT_DURATION,비정상 장시간 피트,pit.pit_duration,값이 180초 초과,자동 수정 없이 검토 이슈 기록,LOW
+DQ008,MISSING_COMPOUND,컴파운드 결측,stints.compound,값이 NULL 또는 공백,UNKNOWN 코드 부여,LOW
+DQ009,MISSING_STINT_BOUNDARY,스틴트 경계 결측,stints.lap_start|stints.lap_end,값이 NULL 또는 공백,복구 보류 및 결측 기록,LOW
+DQ010,INVALID_STINT_RANGE,스틴트 종료 범위 오류,stints.lap_end,lap_end < lap_start,수정 전 검토 이슈 기록,LOW
+DQ011,OVERLAPPING_STINT,스틴트 구간 중첩,stints.lap_start|stints.lap_end,next lap_start < previous lap_end,수정 전 검토 이슈 기록,LOW
+DQ012,UNRESOLVED_MISSING,근거 부족 미복구,all,복구 근거가 없음,원본 결측 유지 및 이슈 기록,LOW

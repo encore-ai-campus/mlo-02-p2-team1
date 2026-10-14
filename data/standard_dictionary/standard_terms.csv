@@ -17,3 +17,9 @@ T015,repair_status,복구 상태,복구 여부를 나타내는 관리 상태,rep
 T016,repair_method,복구 방법,복구에 사용한 처리 방법,repair_method,NONE|session_key_join|median_session_driver_or_session|explicit_unknown
 T017,repair_confidence,복구 신뢰도,복구 판단의 신뢰 수준,repair_confidence,HIGH|MEDIUM|LOW
 T018,repair_reason,복구 근거,복구값을 결정한 이유,repair_reason,문자열
+T019,diagnostic_code,진단 코드,오염 또는 품질 문제의 표준 식별 코드,diagnostic_code,DQ001~DQ012
+T020,diagnostic_status,진단 상태,진단 결과의 처리 상태,diagnostic_status,OPEN|REPAIRED|ACCEPTED|WAIVED
+T021,quality_issue,품질 이슈,검증에서 발견된 결함 기록,quality_issue,diagnostic_code와 연결
+T022,original_value,원본값,복구 전 원본 데이터 값,original_value,원본 보존 전용
+T023,repaired_value,복구값,복구 로직 적용 후의 값,repaired_value,repair_status와 함께 사용
+T024,source_row_key,원본 행 식별자,행 번호가 아닌 업무키 기반 원본 식별 정보,source_row_key,session_key+업무키 조합

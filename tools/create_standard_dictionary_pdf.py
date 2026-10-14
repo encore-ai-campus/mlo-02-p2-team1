@@ -35,11 +35,11 @@ def footer(canvas, doc):
 
 doc = SimpleDocTemplate(str(OUT), pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50, title='F1 AI 데이터 표준사전')
 story = [Spacer(1,25*mm), Paragraph('F1 AI 데이터 표준사전', styles['TitleKR']), Paragraph('오염 데이터 복구 및 품질 검증 파이프라인 기준', styles['BodyKR']), Spacer(1,10*mm), Paragraph('이 문서는 원본 명세서와 실제 진단 결과를 하나의 기준 문서로 통합합니다. 개발자는 컬럼과 허용값을 확인하고, 데이터 품질 담당자는 검증 규칙과 복구 관리값을 확인할 수 있습니다.', styles['BodyKR']), Spacer(1,8*mm), Paragraph('<b>문서 구성</b>　01 표준단어　02 표준용어　03 도메인　04 허용 코드　05 컬럼 표준사전　06 표준 조합 규칙', styles['BodyKR']), Spacer(1,5*mm), Paragraph('<b>진단 반영</b>　복구 기록 25,562건　검증 이슈 371건　명세서 확인 완료', styles['BodyKR']), PageBreak()]
-sections = [('1. 표준단어','standard_words.csv',['word_id','standard_word','korean_name','definition','word_type'],[14*mm,22*mm,22*mm,94*mm,23*mm]),('2. 표준용어','standard_terms.csv',['term_id','standard_term','korean_term','definition','term_pattern','identifier_rule'],[12*mm,22*mm,22*mm,55*mm,26*mm,38*mm]),('3. 도메인','domains.csv',['domain_id','domain_name','korean_name','base_type','length_rule','unit','nullable','validation_rule'],[12*mm,25*mm,25*mm,18*mm,20*mm,16*mm,14*mm,45*mm]),('4. 허용 코드','codes.csv',['code_group','code','korean_name','description','active'],[22*mm,25*mm,25*mm,88*mm,15*mm])]
+sections = [('1. 표준단어','standard_words.csv',['word_id','standard_word','korean_name','definition','word_type'],[14*mm,22*mm,22*mm,94*mm,23*mm]),('2. 표준용어','standard_terms.csv',['term_id','standard_term','korean_term','definition','term_pattern','identifier_rule'],[12*mm,22*mm,22*mm,55*mm,26*mm,38*mm]),('3. 도메인','domains.csv',['domain_id','domain_name','korean_name','base_type','length_rule','unit','nullable','validation_rule'],[12*mm,25*mm,25*mm,18*mm,20*mm,16*mm,14*mm,45*mm]),('4. 허용 코드','codes.csv',['code_group','code','korean_name','description','active'],[22*mm,25*mm,25*mm,88*mm,15*mm]),('5. 오염 진단 코드','diagnostic_codes.csv',['diagnostic_code','diagnostic_name','korean_name','applies_to','condition','default_action','default_confidence'],[17*mm,28*mm,27*mm,38*mm,40*mm,60*mm,25*mm])]
 for title, name, cols, widths in sections:
     story += [Paragraph(title, styles['H1KR']), make_table(read(name), cols, widths), PageBreak()]
 cols = ['file_name','column_name','standard_term','data_type','length','nullable','unit','domain','allowed_values','validation_rule']
-story += [Paragraph('5. 컬럼 표준사전', styles['H1KR']), Paragraph('컬럼별 상세 규칙을 읽기 쉬운 카드형 표로 정리했습니다. 타입은 원본 보존 기준이며, 계산 시에만 숫자나 날짜로 해석합니다.', styles['BodyKR'])]
+story += [Paragraph('6. 컬럼 표준사전', styles['H1KR']), Paragraph('컬럼별 상세 규칙을 읽기 쉬운 카드형 표로 정리했습니다. 타입은 원본 보존 기준이며, 계산 시에만 숫자나 날짜로 해석합니다.', styles['BodyKR'])]
 short_cols = ['column_name','standard_term','data_type','length','nullable','unit','domain','allowed_values','validation_rule']
 short_widths = [28*mm,32*mm,22*mm,18*mm,16*mm,18*mm,31*mm,63*mm,63*mm]
 for file_name in ['sessions.csv','drivers.csv','laps.csv','pit.csv','stints.csv','weather.csv']:
@@ -49,7 +49,7 @@ for file_name in ['sessions.csv','drivers.csv','laps.csv','pit.csv','stints.csv'
         t = Table([[para(v, styles['CellKR']) for v in row] for row in card], colWidths=[22*mm,45*mm,22*mm,86*mm])
         t.setStyle(TableStyle([('BACKGROUND',(0,0),(0,-1),colors.HexColor('#EAF1F6')),('BACKGROUND',(2,0),(2,-2),colors.HexColor('#EAF1F6')),('SPAN',(1,3),(3,3)),('GRID',(0,0),(-1,-1),.4,colors.HexColor('#B8C7D3')),('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),5),('RIGHTPADDING',(0,0),(-1,-1),5),('TOPPADDING',(0,0),(-1,-1),5),('BOTTOMPADDING',(0,0),(-1,-1),5)]))
         story += [t, Spacer(1, 3*mm)]
-story += [PageBreak(), Paragraph('6. 표준 조합 규칙', styles['H1KR'])]
+story += [PageBreak(), Paragraph('7. 표준 조합 규칙', styles['H1KR'])]
 for line in (SRC/'composition_rules.md').read_text(encoding='utf-8').splitlines():
     if line.startswith('# '): continue
     if line.startswith('## '): story.append(Paragraph(line[3:], styles['H2KR']))

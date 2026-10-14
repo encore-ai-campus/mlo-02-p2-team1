@@ -10,6 +10,7 @@
 - `codes.csv`: 허용 코드와 코드 설명
 - `column_dictionary.csv`: 6개 원천 테이블의 컬럼별 표준 정의
 - `composition_rules.md`: 표준명명·키·타입·검증 조합 규칙
+- `diagnostic_codes.csv`: 진단 결과 기반 오염 코드와 기본 처리 규칙
 
 ## 진단 결과 반영
 
@@ -18,6 +19,7 @@
 - `compound`는 허용 코드 목록을 사용하고 결측은 `UNKNOWN`으로 표시합니다.
 - 스틴트는 `session_key + driver_number + stint_number`를 기준으로 관리하며 `lap_end < lap_start`와 실제 구간 중첩을 검증합니다.
 - `segments_sector_1~3`은 목록 원문을 보존하며 임의로 JSON으로 변환하지 않습니다.
+- 진단 코드는 `DQ001~DQ012`로 관리하고, 결함 종류와 복구 상태를 분리합니다.
 
 ## 통합 PDF
 
