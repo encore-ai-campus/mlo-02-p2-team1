@@ -58,4 +58,10 @@ reports/run_result.json
 
 ## 의존성
 
-Python 표준 라이브러리만 사용합니다. 별도 패키지 설치 없이 실행할 수 있습니다.
+Pandas를 사용합니다.
+
+```powershell
+pip install -r requirements.txt
+```
+
+CSV 읽기·결측 복구·그룹별 중앙값 계산·검증 집계는 Pandas DataFrame으로 처리하고, 결과 리포트는 HTML 표와 CSV·JSON 파일로 생성합니다.

@@ -1,94 +1,149 @@
 from __future__ import annotations
-import argparse,csv,io,json,math,statistics,zipfile
+
+import argparse, io, json, math, zipfile
 from collections import defaultdict
-from html import escape
 from pathlib import Path
 
-FILES=['sessions.csv','drivers.csv','laps.csv','stints.csv','weather.csv','pit.csv']
-SCHEMA={
-'drivers.csv':'broadcast_name country_code driver_number first_name full_name headshot_url last_name meeting_key name_acronym session_key team_colour team_name'.split(),
-'laps.csv':'date_start driver_number duration_sector_1 duration_sector_2 duration_sector_3 i1_speed i2_speed is_pit_out_lap lap_duration lap_number meeting_key segments_sector_1 segments_sector_2 segments_sector_3 session_key st_speed'.split(),
-'pit.csv':'date driver_number lane_duration lap_number meeting_key pit_duration session_key stop_duration'.split(),
-'sessions.csv':'circuit_key circuit_short_name country_code country_key country_name date_end date_start gmt_offset is_cancelled location meeting_key session_key session_name session_type year'.split(),
-'stints.csv':'compound driver_number lap_end lap_start meeting_key session_key stint_number tyre_age_at_start'.split(),
-'weather.csv':'air_temperature date humidity meeting_key pressure rainfall session_key track_temperature wind_direction wind_speed'.split()}
-NUM={'duration_sector_1','duration_sector_2','duration_sector_3','i1_speed','i2_speed','lap_duration','st_speed','lane_duration','pit_duration','stop_duration'}
-COMPOUNDS={'SOFT','MEDIUM','HARD','INTERMEDIATE','WET','UNKNOWN'}
-def num(v):
- try:return float(v) if str(v).strip() else None
- except:return None
-def med(v):
- v=sorted(x for x in v if x is not None and math.isfinite(x));return statistics.median(v) if v else None
-def write(path,rows,fields=None):
- path.parent.mkdir(parents=True,exist_ok=True);fields=fields or list(dict.fromkeys(k for r in rows for k in r))
- with path.open('w',encoding='utf-8-sig',newline='') as f: csv.DictWriter(f,fieldnames=fields,extrasaction='ignore').writeheader();csv.DictWriter(f,fieldnames=fields,extrasaction='ignore').writerows(rows)
-def load(path):
- with zipfile.ZipFile(path) as z:
-  names=z.namelist(); marker=next((n for n in names if n.endswith('all_years/sessions.csv')),None)
-  if not marker:raise ValueError('all_years/sessions.csv not found')
-  root=marker[:-len('sessions.csv')]; data={n:list(csv.DictReader(io.StringIO(z.read(root+n).decode('utf-8-sig')))) for n in FILES}
-  spec=next((n for n in names if n.endswith('00. 데이터_명세서.md')),None)
-  return data,bool(spec)
-def prep(name,rows):
- out=[]
- for x in rows:
-  r=dict(x);r['source_file']=name
-  for k,v in x.items():r['original_'+k]=v
-  r.update(repair_status='UNCHANGED',repair_method='NONE',repair_confidence='HIGH',repair_reason='원본값 유지');out.append(r)
- return out
-def setv(r,f,v,method,conf,reason,details,key):
- if r.get(f,'') or v in (None,''):return
- r[f]=str(v);r.update(repair_status='REPAIRED',repair_method=method,repair_confidence=conf,repair_reason=reason)
- details.append({'source_file':r['source_file'],**key,'field':f,'old_value':'','new_value':str(v),'method':method,'confidence':conf,'reason':reason})
-def repair(data,details):
- sessions={r['session_key']:r for r in data['sessions.csv']}; pools=defaultdict(lambda:defaultdict(list));sp=defaultdict(lambda:defaultdict(list))
- for r in data['laps.csv']:
-  for f in NUM:
-   v=num(r.get(f));
-   if v is not None and f!='lap_duration':pools[(r['session_key'],r['driver_number'])][f].append(v);sp[r['session_key']][f].append(v)
- for name,rows in data.items():
-  for r in rows:
-   key={'session_key':r.get('session_key',''),'driver_number':r.get('driver_number',''),'row_key':r.get('lap_number',r.get('stint_number',r.get('date','')))}
-   if name in ('drivers.csv','laps.csv'):
-    s=sessions.get(r.get('session_key'),{})
-    for f in ('year','country_name','country_code','circuit_short_name','location','meeting_key','session_name','session_type'):
-     if f in r:setv(r,f,s.get(f,''),'session_key_join','HIGH','동일 session_key의 sessions.csv 값',details,key)
-   if name=='laps.csv':
-    for f in ('duration_sector_1','duration_sector_2','duration_sector_3','i1_speed','i2_speed','st_speed'):
-     v=med(pools[(r['session_key'],r['driver_number'])][f]) or med(sp[r['session_key']][f]);setv(r,f,v and f'{v:.6f}'.rstrip('0').rstrip('.'),'median_session_driver_or_session','MEDIUM','동일 세션·드라이버 우선 중앙값',details,key)
-   if name=='stints.csv' and r.get('compound','') in ('','NULL','None'):setv(r,'compound','UNKNOWN','explicit_unknown','LOW','원본 타이어 정보가 없어 UNKNOWN으로 명시',details,key)
+import pandas as pd
+
+FILES = ["sessions.csv", "drivers.csv", "laps.csv", "stints.csv", "weather.csv", "pit.csv"]
+SCHEMA = {
+    "drivers.csv": "broadcast_name country_code driver_number first_name full_name headshot_url last_name meeting_key name_acronym session_key team_colour team_name".split(),
+    "laps.csv": "date_start driver_number duration_sector_1 duration_sector_2 duration_sector_3 i1_speed i2_speed is_pit_out_lap lap_duration lap_number meeting_key segments_sector_1 segments_sector_2 segments_sector_3 session_key st_speed".split(),
+    "pit.csv": "date driver_number lane_duration lap_number meeting_key pit_duration session_key stop_duration".split(),
+    "sessions.csv": "circuit_key circuit_short_name country_code country_key country_name date_end date_start gmt_offset is_cancelled location meeting_key session_key session_name session_type year".split(),
+    "stints.csv": "compound driver_number lap_end lap_start meeting_key session_key stint_number tyre_age_at_start".split(),
+    "weather.csv": "air_temperature date humidity meeting_key pressure rainfall session_key track_temperature wind_direction wind_speed".split(),
+}
+NUMERIC = ["duration_sector_1", "duration_sector_2", "duration_sector_3", "i1_speed", "i2_speed", "lap_duration", "st_speed", "lane_duration", "pit_duration", "stop_duration"]
+COMPOUNDS = {"SOFT", "MEDIUM", "HARD", "INTERMEDIATE", "WET", "UNKNOWN"}
+
+
+def is_blank(series):
+    return series.isna() | series.astype("string").str.strip().isin(["", "NULL", "None", "nan"])
+
+
+def load_archive(path):
+    with zipfile.ZipFile(path) as archive:
+        marker = next((name for name in archive.namelist() if name.endswith("all_years/sessions.csv")), None)
+        if marker is None:
+            raise ValueError("압축파일에서 all_years/sessions.csv를 찾지 못했습니다.")
+        root = marker[: -len("sessions.csv")]
+        data = {name: pd.read_csv(io.BytesIO(archive.read(root + name)), dtype="string", keep_default_na=False) for name in FILES}
+        spec_present = any(name.endswith("00. 데이터_명세서.md") for name in archive.namelist())
+    return data, spec_present
+
+
+def prepare(data):
+    for name, df in data.items():
+        for col in list(df.columns):
+            df[f"original_{col}"] = df[col]
+        df["source_file"] = name
+        df["repair_status"] = "UNCHANGED"
+        df["repair_method"] = "NONE"
+        df["repair_confidence"] = "HIGH"
+        df["repair_reason"] = "원본값 유지"
+
+
+def record(data, mask, field, values, method, confidence, reason, details):
+    df = data
+    target = mask & is_blank(df[field]) & values.notna()
+    if not target.any():
+        return
+    old = df.loc[target, field].astype("string").fillna("")
+    new = values.loc[target].astype("string")
+    for idx in df.index[target]:
+        details.append({"source_file": df.at[idx, "source_file"], "session_key": df.at[idx, "session_key"] if "session_key" in df else "", "driver_number": df.at[idx, "driver_number"] if "driver_number" in df else "", "row_key": df.at[idx, "lap_number"] if "lap_number" in df else (df.at[idx, "stint_number"] if "stint_number" in df else ""), "field": field, "old_value": old.loc[idx], "new_value": new.loc[idx], "method": method, "confidence": confidence, "reason": reason})
+    df.loc[target, field] = values.loc[target]
+    df.loc[target, "repair_status"] = "REPAIRED"
+    df.loc[target, "repair_method"] = method
+    df.loc[target, "repair_confidence"] = confidence
+    df.loc[target, "repair_reason"] = reason
+
+
+def repair(data, details):
+    sessions = data["sessions.csv"].set_index("session_key", drop=False)
+    for name in ["drivers.csv", "laps.csv"]:
+        df = data[name]
+        for field in ["year", "country_name", "country_code", "circuit_short_name", "location", "meeting_key", "session_name", "session_type"]:
+            if field in df.columns:
+                values = df["session_key"].map(sessions[field] if field in sessions else pd.Series(dtype="string"))
+                record(df, pd.Series(True, index=df.index), field, values, "session_key_join", "HIGH", "동일 session_key의 sessions.csv 값", details)
+    laps = data["laps.csv"]
+    for field in ["duration_sector_1", "duration_sector_2", "duration_sector_3", "i1_speed", "i2_speed", "st_speed"]:
+        laps[field] = pd.to_numeric(laps[field], errors="coerce")
+        grouped = laps.groupby(["session_key", "driver_number"], dropna=False)[field].transform("median")
+        fallback = laps.groupby("session_key", dropna=False)[field].transform("median")
+        record(laps, pd.Series(True, index=laps.index), field, grouped.fillna(fallback), "median_session_driver_or_session", "MEDIUM", "동일 세션·드라이버 중앙값, 없으면 세션 중앙값", details)
+    stints = data["stints.csv"]
+    record(stints, is_blank(stints["compound"]), "compound", pd.Series("UNKNOWN", index=stints.index, dtype="string"), "explicit_unknown", "LOW", "원본 타이어 정보가 없어 UNKNOWN으로 명시", details)
+
+
 def validate(data):
- issues=[];summary={}
- def add(file,kind,r,field,msg):issues.append({'file':file,'kind':kind,'row_key':r.get('lap_number',r.get('stint_number',r.get('date',''))),'session_key':r.get('session_key',''),'field':field,'message':msg})
- for name,rows in data.items():
-  cols=set(rows[0]) if rows else set();missing=set(SCHEMA[name])-cols
-  if missing:add(name,'SCHEMA',{},'', 'missing columns: '+','.join(sorted(missing)))
-  summary[name]={'rows':len(rows),'expected_columns':len(SCHEMA[name]),'actual_columns':len(cols),'issues':0}
-  for r in rows:
-   for f in NUM:
-    if f in r and r[f] and num(r[f]) is None:add(name,'TYPE',r,f,'숫자로 해석할 수 없음')
-   if name=='stints.csv' and num(r.get('lap_start')) is not None and num(r.get('lap_end')) is not None and num(r['lap_end'])<num(r['lap_start']):add(name,'RANGE',r,'lap_end','lap_end < lap_start')
-   if name=='stints.csv' and r.get('compound','') not in COMPOUNDS:add(name,'DOMAIN',r,'compound','허용 목록 외 compound')
-   if name=='laps.csv' and (num(r.get('lap_duration')) or 0)>300:add(name,'OUTLIER',r,'lap_duration','300초 초과 비정상 랩')
-   if name=='pit.csv' and (num(r.get('pit_duration')) or 0)>180:add(name,'OUTLIER',r,'pit_duration','180초 초과 비정상 피트 시간')
- groups=defaultdict(list)
- for r in data['stints.csv']:groups[(r.get('session_key',''),r.get('driver_number',''))].append(r)
- for rs in groups.values():
-  rs.sort(key=lambda r:num(r.get('lap_start')) if num(r.get('lap_start')) is not None else float('inf'))
-  for prev,cur in zip(rs,rs[1:]):
-   end,start=num(prev.get('lap_end')),num(cur.get('lap_start'))
-   if end is not None and start is not None and start<end:add('stints.csv','OVERLAP',cur,'lap_start','동일 세션·드라이버 스틴트 구간이 실제로 겹침')
- for i in issues:summary[i['file']]['issues']+=1
- return summary,issues
-def report(out,summary,issues,details,spec):
- write(out/'reports'/'validation_issues.csv',issues or [{'file':'','kind':'','row_key':'','session_key':'','field':'','message':'검증 이슈 없음'}])
- h="<meta charset='utf-8'><style>body{font-family:Arial,'Malgun Gothic';margin:32px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccd;padding:6px;text-align:left}th{background:#eaf1f6}</style><h1>F1 오염 데이터 복구 품질 리포트</h1>"
- h+=f"<p>명세서 포함: <b>{'YES' if spec else 'NO'}</b> · 복구 기록: <b>{len(details)}</b> · 검증 이슈: <b>{len(issues)}</b></p><h2>파일별 검증</h2><table><tr><th>파일</th><th>행</th><th>명세 컬럼</th><th>결과 컬럼</th><th>이슈</th></tr>"+''.join(f"<tr><td>{escape(k)}</td><td>{v['rows']}</td><td>{v['expected_columns']}</td><td>{v['actual_columns']}</td><td>{v['issues']}</td></tr>" for k,v in summary.items())+'</table>'
- h+="<h2>복구 전후 및 근거</h2><p>original_* 컬럼으로 원본을 보존합니다. 조인은 HIGH, 중앙값은 MEDIUM, UNKNOWN 표시는 LOW입니다.</p><table><tr><th>파일</th><th>세션</th><th>행</th><th>필드</th><th>전</th><th>후</th><th>방법</th><th>신뢰도</th><th>근거</th></tr>"+''.join(f"<tr><td>{escape(str(d['source_file']))}</td><td>{escape(str(d['session_key']))}</td><td>{escape(str(d['row_key']))}</td><td>{escape(d['field'])}</td><td>{escape(d['old_value'])}</td><td>{escape(d['new_value'])}</td><td>{escape(d['method'])}</td><td>{d['confidence']}</td><td>{escape(d['reason'])}</td></tr>" for d in details[:2000])+'</table>'
- h+="<h2>검증 이슈 샘플</h2><table><tr><th>파일</th><th>종류</th><th>세션</th><th>필드</th><th>내용</th></tr>"+''.join(f"<tr><td>{i['file']}</td><td>{i['kind']}</td><td>{i['session_key']}</td><td>{i['field']}</td><td>{escape(i['message'])}</td></tr>" for i in issues[:2000])+'</table>'
- (out/'reports'/'quality_report.html').write_text('<!doctype html>'+h,encoding='utf-8')
+    issues = []
+    for name, df in data.items():
+        missing = sorted(set(SCHEMA[name]) - set(df.columns))
+        if missing:
+            issues.append({"file": name, "kind": "SCHEMA", "row_key": "", "session_key": "", "field": "", "message": "missing columns: " + ", ".join(missing)})
+        for field in NUMERIC:
+            if field in df.columns:
+                parsed = pd.to_numeric(df[field], errors="coerce")
+                bad = (~is_blank(df[field])) & parsed.isna()
+                for idx in df.index[bad]:
+                    issues.append({"file": name, "kind": "TYPE", "row_key": idx, "session_key": df.at[idx, "session_key"] if "session_key" in df else "", "field": field, "message": "숫자로 해석할 수 없음"})
+        if name == "stints.csv":
+            start, end = pd.to_numeric(df["lap_start"], errors="coerce"), pd.to_numeric(df["lap_end"], errors="coerce")
+            for idx in df.index[(start.notna() & end.notna() & (end < start))]:
+                issues.append({"file": name, "kind": "RANGE", "row_key": df.at[idx, "stint_number"], "session_key": df.at[idx, "session_key"], "field": "lap_end", "message": "lap_end < lap_start"})
+            invalid = ~is_blank(df["compound"]) & ~df["compound"].isin(COMPOUNDS)
+            for idx in df.index[invalid]:
+                issues.append({"file": name, "kind": "DOMAIN", "row_key": df.at[idx, "stint_number"], "session_key": df.at[idx, "session_key"], "field": "compound", "message": "허용 목록 외 compound"})
+        if name == "laps.csv":
+            bad = pd.to_numeric(df["lap_duration"], errors="coerce") > 300
+            for idx in df.index[bad]:
+                issues.append({"file": name, "kind": "OUTLIER", "row_key": df.at[idx, "lap_number"], "session_key": df.at[idx, "session_key"], "field": "lap_duration", "message": "300초 초과 비정상 랩"})
+        if name == "pit.csv":
+            bad = pd.to_numeric(df["pit_duration"], errors="coerce") > 180
+            for idx in df.index[bad]:
+                issues.append({"file": name, "kind": "OUTLIER", "row_key": df.at[idx, "lap_number"], "session_key": df.at[idx, "session_key"], "field": "pit_duration", "message": "180초 초과 비정상 피트 시간"})
+    stints = data["stints.csv"].copy()
+    stints["_start"] = pd.to_numeric(stints["lap_start"], errors="coerce")
+    stints["_end"] = pd.to_numeric(stints["lap_end"], errors="coerce")
+    stints = stints.sort_values(["session_key", "driver_number", "_start"])
+    previous = stints.groupby(["session_key", "driver_number"], dropna=False)["_end"].shift()
+    overlap = stints["_start"].notna() & previous.notna() & (stints["_start"] < previous)
+    for idx in stints.index[overlap]:
+        issues.append({"file": "stints.csv", "kind": "OVERLAP", "row_key": stints.at[idx, "stint_number"], "session_key": stints.at[idx, "session_key"], "field": "lap_start", "message": "동일 세션·드라이버 스틴트 구간이 실제로 겹침"})
+    return issues
+
+
+def build_report(out, data, details, issues, spec_present):
+    report_dir = out / "reports"; report_dir.mkdir(parents=True, exist_ok=True)
+    detail_df = pd.DataFrame(details); issue_df = pd.DataFrame(issues)
+    if detail_df.empty: detail_df = pd.DataFrame([{"source_file": "", "field": "", "old_value": "", "new_value": "", "method": "", "confidence": "", "reason": ""}])
+    if issue_df.empty: issue_df = pd.DataFrame([{"file": "", "kind": "", "field": "", "message": "검증 이슈 없음"}])
+    detail_df.to_csv(report_dir / "repair_detail.csv", index=False, encoding="utf-8-sig")
+    issue_df.to_csv(report_dir / "validation_issues.csv", index=False, encoding="utf-8-sig")
+    summary = []
+    for name, df in data.items():
+        file_issues = sum(1 for issue in issues if issue["file"] == name)
+        summary.append({"file": name, "rows": len(df), "changes": int((df["repair_status"] == "REPAIRED").sum()), "status": "PASS" if file_issues == 0 else "REVIEW", "issues": file_issues})
+    summary_df = pd.DataFrame(summary); summary_df.to_csv(report_dir / "repair_summary.csv", index=False, encoding="utf-8-sig")
+    cards = f"<div class='cards'><div>복구 기록<strong>{len(details):,}</strong></div><div>검증 이슈<strong>{len(issues):,}</strong></div><div>명세서<strong>{'확인' if spec_present else '미확인'}</strong></div></div>"
+    html = "<!doctype html><html lang='ko'><head><meta charset='utf-8'><title>F1 품질 리포트</title><style>body{font-family:Arial,'Malgun Gothic';margin:32px;color:#17212b}table{border-collapse:collapse;width:100%;margin:12px 0 28px;font-size:13px}th,td{border:1px solid #d5dee7;padding:7px;text-align:left}th{background:#eaf1f6}.cards{display:flex;gap:12px;margin:20px 0}.cards div{background:#f1f5f8;padding:16px;border-radius:8px}.cards strong{display:block;font-size:25px;margin-top:6px}h2{margin-top:32px}</style></head><body>"
+    html += "<h1>F1 오염 데이터 복구 및 품질 검증 리포트</h1>" + cards + "<h2>파일별 처리 결과</h2>" + summary_df.to_html(index=False, escape=True)
+    html += "<h2>복구 기록 샘플</h2>" + detail_df.head(2000).to_html(index=False, escape=True)
+    html += "<h2>검증 이슈</h2>" + issue_df.head(2000).to_html(index=False, escape=True) + "</body></html>"
+    (report_dir / "quality_report.html").write_text(html, encoding="utf-8")
+    (report_dir / "run_result.json").write_text(json.dumps({"output": str(out), "repair_records": len(details), "validation_issues": len(issues), "spec_present": spec_present}, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('--config',type=Path,default=Path('config.json'));a=ap.parse_args();cfg=json.loads(a.config.read_text(encoding='utf-8'));out=Path(cfg['output_directory']);raw,spec=load(Path(cfg['input_archive']));data={k:prep(k,v) for k,v in raw.items()};details=[];repair(data,details);summary,issues=validate(data)
- for n,r in data.items():write(out/'repaired'/n,r)
- write(out/'reports'/'repair_detail.csv',details or [{'source_file':'','session_key':'','driver_number':'','row_key':'','field':'','old_value':'','new_value':'','method':'','confidence':'','reason':''}]);write(out/'reports'/'repair_summary.csv',[{'file':k,'rows':v['rows'],'changes':sum(r['repair_status']=='REPAIRED' for r in data[k]),'status':'PASS' if not v['issues'] else 'REVIEW','issues':v['issues']} for k,v in summary.items()]);report(out,summary,issues,details,spec);(out/'reports'/'run_result.json').write_text(json.dumps({'output':str(out),'repair_records':len(details),'validation_issues':len(issues),'spec_present':spec},ensure_ascii=False,indent=2),encoding='utf-8');print(json.dumps({'output':str(out),'repair_records':len(details),'validation_issues':len(issues)},ensure_ascii=False))
-if __name__=='__main__':main()
+    parser = argparse.ArgumentParser(); parser.add_argument("--config", type=Path, default=Path("config.json")); args = parser.parse_args()
+    config = json.loads(args.config.read_text(encoding="utf-8")); out = Path(config["output_directory"]); data, spec = load_archive(Path(config["input_archive"])); prepare(data); details = []; repair(data, details); issues = validate(data)
+    for name, df in data.items():
+        (out / "repaired").mkdir(parents=True, exist_ok=True); df.to_csv(out / "repaired" / name, index=False, encoding="utf-8-sig")
+    build_report(out, data, details, issues, spec); print(json.dumps({"output": str(out), "repair_records": len(details), "validation_issues": len(issues)}, ensure_ascii=False))
+
+
+if __name__ == "__main__": main()
