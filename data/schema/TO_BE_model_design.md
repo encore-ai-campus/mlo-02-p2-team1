@@ -77,14 +77,14 @@ erDiagram
         varchar country_code
     }
     SESSION_DRIVER {
-        varchar session_key PK_FK
-        varchar driver_number PK_FK
+        varchar session_key PK,FK
+        varchar driver_number PK,FK
         bigint driver_id FK
         varchar team_name
     }
     LAP {
-        varchar session_key PK_FK
-        varchar driver_number PK_FK
+        varchar session_key PK,FK
+        varchar driver_number PK,FK
         int lap_number PK
         decimal lap_duration
         decimal i1_speed
@@ -92,22 +92,22 @@ erDiagram
         decimal st_speed
     }
     STINT {
-        varchar session_key PK_FK
-        varchar driver_number PK_FK
+        varchar session_key PK,FK
+        varchar driver_number PK,FK
         int stint_number PK
         varchar compound_code FK
         int lap_start
         int lap_end
     }
     PIT_EVENT {
-        varchar session_key PK_FK
-        varchar driver_number PK_FK
+        varchar session_key PK,FK
+        varchar driver_number PK,FK
         int lap_number PK
         datetime event_date
         decimal pit_duration
     }
     WEATHER {
-        varchar session_key PK_FK
+        varchar session_key PK,FK
         datetime observed_at PK
         decimal air_temperature
         decimal humidity
