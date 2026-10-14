@@ -71,6 +71,13 @@ def validate(data):
    if name=='stints.csv' and r.get('compound','') not in COMPOUNDS:add(name,'DOMAIN',r,'compound','허용 목록 외 compound')
    if name=='laps.csv' and (num(r.get('lap_duration')) or 0)>300:add(name,'OUTLIER',r,'lap_duration','300초 초과 비정상 랩')
    if name=='pit.csv' and (num(r.get('pit_duration')) or 0)>180:add(name,'OUTLIER',r,'pit_duration','180초 초과 비정상 피트 시간')
+ groups=defaultdict(list)
+ for r in data['stints.csv']:groups[(r.get('session_key',''),r.get('driver_number',''))].append(r)
+ for rs in groups.values():
+  rs.sort(key=lambda r:num(r.get('lap_start')) if num(r.get('lap_start')) is not None else float('inf'))
+  for prev,cur in zip(rs,rs[1:]):
+   end,start=num(prev.get('lap_end')),num(cur.get('lap_start'))
+   if end is not None and start is not None and start<=end:add('stints.csv','OVERLAP',cur,'lap_start','동일 세션·드라이버 스틴트 구간 겹침 후보')
  for i in issues:summary[i['file']]['issues']+=1
  return summary,issues
 def report(out,summary,issues,details,spec):
