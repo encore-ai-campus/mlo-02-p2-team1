@@ -1,0 +1,18 @@
+code_group,code,code_name,korean_name,description,active
+COMPOUND,SOFT,SOFT,소프트,마른 노면용 소프트 타이어,Y
+COMPOUND,MEDIUM,MEDIUM,미디엄,마른 노면용 미디엄 타이어,Y
+COMPOUND,HARD,HARD,하드,마른 노면용 하드 타이어,Y
+COMPOUND,INTERMEDIATE,INTERMEDIATE,인터미디어트,젖은 노면 초기 대응 타이어,Y
+COMPOUND,WET,WET,웻,젖은 노면용 타이어,Y
+COMPOUND,UNKNOWN,UNKNOWN,미상,원본 타이어 정보 없음,Y
+SESSION_TYPE,Race,Race,레이스,정규 레이스 세션,Y
+SESSION_TYPE,Sprint,Sprint,스프린트,스프린트 레이스 세션,Y
+SESSION_TYPE,Qualifying,Qualifying,예선,예선 세션,Y
+SESSION_TYPE,Practice,Practice,연습,연습 세션,Y
+BOOLEAN,True,True,참,참 상태,Y
+BOOLEAN,False,False,거짓,거짓 상태,Y
+REPAIR_STATUS,UNCHANGED,UNCHANGED,원본 유지,복구 없이 원본값 유지,Y
+REPAIR_STATUS,REPAIRED,REPAIRED,복구됨,복구 로직으로 값 변경,Y
+CONFIDENCE,HIGH,HIGH,높음,직접 키 조인 또는 명확한 원천값,Y
+CONFIDENCE,MEDIUM,MEDIUM,중간,그룹 통계 기반 추정,Y
+CONFIDENCE,LOW,LOW,낮음,근거 부족 상태의 명시적 표시,Y

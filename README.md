@@ -56,6 +56,10 @@ reports/run_result.json
 
 `repaired/*.csv`를 적재 테이블의 원천으로 사용하고 `repair_status`, `repair_confidence`로 원본 유지값·직접 복구값·통계 추정값을 구분할 수 있습니다.
 
+## AI 데이터 표준사전
+
+진단 결과를 반영한 표준사전은 `data/standard_dictionary/`에 있습니다. 표준단어·표준용어·도메인·허용코드·컬럼별 타입과 길이·조합 규칙을 각각 CSV와 Markdown으로 관리합니다.
+
 ## 의존성
 
 Pandas를 사용합니다.

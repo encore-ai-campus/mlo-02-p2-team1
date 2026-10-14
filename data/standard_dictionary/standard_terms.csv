@@ -1,0 +1,19 @@
+term_id,standard_term,korean_term,definition,term_pattern,identifier_rule
+T001,session_key,세션 식별자,세션을 식별하는 문자열 키,session_key,FK sessions.session_key
+T002,meeting_key,대회 식별자,대회를 식별하는 문자열 키,meeting_key,세션과 동일 개념으로 취급하지 않음
+T003,driver_number,드라이버 번호,해당 시즌 세션에서 차량을 식별하는 번호,driver_number,session_key와 함께 사용
+T004,lap_number,랩 번호,세션 내 랩 순번,lap_number,session_key+driver_number+lap_number
+T005,stint_number,스틴트 번호,드라이버별 스틴트 순번,stint_number,session_key+driver_number+stint_number
+T006,date_start,시작 일시,세션 또는 랩 시작 시각,date_start,ISO 8601 UTC offset 권장
+T007,date_end,종료 일시,세션 종료 시각,date_end,ISO 8601 UTC offset 권장
+T008,lap_duration,랩 소요시간,랩 전체 소요 시간(초),lap_duration,0 이상; 300 초과 검토
+T009,pit_duration,피트 소요시간,피트 관련 소요 시간(초),pit_duration,0 이상; 180 초과 검토
+T010,stop_duration,정차 소요시간,피트 정차 상태의 소요 시간(초),stop_duration,0 이상
+T011,lane_duration,피트레인 소요시간,피트레인 구간 소요 시간(초),lane_duration,0 이상
+T012,lap_start,스틴트 시작 랩,스틴트가 시작된 랩 번호,lap_start,정수; lap_end 이상 아님
+T013,lap_end,스틴트 종료 랩,스틴트가 종료된 랩 번호,lap_end,정수; lap_start 이상
+T014,segments_sector,섹터 미니구간 상태,섹터별 미니구간 상태 목록 문자열,segments_sector_[1-3],목록 원문 보존
+T015,repair_status,복구 상태,복구 여부를 나타내는 관리 상태,repair_status,UNCHANGED|REPAIRED
+T016,repair_method,복구 방법,복구에 사용한 처리 방법,repair_method,NONE|session_key_join|median_session_driver_or_session|explicit_unknown
+T017,repair_confidence,복구 신뢰도,복구 판단의 신뢰 수준,repair_confidence,HIGH|MEDIUM|LOW
+T018,repair_reason,복구 근거,복구값을 결정한 이유,repair_reason,문자열
