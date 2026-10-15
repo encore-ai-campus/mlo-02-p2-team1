@@ -2,7 +2,7 @@
 
 ## 1. 설계 목적
 
-AS-IS 프로파일링 결과와 AI 데이터 표준사전을 적용해 F1 데이터를 MySQL 8.0+에서 관리하기 위한 목표 스키마를 정의한다. 이 문서는 DB 설계도이며, 실제 `CREATE TABLE` 실행은 별도 단계에서 진행한다.
+AS-IS 프로파일링 결과와 AI 데이터 표준사전을 적용해 F1 데이터 11종(오염 정제 6종 + 신규 5종)을 MySQL 8.0+에서 관리하기 위한 목표 스키마를 정의한다. 기준 기획서는 `F1_P2_Spec.md`이고, 원천별 컬럼 명세는 `F1_데이터_명세서.md`에 있다. 실행 DDL은 `sql/04_create_schema.sql`, 적재는 `sql/05_insert_schema.sql`이다.
 
 설계 원칙:
 
@@ -26,6 +26,13 @@ erDiagram
     SESSION ||--o{ WEATHER_OBSERVATION : measures
     SESSION ||--o{ QUALITY_ISSUE : produces
     QUALITY_ISSUE ||--o{ REPAIR_DETAIL : explains
+    MEETING ||--o{ STARTING_GRID : "qualifying grid"
+    SESSION ||--o{ STARTING_GRID : "race_session_key"
+    SESSION_DRIVER ||--o| SESSION_RESULT : finishes
+    SESSION_DRIVER ||--o{ POSITION_EVENT : ranks
+    SESSION_DRIVER ||--o{ INTERVAL_EVENT : gaps
+    SESSION ||--o{ RACE_CONTROL_EVENT : announces
+    REF_RACE_POINTS_RULE ||--o{ SESSION_RESULT : scores
 ```
 
 업무 객체:
@@ -40,6 +47,10 @@ erDiagram
 - `WEATHER_OBSERVATION`: 세션 시각별 기상 측정
 - `QUALITY_ISSUE`: DQ 진단 결과
 - `REPAIR_DETAIL`: 복구 전후 값과 근거
+- `STARTING_GRID`: 예선 결과로 정해진 출발 순위 (Qualifying 키 보존, Race로 매핑)
+- `SESSION_RESULT`: Race 최종 분류와 본경기 기본 포인트
+- `POSITION_EVENT`, `INTERVAL_EVENT`: 경기 중 순위·격차 시계열
+- `RACE_CONTROL_EVENT`: SC/VSC·깃발·사고 등 관제 메시지
 
 ## 3. 논리 ERD
 
@@ -127,7 +138,12 @@ erDiagram
 | `pit_event` | 피트 이벤트 | `session_key + driver_number + lap_number` | `session_driver` |
 | `weather` | 기상 측정 | `session_key + observed_at` | `session_key` |
 | `quality_issue` | 진단 결과 | `quality_issue_id` | `session_key`, `diagnostic_code` |
-| `repair_detail` | 복구 이력 | `repair_detail_id` | `session_key`, `diagnostic_code` |
+| `repair_detail` | 복구 이력 | `repair_detail_id` | `issue_id` |
+| `starting_grid` | 출발 그리드 | `qualifying_session_key + driver_number` | `meeting_key`, `race_session_key` |
+| `session_result` | Race 결과·기본 포인트 | `session_key + driver_number` | `session_driver`, `ref_race_points_rule`(연도·순위) |
+| `position_event` | 순위 시계열 | `position_event_id` (유일: `session_key + driver_number + recorded_at`) | `session_driver` |
+| `interval_event` | 격차 시계열 | `interval_event_id` (유일: `session_key + driver_number + recorded_at`) | `session_driver` |
+| `race_control_event` | 관제 메시지 | `race_control_event_id` | `session`, `session_driver`(드라이버 대상일 때) |
 
 `driver_number`는 시즌·세션 간 재사용될 수 있으므로 `driver` 테이블의 단독 식별키로 사용하지 않는다. 화면과 사실 테이블에서는 반드시 `session_key + driver_number`를 함께 사용한다.
 
@@ -162,6 +178,11 @@ erDiagram
 | `ref_repair_status` | `UNCHANGED`, `REPAIRED` |
 | `ref_repair_confidence` | `HIGH`, `MEDIUM`, `LOW` |
 | `ref_repair_method` | `codes.csv`의 `REPAIR_METHOD` 그룹 (중앙값 추정은 폐기) |
+| `ref_race_points_rule` | 연도 × 1~10위 기본 배점 (`race_points_rules.csv`) |
+| `ref_validation_check` | 정제 후 검증 항목 VC01~VC71 (`validation_checks.csv`) |
+| 기타 코드 | `RACE_CONTROL_CATEGORY`, `RACE_CONTROL_FLAG`, `RACE_CONTROL_SCOPE`, `CLASSIFICATION_STATUS`, `POINTS_RULE_STATUS`, `VALIDATION_STATUS` |
+
+실행 DDL에서는 코드 테이블을 `ref_code(code_group, code)` 하나로 적재하고 `ref_diagnostic`, `ref_race_points_rule`, `ref_validation_check`만 별도 테이블로 둔다.
 
 ### 5.3 핵심 제약조건
 
@@ -233,10 +254,32 @@ WHERE a.lap_end IS NOT NULL
 
 모든 진단 이슈는 `quality_issue`에 기록하고, 복구가 발생한 행은 `repair_detail`에 원본값·복구값·방법·신뢰도·근거를 기록한다.
 
-## 9. 구현 전 확정사항
+## 9. 신규 5종과 포인트 설계
 
-1. MySQL 데이터베이스명과 운영·개발 환경을 확정한다.
-2. `driver_id` 대체키 발급과 드라이버 동일인 통합 정책을 확정한다.
-3. 동일 랩 다중 피트 이벤트가 있으면 `pit_event_number`를 복합키에 추가한다.
-4. UTC 오프셋을 포함한 원본 일시를 MySQL에 저장하는 변환 정책을 확정한다.
-5. 이 문서 확정 후 별도 단계에서 MySQL `CREATE TABLE` DDL을 작성한다.
+- **출발 그리드 매핑:** `starting_grid`의 원본 `session_key`는 Qualifying 키다. `qualifying_session_key`로 보존하고, 같은 `meeting_key`의 Race 세션을 찾아 `race_session_key`에 저장한다. Qualifying/Race `session_key`를 직접 JOIN하지 않는다.
+- **결과 분류:** `classification_status` = `DSQ`/`DNS`/`DNF`(플래그 우선) → 순위 있으면 `CLASSIFIED` → 나머지 `NOT_CLASSIFIED`. `DNF`라도 순위가 있으면 그 순위로 배점한다.
+- **본경기 기본 포인트:** `race_base_points = ref_race_points_rule(year, finish_position)`, 11위 이하·미분류 0점. 원천 `points`는 `source_points`로만 보존한다(최속 랩 보너스·원천 누락 포함). 단축·중단 경기는 `points_rule_status = EXCLUDED_NONSTANDARD`로 표시한다.
+- **팀 귀속:** `session_driver.team_name`(경기 당시 소속팀)으로 합산한다. 뷰 `v_race_outcome`, `v_team_race_points`가 `gold_race_outcome`·`gold_team_profile`의 기초다.
+- **시계열:** `position_event`, `interval_event`, `race_control_event`는 랩당 1행이 아니므로 대리키를 쓰고, 랩·피트와는 시각 기준 as-of JOIN 또는 랩 단위 집계 후 결합한다. 격차의 `+N LAP(S)`는 `*_laps` 컬럼으로 분리하고 초 컬럼은 NULL로 둔다.
+
+## 10. Gold 9개 마트 대응
+
+| Gold 마트 | 주 원천 테이블 |
+|---|---|
+| `gold_driver_performance` | `lap`, `stint`, `session_driver`, `race_control_event`(SC/VSC 제외) |
+| `gold_tyre_performance` | `stint`, `lap` |
+| `gold_race_outcome` | `session_result`, `starting_grid`, `v_race_outcome` |
+| `gold_pit_strategy` | `pit_event`, `position_event`, `interval_event`, `race_control_event` |
+| `gold_driver_profile` | 위 드라이버 마트 + `session_result` 누적 기본 포인트 |
+| `gold_team_profile` | `v_team_race_points`, `pit_event`, `stint` |
+| `gold_team_pit_benchmark` | `pit_event` (`lane_duration`·`stop_duration` 분리, 격리 행 제외) |
+| `gold_driver_team_fit` | 드라이버·팀 프로필 마트 |
+| `gold_data_quality` | `quality_issue`, `repair_detail`, 정제 후 검증 결과(`vc_result`) |
+
+## 11. 확정 사항과 남은 결정
+
+1. 드라이버 동일인 기준은 `full_name`(정제 후 29명, 국적·약어 충돌 없음). `driver_id`는 대체키로 발급한다.
+2. 일시는 모두 UTC로 변환해 `DATETIME(6)`에 저장한다(원본 오프셋은 전부 `+00:00`).
+3. 피트 키 `session_key + driver_number + lap_number`는 현재 데이터에서 유일하다. 같은 랩 다중 피트가 생기면 `pit_event_number`를 추가한다.
+4. 격리 행도 적재하고 `quarantine_flag`로 분석에서 제외한다.
+5. 남은 결정: 운영 DB 이름·계정, Django 모델 연결 방식(`inspectdb`로 생성하거나 `managed = False` 모델로 이 스키마를 사용).

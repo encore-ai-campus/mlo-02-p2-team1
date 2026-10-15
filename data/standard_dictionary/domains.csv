@@ -17,3 +17,8 @@ D015,DIAGNOSTIC_STATUS,진단 처리 상태,string,최대 16자,,없음,N,OPEN|R
 D016,REPAIR_METHOD,복구 방법 코드,string,최대 64자,,없음,N,codes.csv REPAIR_METHOD 그룹(active=Y)
 D017,CONFIDENCE_CODE,복구 신뢰도 코드,string,최대 16자,,없음,N,HIGH|MEDIUM|LOW
 D018,ROW_KEY,업무 행 식별자,string,최대 128자,,없음,N,행 번호 단독 사용 금지
+D019,POSITION,순위,string,최대 8자,,없음,Y,1 이상 정수
+D020,POINTS,포인트,string,최대 8자,1,점,Y,0 이상 실수; 원천 최대 26(최속 랩 보너스 포함)
+D021,GAP_TEXT,격차 문자열,string,최대 24자,3,초,Y,0 이상 실수 또는 +N LAP(S)
+D022,RACE_CONTROL_CATEGORY,관제 분류 코드,string,최대 32자,,없음,N,codes.csv RACE_CONTROL_CATEGORY 그룹
+D023,VALIDATION_CHECK_ID,정제 후 검증 ID,string,최대 8자,,없음,N,VC + 2자리 숫자

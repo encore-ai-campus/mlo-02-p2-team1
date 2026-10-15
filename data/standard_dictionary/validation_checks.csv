@@ -1,0 +1,37 @@
+check_id,category,korean_category,check_name,description,severity,expected,spec_ref
+VC01,MISSING,결측,KEY_NOT_NULL,식별키·meeting_key 컬럼 공백,ERROR,0,5.1
+VC02,MISSING,결측,NULL_PROFILE,컬럼별 공백 건수(참고용 프로파일; null_profile 출력),INFO,-,5.1
+VC03,MISSING,결측,NO_ZERO_IMPUTATION,원본 공백인데 정제 후 0으로 채워진 시간·속도 값,ERROR,0,6.2·11
+VC04,MISSING,결측,UNCLASSIFIED_WITHOUT_STATUS,session_result 순위 공백인데 dnf·dns·dsq 모두 False,WARNING,0,7.1
+VC10,DUPLICATE,중복,NATURAL_KEY_UNIQUE,파일별 자연키 중복,ERROR,0,5.1
+VC11,DUPLICATE,중복,EXACT_ROW_DUPLICATE,모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함),WARNING,0,5.1
+VC12,DUPLICATE,중복,POSITION_UNIQUE,같은 세션 안 최종 순위·그리드 순위 중복,ERROR,0,7.3
+VC13,DUPLICATE,중복,DRIVER_IDENTITY_UNIQUE,같은 세션에서 한 full_name·name_acronym이 여러 driver_number에 등장,ERROR,0,11
+VC20,REFERENTIAL,참조,SESSION_FK,session_key가 sessions에 없음(starting_grid 제외),ERROR,0,5.1
+VC21,REFERENTIAL,참조,SESSION_DRIVER_FK,session_key+driver_number가 drivers에 없음,ERROR,0,5.1
+VC22,REFERENTIAL,참조,MEETING_KEY_CONSISTENT,같은 session_key의 meeting_key가 sessions와 다름,ERROR,0,11
+VC23,REFERENTIAL,참조,GRID_QUALIFYING_MAPPING,starting_grid가 Race session_key를 쓰거나 meeting_key당 Race 세션이 1개가 아님,ERROR,0,2.3·5.2
+VC24,REFERENTIAL,참조,GRID_WITHOUT_RESULT,starting_grid(meeting_key+driver_number)가 Race 결과에 없음(예선 후 기권 확인),WARNING,0,5.2·11
+VC25,REFERENTIAL,참조,RESULT_WITHOUT_GRID,Race 결과에 그리드가 없음(피트레인 출발 등 원천 특성),INFO,-,5.2
+VC26,REFERENTIAL,참조,PIT_LAP_IN_RANGE,피트 랩이 해당 드라이버 최대 랩보다 큼,WARNING,0,5.1
+VC27,REFERENTIAL,참조,LAP_COVERED_BY_STINT,어느 스틴트 구간에도 속하지 않는 랩,WARNING,0,5.1
+VC30,RANGE,범위·형식,NUMERIC_PARSE,숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용),ERROR,0,5.1
+VC31,RANGE,범위·형식,VALUE_RANGE,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),ERROR,0,5.1
+VC32,RANGE,범위·형식,CODE_DOMAIN,허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위),ERROR,0,5.1
+VC33,RANGE,범위·형식,DATETIME_PARSE,일시 변환 실패 또는 세션 종료<시작,ERROR,0,5.1
+VC34,RANGE,범위·형식,RESULT_STATUS_EXCLUSIVE,dnf·dns·dsq 중 2개 이상 True,ERROR,0,7.1
+VC40,CONSISTENCY,정합성,TEAM_DRIVER_COUNT,세션별 팀 소속 드라이버 수가 2가 아님,WARNING,0,11
+VC41,CONSISTENCY,정합성,SEASON_NUMBER_IDENTITY,같은 시즌 driver_number에 full_name이 여러 개,WARNING,0,11
+VC42,CONSISTENCY,정합성,SECTOR_SUM,섹터 3개 합과 랩타임 차이 0.5초 초과(잔여 검토),WARNING,0,5.1
+VC43,CONSISTENCY,정합성,PIT_DURATION_SPLIT,lane_duration과 pit_duration 불일치(격리 행 제외),ERROR,0,6.2·11
+VC44,CONSISTENCY,정합성,RESULT_LAPS_VS_LAPS,session_result.number_of_laps와 laps 최대 랩 차이 1랩 초과,WARNING,0,5.2
+VC45,CONSISTENCY,정합성,STINT_OVERLAP,다음 스틴트 시작 < 이전 스틴트 종료,WARNING,0,5.1
+VC50,POINTS,포인트,SOURCE_POINTS_DIFF,원천 points와 재계산 race_base_points 차이(최속 랩 보너스·원천 누락 확인용),INFO,-,7.1
+VC51,POINTS,포인트,DRIVER_TEAM_POINTS_SUM,Race별 드라이버 기본 포인트 합 ≠ 팀 기본 포인트 합,ERROR,0,7.3·11
+VC52,POINTS,포인트,RACE_TOTAL_101,Race별 기본 포인트 합계가 101점이 아님,WARNING,0,7.1
+VC53,POINTS,포인트,TEAM_AT_RACE_KNOWN,포인트 귀속 팀(drivers.team_name)이 공백,ERROR,0,7.2
+VC60,RECONCILE,대사,ROW_RECONCILE,원본(bronze_manifest) 행 수와 정제 후 행 수 불일치,ERROR,0,4·11
+VC61,RECONCILE,대사,QUARANTINE_FLAG,quarantine_flag=Y 행 수(격리 대상 참고),INFO,-,11
+VC62,RECONCILE,대사,CHANGE_WITHOUT_RECORD,original_* 와 값이 다른데 repair_status가 REPAIRED가 아님,ERROR,0,5.1·11
+VC70,JOIN,행 증폭,DRIVER_JOIN_FANOUT,laps·session_result를 drivers와 JOIN한 뒤 행 수 증가,ERROR,0,5.2·11
+VC71,JOIN,행 증폭,STINT_RANGE_JOIN_FANOUT,랩이 2개 이상 스틴트 구간에 매칭(경계 랩 공유 → Silver에서 귀속 규칙 필요),INFO,-,5.1·11

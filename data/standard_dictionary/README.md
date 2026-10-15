@@ -1,6 +1,6 @@
 # F1 AI 데이터 표준사전
 
-진단 결과와 원본 데이터 명세서를 기준으로 작성한 표준사전입니다. 원본 값은 문자열로 보존하고, 계산·검증 시에만 도메인 규칙에 따라 숫자나 날짜시간으로 해석합니다.
+진단 결과, 원본 데이터 명세서, `F1_P2_Spec.md`를 기준으로 작성한 표준사전입니다. 원천별 명세는 `../schema/F1_데이터_명세서.md`에 있습니다. 원본 값은 문자열로 보존하고, 계산·검증 시에만 도메인 규칙에 따라 숫자나 날짜시간으로 해석합니다.
 
 ## 구성
 
@@ -8,7 +8,9 @@
 - `standard_terms.csv`: 표준 용어, 용어 조합, 식별자 규칙
 - `domains.csv`: 데이터 타입, 길이, 단위, 결측 허용, 검증 규칙
 - `codes.csv`: 허용 코드와 코드 설명
-- `column_dictionary.csv`: 6개 원천 테이블의 컬럼별 표준 정의
+- `column_dictionary.csv`: 원천 11종(오염 정제 6종 + 신규 5종)의 컬럼별 표준 정의
+- `race_points_rules.csv`: 연도별 본경기 기본 배점(1~10위 25-18-15-12-10-8-6-4-2-1, 최속 랩 보너스·Sprint 제외)
+- `validation_checks.csv`: 정제 후 검증 항목 VC01~VC71 (`tools/validate_cleaned.py`, `sql/03_validate_cleaned.sql` 공용)
 - `composition_rules.md`: 표준명명·키·타입·검증 조합 규칙
 - `diagnostic_codes.csv`: 진단 결과 기반 오염 코드와 기본 처리 규칙
 
@@ -24,3 +26,9 @@
 ## 통합 PDF
 
 CSV와 Markdown 내용을 한 번에 확인하려면 [F1 AI 데이터 표준사전 PDF](./F1_AI_data_standard_dictionary.pdf)를 열어보세요.
+
+## 신규 5종 반영
+
+- 격차(`interval`, `gap_to_leader`)는 초 단위 숫자와 `+N LAP(S)` 문자열이 섞이므로 `GAP_TEXT` 도메인으로 관리합니다.
+- `starting_grid.session_key`는 Qualifying 키이며 Race 키와 직접 JOIN하지 않습니다(`qualifying_session_key`, `race_session_key` 용어).
+- 원천 `session_result.points`는 보존만 하고, 분석에는 `race_base_points`(본경기 기본 포인트)를 씁니다.
