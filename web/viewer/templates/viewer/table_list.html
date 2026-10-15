@@ -1,0 +1,20 @@
+{% extends "viewer/base.html" %}
+{% block content %}
+<h1>적재된 테이블 <small>f1_db</small></h1>
+<p class="meta">행 수는 MySQL 추정치라 실제와 약간 다를 수 있습니다. 정확한 건수는 상세 화면의 “총 N건”입니다.</p>
+{% for label, tables in groups %}
+<h2>{{ label }}</h2>
+<div class="tbl">
+  <table>
+    <thead><tr><th>테이블</th><th>행 수(추정)</th></tr></thead>
+    <tbody>
+    {% for name, cnt, ttype in tables %}
+      <tr><td><a href="{% url 'table_detail' name %}">{{ name }}</a>{% if ttype == "VIEW" %} <span class="meta">(뷰)</span>{% endif %}</td><td class="n">{{ cnt|default_if_none:"—" }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% empty %}
+<p>테이블이 없습니다. sql/01~05를 먼저 실행하세요.</p>
+{% endfor %}
+{% endblock %}

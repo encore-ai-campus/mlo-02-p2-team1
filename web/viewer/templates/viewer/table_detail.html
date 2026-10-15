@@ -1,0 +1,20 @@
+{% extends "viewer/base.html" %}
+{% block title %}{{ name }} · F1 Data{% endblock %}
+{% block content %}
+<h1>{{ name }} <small>총 {{ total }}건{% if pk %} · 정렬: {{ pk|join:", " }}{% endif %}</small></h1>
+<div class="tbl">
+  <table>
+    <thead><tr>{% for c in cols %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>{% for v in r %}<td>{{ v|default_if_none:"" }}</td>{% endfor %}</tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="pager">
+  {% if prev %}<a href="?page={{ prev }}">◀ 이전</a>{% endif %}
+  {{ page }} / {{ last_page }}
+  {% if next %}<a href="?page={{ next }}">다음 ▶</a>{% endif %}
+</div>
+{% endblock %}

@@ -1,114 +1,175 @@
-<!doctype html><html lang='ko'><head><meta charset='utf-8'><title>F1 품질 리포트</title><style>body{font-family:Arial,'Malgun Gothic',sans-serif;margin:32px;color:#17212b}table{border-collapse:collapse;width:100%;margin:12px 0 28px;font-size:12.5px}th,td{border:1px solid #d5dee7;padding:6px;text-align:left;vertical-align:top}th{background:#eaf1f6}.cards{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}.cards div{background:#f1f5f8;padding:14px 18px;border-radius:8px}.cards strong{display:block;font-size:24px;margin-top:6px}h2{margin-top:36px}.meta{color:#56636f;font-size:13px}</style></head><body><h1>F1 오염 데이터 검증·복구 리포트</h1><p class='meta'>파이프라인 0.2.0 · 입력 data\f1_recovery\F1_distribution · run_id 3d8d8eebc0fc</p><div class='cards'><div>탐지<strong>28,052</strong></div><div>자동 복구<strong>1,335</strong></div><div>허용(원천 특성)<strong>24,824</strong></div><div>검토 필요<strong>1,893</strong></div><div>격리 행<strong>2</strong></div></div><h2>1. Bronze 매니페스트</h2><table class="dataframe">
+<!doctype html><html lang='ko'><head><meta charset='utf-8'><title>F1 품질 리포트</title><style>body{font-family:Arial,'Malgun Gothic',sans-serif;margin:32px;color:#17212b}table{border-collapse:collapse;width:100%;margin:12px 0 28px;font-size:12.5px}th,td{border:1px solid #d5dee7;padding:6px;text-align:left;vertical-align:top}th{background:#eaf1f6}.cards{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}.cards div{background:#f1f5f8;padding:14px 18px;border-radius:8px}.cards strong{display:block;font-size:24px;margin-top:6px}h2{margin-top:36px}.meta{color:#56636f;font-size:13px}</style></head><body><h1>F1 오염 데이터 검증·복구 리포트</h1><p class='meta'>파이프라인 0.2.0 · 입력 data\f1_recovery\F1_distribution · run_id 3d8d8eebc0fc</p><div class='cards'><div>탐지<strong>28,052</strong></div><div>자동 복구<strong>1,335</strong></div><div>허용(원천 특성)<strong>24,824</strong></div><div>검토 필요<strong>1,893</strong></div><div>격리 행<strong>2</strong></div></div><h2>1. Bronze 매니페스트</h2><p class='meta'>원본 파일이 배포본 그대로인지(체크섬)와 명세서의 행·컬럼 구성과 같은지 확인한다. 판정 컬럼(spec_row_count·schema·column_order·checksum)이 모두 MATCH/OK이면 정상이다. 해시 값은 증빙용이라 맨 뒤에 앞 12자리만 표시한다(전체 값은 bronze_manifest.csv).</p><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>file</th>
-      <th>bytes</th>
       <th>rows</th>
       <th>columns</th>
-      <th>encoding</th>
-      <th>sha256</th>
-      <th>sha256_expected</th>
-      <th>checksum</th>
-      <th>schema</th>
-      <th>column_order</th>
       <th>spec_rows</th>
       <th>spec_columns</th>
       <th>spec_row_count</th>
+      <th>schema</th>
+      <th>column_order</th>
+      <th>checksum</th>
+      <th>encoding</th>
+      <th>bytes</th>
+      <th>sha256</th>
+      <th>sha256_expected</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td>sessions.csv</td>
-      <td>11673</td>
       <td>87</td>
       <td>15</td>
+      <td>87</td>
+      <td>15</td>
+      <td>MATCH</td>
+      <td>OK</td>
+      <td>OK</td>
+      <td>MATCH</td>
       <td>utf-8</td>
-      <td>14e2aa1c932bf8e56ba3e9d37d7bebb75e75dbf421f641abeac4cf5858ccf7e9</td>
-      <td>14e2aa1c932bf8e56ba3e9d37d7bebb75e75dbf421f641abeac4cf5858ccf7e9</td>
-      <td>MATCH</td>
-      <td>OK</td>
-      <td>OK</td>
-      <td>87</td>
-      <td>15</td>
-      <td>MATCH</td>
+      <td>11673</td>
+      <td>14e2aa1c932b…</td>
+      <td>14e2aa1c932b…</td>
     </tr>
     <tr>
       <td>drivers.csv</td>
-      <td>382185</td>
       <td>1771</td>
       <td>12</td>
+      <td>1771</td>
+      <td>12</td>
+      <td>MATCH</td>
+      <td>OK</td>
+      <td>OK</td>
+      <td>MATCH</td>
       <td>utf-8</td>
-      <td>5da86e249f90ff3b97f81f98c43acabe60198568b144cf03fa00d530f6ceee99</td>
-      <td>5da86e249f90ff3b97f81f98c43acabe60198568b144cf03fa00d530f6ceee99</td>
-      <td>MATCH</td>
-      <td>OK</td>
-      <td>OK</td>
-      <td>1771</td>
-      <td>12</td>
-      <td>MATCH</td>
+      <td>382185</td>
+      <td>5da86e249f90…</td>
+      <td>5da86e249f90…</td>
     </tr>
     <tr>
       <td>laps.csv</td>
-      <td>23304903</td>
       <td>97018</td>
       <td>16</td>
+      <td>97018</td>
+      <td>16</td>
+      <td>MATCH</td>
+      <td>OK</td>
+      <td>OK</td>
+      <td>MATCH</td>
       <td>utf-8</td>
-      <td>65129a69302378f9828200926a6daa09b9ce65cc7cbdb8a40f349689fbafae53</td>
-      <td>65129a69302378f9828200926a6daa09b9ce65cc7cbdb8a40f349689fbafae53</td>
-      <td>MATCH</td>
-      <td>OK</td>
-      <td>OK</td>
-      <td>97018</td>
-      <td>16</td>
-      <td>MATCH</td>
+      <td>23304903</td>
+      <td>65129a693023…</td>
+      <td>65129a693023…</td>
     </tr>
     <tr>
       <td>stints.csv</td>
-      <td>150297</td>
       <td>5040</td>
       <td>8</td>
+      <td>5040</td>
+      <td>8</td>
+      <td>MATCH</td>
+      <td>OK</td>
+      <td>OK</td>
+      <td>MATCH</td>
       <td>utf-8</td>
-      <td>60154ce2696997697ba42ee43487e0749799d73f8a300ab80e2ee8928e997483</td>
-      <td>60154ce2696997697ba42ee43487e0749799d73f8a300ab80e2ee8928e997483</td>
-      <td>MATCH</td>
-      <td>OK</td>
-      <td>OK</td>
-      <td>5040</td>
-      <td>8</td>
-      <td>MATCH</td>
+      <td>150297</td>
+      <td>60154ce26969…</td>
+      <td>60154ce26969…</td>
     </tr>
     <tr>
       <td>weather.csv</td>
-      <td>1053799</td>
       <td>13928</td>
       <td>10</td>
+      <td>13928</td>
+      <td>10</td>
+      <td>MATCH</td>
+      <td>OK</td>
+      <td>OK</td>
+      <td>MATCH</td>
       <td>utf-8</td>
-      <td>f125429cec0ef286e9cbceca54a590d916799ef81caa2d128f23bf7048c7d6f9</td>
-      <td>f125429cec0ef286e9cbceca54a590d916799ef81caa2d128f23bf7048c7d6f9</td>
-      <td>MATCH</td>
-      <td>OK</td>
-      <td>OK</td>
-      <td>13928</td>
-      <td>10</td>
-      <td>MATCH</td>
+      <td>1053799</td>
+      <td>f125429cec0e…</td>
+      <td>f125429cec0e…</td>
     </tr>
     <tr>
       <td>pit.csv</td>
-      <td>192135</td>
       <td>3029</td>
       <td>8</td>
+      <td>3029</td>
+      <td>8</td>
+      <td>MATCH</td>
+      <td>OK</td>
+      <td>OK</td>
+      <td>MATCH</td>
       <td>utf-8</td>
-      <td>8926e1245ffa1c1655a6abd6ba9d9bf8ec9bf63933a06e5b77c328cdaf2ce5f0</td>
-      <td>8926e1245ffa1c1655a6abd6ba9d9bf8ec9bf63933a06e5b77c328cdaf2ce5f0</td>
-      <td>MATCH</td>
-      <td>OK</td>
-      <td>OK</td>
-      <td>3029</td>
-      <td>8</td>
-      <td>MATCH</td>
+      <td>192135</td>
+      <td>8926e1245ffa…</td>
+      <td>8926e1245ffa…</td>
     </tr>
   </tbody>
-</table><h2>2. 파일별 처리 결과</h2><table class="dataframe">
+</table><details open><summary>컬럼 설명</summary><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>컬럼</th>
+      <th>의미</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>file</td>
+      <td>파일명</td>
+    </tr>
+    <tr>
+      <td>rows</td>
+      <td>실제 데이터 행 수 (헤더 제외)</td>
+    </tr>
+    <tr>
+      <td>columns</td>
+      <td>실제 컬럼 수</td>
+    </tr>
+    <tr>
+      <td>spec_rows</td>
+      <td>데이터 명세서(00. 데이터_명세서.md)에 적힌 행 수</td>
+    </tr>
+    <tr>
+      <td>spec_columns</td>
+      <td>데이터 명세서에 적힌 컬럼 수</td>
+    </tr>
+    <tr>
+      <td>spec_row_count</td>
+      <td>행·컬럼 수가 명세서와 같으면 MATCH, 다르면 MISMATCH, 명세서가 없으면 NO_SPEC</td>
+    </tr>
+    <tr>
+      <td>schema</td>
+      <td>명세서 컬럼 이름이 빠짐없이 있고 추가 컬럼이 없으면 OK</td>
+    </tr>
+    <tr>
+      <td>column_order</td>
+      <td>컬럼 순서까지 명세서와 같으면 OK, 순서만 다르면 DIFFERENT</td>
+    </tr>
+    <tr>
+      <td>checksum</td>
+      <td>파일이 배포본 그대로인지: sha256 = sha256_expected 이면 MATCH, 기준값이 없으면 NO_REFERENCE, 다르면 MISMATCH(파일 변경·손상)</td>
+    </tr>
+    <tr>
+      <td>encoding</td>
+      <td>판별한 문자 인코딩 (utf-8, BOM이 있으면 utf-8-sig)</td>
+    </tr>
+    <tr>
+      <td>bytes</td>
+      <td>파일 크기(바이트)</td>
+    </tr>
+    <tr>
+      <td>sha256</td>
+      <td>이번에 읽은 파일 바이트의 SHA-256 해시 (원본 보존 증빙, 참고용)</td>
+    </tr>
+    <tr>
+      <td>sha256_expected</td>
+      <td>배포본 SHA256SUMS.txt에 적힌 기준 해시 (참고용)</td>
+    </tr>
+  </tbody>
+</table></details><h2>2. 파일별 처리 결과</h2><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>file</th>

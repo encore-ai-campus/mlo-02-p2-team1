@@ -1,0 +1,13 @@
+# Python / 가상환경
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# 비밀번호·로컬 설정 (커밋 금지)
+.env
+*.local.sql
+
+# 로컬 작업물
+.claude/
+backups/

@@ -1,1 +1,6 @@
 pandas>=2.0
+sqlalchemy>=2.0
+pymysql
+cryptography
+django>=5.2,<6
+python-dotenv

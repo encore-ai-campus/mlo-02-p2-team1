@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}F1 Data{% endblock %}</title>
+  <style>
+    body { font-family: "Malgun Gothic", sans-serif; margin: 0; background: #f6f7f9; color: #222; }
+    nav { background: #15151e; padding: 12px 24px; }
+    nav a { color: #fff; text-decoration: none; font-weight: bold; }
+    main { padding: 24px; }
+    h1 small { font-size: 14px; color: #666; font-weight: normal; }
+    h2 { font-size: 16px; margin: 28px 0 8px; }
+    .tbl { overflow-x: auto; background: #fff; border-radius: 6px; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th, td { border-bottom: 1px solid #e5e5e5; padding: 6px 10px; text-align: left; white-space: nowrap; }
+    th { background: #f0f0f3; }
+    td.n { text-align: right; font-variant-numeric: tabular-nums; }
+    .pager { margin-top: 12px; }
+    .pager a { margin-right: 12px; }
+    .meta { color: #666; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <nav><a href="{% url 'table_list' %}">F1 Data — 테이블 목록</a> <a href="{% url 'decision_board' %}" style="margin-left:18px;font-weight:normal">Decision Board →</a></nav>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>
