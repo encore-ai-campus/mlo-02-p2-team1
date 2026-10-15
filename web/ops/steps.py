@@ -14,7 +14,7 @@ from pathlib import Path
 from django.conf import settings
 
 ROOT = Path(settings.BASE_DIR).parent
-LOG_DIR = ROOT / "outputs" / "ops_runs"
+LOG_DIR = ROOT / "logs" / "ops_runs"
 PY = sys.executable
 
 

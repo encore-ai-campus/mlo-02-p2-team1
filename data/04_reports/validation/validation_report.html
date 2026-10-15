@@ -1,0 +1,2840 @@
+<!doctype html><html lang='ko'><head><meta charset='utf-8'><title>F1 정제 후 검증 리포트</title><style>body{font-family:Arial,'Malgun Gothic',sans-serif;margin:32px;color:#17212b}table{border-collapse:collapse;width:100%;margin:12px 0 28px;font-size:12.5px}th,td{border:1px solid #d5dee7;padding:6px;text-align:left;vertical-align:top}th{background:#eaf1f6}.cards{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}.cards div{background:#f1f5f8;padding:14px 18px;border-radius:8px;min-width:90px}.cards strong{display:block;font-size:24px;margin-top:6px}h2{margin-top:36px}.meta{color:#56636f;font-size:13px}.badge{color:#fff;border-radius:4px;padding:2px 6px;font-size:11.5px;font-weight:bold}</style></head><body><h1>F1 정제 후 데이터 검증 리포트</h1><p class='meta'>정제 결과 D:\workspace\mlo-02-p2-team1\data\03_cleaned · 추가 데이터 D:\workspace\mlo-02-p2-team1\data\01_raw\f1_extra_data · 검사 정의 data/02_reference/standard_dictionary/validation_checks.csv · 생성 2026-10-15 19:58</p><div class='cards'><div style='border-top:4px solid #1f7a4d'>PASS<strong>124</strong></div><div style='border-top:4px solid #b42318'>FAIL<strong>0</strong></div><div style='border-top:4px solid #b54708'>WARN<strong>7</strong></div><div style='border-top:4px solid #475467'>INFO<strong>20</strong></div></div><p class='meta'>FAIL = ERROR 등급 위반, WARN = WARNING 등급 위반(검토), INFO = 참고 건수(통과/실패 판정 없음)</p><h2>1. 행 수 대사</h2><p class='meta'>처리 결과를 겹치지 않는 4개 구간으로 나눠 <b>② 원본 유지 + ③ 복구 + ④ 격리 + ⑤ 제거 = ① 원본</b>인지 확인한다. 오염 정제 6종 합계: 119,579 + 1,292 + 2 + 0 = 120,873 (원본 120,873). 복구 행은 값이 하나 이상 바뀐 행이고, 격리 행은 복구 여부와 관계없이 ④로만 센다. 파이프라인은 행을 삭제하지 않고 중복 키(DQ026)는 격리하므로 ⑤ 제거는 0이 정상이다. '남은 키 중복 행'은 정제 후 자연키가 겹치는 행 수(VC10)다.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>파일</th>
+      <th>구분</th>
+      <th>① 원본 행</th>
+      <th>② 원본 유지</th>
+      <th>③ 복구</th>
+      <th>④ 격리</th>
+      <th>⑤ 제거(중복 제거 등)</th>
+      <th>처리 합계 ②+③+④+⑤</th>
+      <th>차이(합계-①)</th>
+      <th>정제 후 행</th>
+      <th>분석 대상 ②+③</th>
+      <th>quarantine 파일 행</th>
+      <th>남은 키 중복 행</th>
+      <th>status</th>
+      <th>비고</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>sessions</td>
+      <td>오염 정제 6종</td>
+      <td>87</td>
+      <td>85</td>
+      <td>2</td>
+      <td>0</td>
+      <td>0</td>
+      <td>87</td>
+      <td>0</td>
+      <td>87</td>
+      <td>87</td>
+      <td>0</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본 행 수는 04_reports/quality/bronze_manifest.csv</td>
+    </tr>
+    <tr>
+      <td>drivers</td>
+      <td>오염 정제 6종</td>
+      <td>1,771</td>
+      <td>1,047</td>
+      <td>724</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td>1,771</td>
+      <td>0</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본 행 수는 04_reports/quality/bronze_manifest.csv</td>
+    </tr>
+    <tr>
+      <td>laps</td>
+      <td>오염 정제 6종</td>
+      <td>97,018</td>
+      <td>96,493</td>
+      <td>525</td>
+      <td>0</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td>97,018</td>
+      <td>0</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본 행 수는 04_reports/quality/bronze_manifest.csv</td>
+    </tr>
+    <tr>
+      <td>stints</td>
+      <td>오염 정제 6종</td>
+      <td>5,040</td>
+      <td>5,004</td>
+      <td>36</td>
+      <td>0</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td>5,040</td>
+      <td>0</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본 행 수는 04_reports/quality/bronze_manifest.csv</td>
+    </tr>
+    <tr>
+      <td>weather</td>
+      <td>오염 정제 6종</td>
+      <td>13,928</td>
+      <td>13,923</td>
+      <td>5</td>
+      <td>0</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td>13,928</td>
+      <td>0</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본 행 수는 04_reports/quality/bronze_manifest.csv</td>
+    </tr>
+    <tr>
+      <td>pit</td>
+      <td>오염 정제 6종</td>
+      <td>3,029</td>
+      <td>3,027</td>
+      <td>0</td>
+      <td>2</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td>3,027</td>
+      <td>2</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본 행 수는 04_reports/quality/bronze_manifest.csv</td>
+    </tr>
+    <tr>
+      <td>starting_grid</td>
+      <td>추가 5종</td>
+      <td>1,770</td>
+      <td>1,770</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1,770</td>
+      <td>0</td>
+      <td>1,770</td>
+      <td>1,770</td>
+      <td>-</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>정제 단계 없음(원본 그대로 검증)</td>
+    </tr>
+    <tr>
+      <td>session_result</td>
+      <td>추가 5종</td>
+      <td>1,771</td>
+      <td>1,771</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td>1,771</td>
+      <td>-</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>정제 단계 없음(원본 그대로 검증)</td>
+    </tr>
+    <tr>
+      <td>position</td>
+      <td>추가 5종</td>
+      <td>42,952</td>
+      <td>42,952</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>42,952</td>
+      <td>0</td>
+      <td>42,952</td>
+      <td>42,952</td>
+      <td>-</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>정제 단계 없음(원본 그대로 검증)</td>
+    </tr>
+    <tr>
+      <td>race_control</td>
+      <td>추가 5종</td>
+      <td>9,499</td>
+      <td>9,499</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>9,499</td>
+      <td>0</td>
+      <td>9,499</td>
+      <td>9,499</td>
+      <td>-</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>정제 단계 없음(원본 그대로 검증)</td>
+    </tr>
+    <tr>
+      <td>intervals</td>
+      <td>추가 5종</td>
+      <td>2,107,568</td>
+      <td>2,107,568</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2,107,568</td>
+      <td>0</td>
+      <td>2,107,568</td>
+      <td>2,107,568</td>
+      <td>-</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>정제 단계 없음(원본 그대로 검증)</td>
+    </tr>
+    <tr>
+      <td>합계(오염 정제 6종)</td>
+      <td></td>
+      <td>120,873</td>
+      <td>119,579</td>
+      <td>1,292</td>
+      <td>2</td>
+      <td>0</td>
+      <td>120,873</td>
+      <td>0</td>
+      <td>120,873</td>
+      <td>120,871</td>
+      <td>2</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table><h2>2. 분류별 요약</h2><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>category</th>
+      <th>korean_category</th>
+      <th>checks</th>
+      <th>PASS</th>
+      <th>FAIL</th>
+      <th>WARN</th>
+      <th>INFO</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CONSISTENCY</td>
+      <td>정합성</td>
+      <td>6</td>
+      <td>3</td>
+      <td>0</td>
+      <td>3</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>DUPLICATE</td>
+      <td>중복</td>
+      <td>25</td>
+      <td>25</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>JOIN</td>
+      <td>행 증폭</td>
+      <td>5</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>MISSING</td>
+      <td>결측</td>
+      <td>26</td>
+      <td>14</td>
+      <td>0</td>
+      <td>1</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <td>POINTS</td>
+      <td>포인트</td>
+      <td>4</td>
+      <td>3</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>RANGE</td>
+      <td>범위·형식</td>
+      <td>37</td>
+      <td>37</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>RECONCILE</td>
+      <td>대사</td>
+      <td>18</td>
+      <td>12</td>
+      <td>0</td>
+      <td>0</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>REFERENTIAL</td>
+      <td>참조</td>
+      <td>30</td>
+      <td>26</td>
+      <td>0</td>
+      <td>3</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table><h2>3. FAIL·WARN 항목</h2><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>check_id</th>
+      <th>korean_category</th>
+      <th>check_name</th>
+      <th>target</th>
+      <th>severity</th>
+      <th>fail_count</th>
+      <th>total_count</th>
+      <th>status</th>
+      <th>description</th>
+      <th>note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>VC04</td>
+      <td>결측</td>
+      <td>UNCLASSIFIED_WITHOUT_STATUS</td>
+      <td>session_result</td>
+      <td>WARNING</td>
+      <td>4</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>session_result 순위 공백인데 dnf·dns·dsq 모두 False</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC24</td>
+      <td>참조</td>
+      <td>GRID_WITHOUT_RESULT</td>
+      <td>starting_grid</td>
+      <td>WARNING</td>
+      <td>2</td>
+      <td>1,770</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>starting_grid(meeting_key+driver_number)가 Race 결과에 없음(예선 후 기권 확인)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC26</td>
+      <td>참조</td>
+      <td>PIT_LAP_IN_RANGE</td>
+      <td>pit</td>
+      <td>WARNING</td>
+      <td>1</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>피트 랩이 해당 드라이버 최대 랩보다 큼</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC27</td>
+      <td>참조</td>
+      <td>LAP_COVERED_BY_STINT</td>
+      <td>laps</td>
+      <td>WARNING</td>
+      <td>280</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>어느 스틴트 구간에도 속하지 않는 랩</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC40</td>
+      <td>정합성</td>
+      <td>TEAM_DRIVER_COUNT</td>
+      <td>drivers</td>
+      <td>WARNING</td>
+      <td>3</td>
+      <td>887</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>세션별 팀 소속 드라이버 수가 2가 아님</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC42</td>
+      <td>정합성</td>
+      <td>SECTOR_SUM</td>
+      <td>laps</td>
+      <td>WARNING</td>
+      <td>20</td>
+      <td>96,597</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>섹터 3개 합과 랩타임 차이 0.5초 초과(잔여 검토)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC45</td>
+      <td>정합성</td>
+      <td>STINT_OVERLAP</td>
+      <td>stints</td>
+      <td>WARNING</td>
+      <td>3</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>다음 스틴트 시작 &lt; 이전 스틴트 종료</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table><h2>4. 전체 검사 결과</h2><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>check_id</th>
+      <th>korean_category</th>
+      <th>check_name</th>
+      <th>target</th>
+      <th>severity</th>
+      <th>fail_count</th>
+      <th>total_count</th>
+      <th>status</th>
+      <th>description</th>
+      <th>note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>VC04</td>
+      <td>결측</td>
+      <td>UNCLASSIFIED_WITHOUT_STATUS</td>
+      <td>session_result</td>
+      <td>WARNING</td>
+      <td>4</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>session_result 순위 공백인데 dnf·dns·dsq 모두 False</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC24</td>
+      <td>참조</td>
+      <td>GRID_WITHOUT_RESULT</td>
+      <td>starting_grid</td>
+      <td>WARNING</td>
+      <td>2</td>
+      <td>1,770</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>starting_grid(meeting_key+driver_number)가 Race 결과에 없음(예선 후 기권 확인)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC26</td>
+      <td>참조</td>
+      <td>PIT_LAP_IN_RANGE</td>
+      <td>pit</td>
+      <td>WARNING</td>
+      <td>1</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>피트 랩이 해당 드라이버 최대 랩보다 큼</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC27</td>
+      <td>참조</td>
+      <td>LAP_COVERED_BY_STINT</td>
+      <td>laps</td>
+      <td>WARNING</td>
+      <td>280</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>어느 스틴트 구간에도 속하지 않는 랩</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC40</td>
+      <td>정합성</td>
+      <td>TEAM_DRIVER_COUNT</td>
+      <td>drivers</td>
+      <td>WARNING</td>
+      <td>3</td>
+      <td>887</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>세션별 팀 소속 드라이버 수가 2가 아님</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC42</td>
+      <td>정합성</td>
+      <td>SECTOR_SUM</td>
+      <td>laps</td>
+      <td>WARNING</td>
+      <td>20</td>
+      <td>96,597</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>섹터 3개 합과 랩타임 차이 0.5초 초과(잔여 검토)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC45</td>
+      <td>정합성</td>
+      <td>STINT_OVERLAP</td>
+      <td>stints</td>
+      <td>WARNING</td>
+      <td>3</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+      <td>다음 스틴트 시작 &lt; 이전 스틴트 종료</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC02</td>
+      <td>결측</td>
+      <td>NULL_PROFILE</td>
+      <td>sessions</td>
+      <td>INFO</td>
+      <td>0</td>
+      <td>1,305</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>컬럼별 공백 건수(참고용 프로파일; null_profile 출력)</td>
+      <td>null_profile.csv 참고</td>
+    </tr>
+    <tr>
+      <td>VC02</td>
+      <td>결측</td>
+      <td>NULL_PROFILE</td>
+      <td>drivers</td>
+      <td>INFO</td>
+      <td>186</td>
+      <td>21,252</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>컬럼별 공백 건수(참고용 프로파일; null_profile 출력)</td>
+      <td>null_profile.csv 참고</td>
+    </tr>
+    <tr>
+      <td>VC02</td>
+      <td>결측</td>
+      <td>NULL_PROFILE</td>
+      <td>laps</td>
+      <td>INFO</td>
+      <td>26,025</td>
+      <td>1,552,288</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>컬럼별 공백 건수(참고용 프로파일; null_profile 출력)</td>
+      <td>null_profile.csv 참고</td>
+    </tr>
+    <tr>
+      <td>VC02</td>
+      <td>결측</td>
+      <td>NULL_PROFILE</td>
+      <td>stints</td>
+      <td>INFO</td>
+      <td>6</td>
+      <td>40,320</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>컬럼별 공백 건수(참고용 프로파일; null_profile 출력)</td>
+      <td>null_profile.csv 참고</td>
+    </tr>
+    <tr>
+      <td>VC02</td>
+      <td>결측</td>
+      <td>NULL_PROFILE</td>
+      <td>weather</td>
+      <td>INFO</td>
+      <td>0</td>
+      <td>139,280</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>컬럼별 공백 건수(참고용 프로파일; null_profile 출력)</td>
+      <td>null_profile.csv 참고</td>
+    </tr>
+    <tr>
+      <td>VC02</td>
+      <td>결측</td>
+      <td>NULL_PROFILE</td>
+      <td>pit</td>
+      <td>INFO</td>
+      <td>2,026</td>
+      <td>24,232</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>컬럼별 공백 건수(참고용 프로파일; null_profile 출력)</td>
+      <td>null_profile.csv 참고</td>
+    </tr>
+    <tr>
+      <td>VC02</td>
+      <td>결측</td>
+      <td>NULL_PROFILE</td>
+      <td>starting_grid</td>
+      <td>INFO</td>
+      <td>59</td>
+      <td>8,850</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>컬럼별 공백 건수(참고용 프로파일; null_profile 출력)</td>
+      <td>null_profile.csv 참고</td>
+    </tr>
+    <tr>
+      <td>VC02</td>
+      <td>결측</td>
+      <td>NULL_PROFILE</td>
+      <td>session_result</td>
+      <td>INFO</td>
+      <td>1,147</td>
+      <td>19,481</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>컬럼별 공백 건수(참고용 프로파일; null_profile 출력)</td>
+      <td>null_profile.csv 참고</td>
+    </tr>
+    <tr>
+      <td>VC02</td>
+      <td>결측</td>
+      <td>NULL_PROFILE</td>
+      <td>position</td>
+      <td>INFO</td>
+      <td>0</td>
+      <td>214,760</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>컬럼별 공백 건수(참고용 프로파일; null_profile 출력)</td>
+      <td>null_profile.csv 참고</td>
+    </tr>
+    <tr>
+      <td>VC02</td>
+      <td>결측</td>
+      <td>NULL_PROFILE</td>
+      <td>race_control</td>
+      <td>INFO</td>
+      <td>32,426</td>
+      <td>104,489</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>컬럼별 공백 건수(참고용 프로파일; null_profile 출력)</td>
+      <td>null_profile.csv 참고</td>
+    </tr>
+    <tr>
+      <td>VC02</td>
+      <td>결측</td>
+      <td>NULL_PROFILE</td>
+      <td>intervals</td>
+      <td>INFO</td>
+      <td>37,023</td>
+      <td>12,645,408</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>컬럼별 공백 건수(참고용 프로파일; null_profile 출력)</td>
+      <td>null_profile.csv 참고</td>
+    </tr>
+    <tr>
+      <td>VC25</td>
+      <td>참조</td>
+      <td>RESULT_WITHOUT_GRID</td>
+      <td>session_result</td>
+      <td>INFO</td>
+      <td>3</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>Race 결과에 그리드가 없음(피트레인 출발 등 원천 특성)</td>
+      <td>그리드 없는 Race 결과(피트레인 출발 등)</td>
+    </tr>
+    <tr>
+      <td>VC71</td>
+      <td>행 증폭</td>
+      <td>STINT_RANGE_JOIN_FANOUT</td>
+      <td>laps×stints</td>
+      <td>INFO</td>
+      <td>305</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>랩이 2개 이상 스틴트 구간에 매칭(경계 랩 공유 → Silver에서 귀속 규칙 필요)</td>
+      <td>경계 랩이 앞뒤 스틴트에 모두 속함</td>
+    </tr>
+    <tr>
+      <td>VC50</td>
+      <td>포인트</td>
+      <td>SOURCE_POINTS_DIFF</td>
+      <td>session_result</td>
+      <td>INFO</td>
+      <td>47</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>원천 points와 재계산 race_base_points 차이(최속 랩 보너스·원천 누락 확인용)</td>
+      <td>-18점 2건, -15점 1건, -12점 1건, -10점 1건, -8점 1건, -6점 1건, -4점 1건, -2점 1건, -1점 1건, +1점 37건</td>
+    </tr>
+    <tr>
+      <td>VC61</td>
+      <td>대사</td>
+      <td>QUARANTINE_FLAG</td>
+      <td>sessions</td>
+      <td>INFO</td>
+      <td>0</td>
+      <td>87</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>quarantine_flag=Y 행 수(격리 대상 참고)</td>
+      <td>quarantine/sessions.csv 0행</td>
+    </tr>
+    <tr>
+      <td>VC61</td>
+      <td>대사</td>
+      <td>QUARANTINE_FLAG</td>
+      <td>drivers</td>
+      <td>INFO</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>quarantine_flag=Y 행 수(격리 대상 참고)</td>
+      <td>quarantine/drivers.csv 0행</td>
+    </tr>
+    <tr>
+      <td>VC61</td>
+      <td>대사</td>
+      <td>QUARANTINE_FLAG</td>
+      <td>laps</td>
+      <td>INFO</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>quarantine_flag=Y 행 수(격리 대상 참고)</td>
+      <td>quarantine/laps.csv 0행</td>
+    </tr>
+    <tr>
+      <td>VC61</td>
+      <td>대사</td>
+      <td>QUARANTINE_FLAG</td>
+      <td>stints</td>
+      <td>INFO</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>quarantine_flag=Y 행 수(격리 대상 참고)</td>
+      <td>quarantine/stints.csv 0행</td>
+    </tr>
+    <tr>
+      <td>VC61</td>
+      <td>대사</td>
+      <td>QUARANTINE_FLAG</td>
+      <td>weather</td>
+      <td>INFO</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>quarantine_flag=Y 행 수(격리 대상 참고)</td>
+      <td>quarantine/weather.csv 0행</td>
+    </tr>
+    <tr>
+      <td>VC61</td>
+      <td>대사</td>
+      <td>QUARANTINE_FLAG</td>
+      <td>pit</td>
+      <td>INFO</td>
+      <td>2</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#475467'>INFO</span></td>
+      <td>quarantine_flag=Y 행 수(격리 대상 참고)</td>
+      <td>quarantine/pit.csv 2행</td>
+    </tr>
+    <tr>
+      <td>VC01</td>
+      <td>결측</td>
+      <td>KEY_NOT_NULL</td>
+      <td>sessions</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>87</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>식별키·meeting_key 컬럼 공백</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC01</td>
+      <td>결측</td>
+      <td>KEY_NOT_NULL</td>
+      <td>drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>식별키·meeting_key 컬럼 공백</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC01</td>
+      <td>결측</td>
+      <td>KEY_NOT_NULL</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>식별키·meeting_key 컬럼 공백</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC01</td>
+      <td>결측</td>
+      <td>KEY_NOT_NULL</td>
+      <td>stints</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>식별키·meeting_key 컬럼 공백</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC01</td>
+      <td>결측</td>
+      <td>KEY_NOT_NULL</td>
+      <td>weather</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>식별키·meeting_key 컬럼 공백</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC01</td>
+      <td>결측</td>
+      <td>KEY_NOT_NULL</td>
+      <td>pit</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>식별키·meeting_key 컬럼 공백</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC01</td>
+      <td>결측</td>
+      <td>KEY_NOT_NULL</td>
+      <td>starting_grid</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,770</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>식별키·meeting_key 컬럼 공백</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC01</td>
+      <td>결측</td>
+      <td>KEY_NOT_NULL</td>
+      <td>session_result</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>식별키·meeting_key 컬럼 공백</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC01</td>
+      <td>결측</td>
+      <td>KEY_NOT_NULL</td>
+      <td>position</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>42,952</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>식별키·meeting_key 컬럼 공백</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC01</td>
+      <td>결측</td>
+      <td>KEY_NOT_NULL</td>
+      <td>race_control</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>9,499</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>식별키·meeting_key 컬럼 공백</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC01</td>
+      <td>결측</td>
+      <td>KEY_NOT_NULL</td>
+      <td>intervals</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>2,107,568</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>식별키·meeting_key 컬럼 공백</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC03</td>
+      <td>결측</td>
+      <td>NO_ZERO_IMPUTATION</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본 공백인데 정제 후 0으로 채워진 시간·속도 값</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC03</td>
+      <td>결측</td>
+      <td>NO_ZERO_IMPUTATION</td>
+      <td>pit</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본 공백인데 정제 후 0으로 채워진 시간·속도 값</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC03</td>
+      <td>결측</td>
+      <td>NO_ZERO_IMPUTATION</td>
+      <td>stints</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본 공백인데 정제 후 0으로 채워진 시간·속도 값</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC10</td>
+      <td>중복</td>
+      <td>NATURAL_KEY_UNIQUE</td>
+      <td>sessions</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>87</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>파일별 자연키 중복</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC11</td>
+      <td>중복</td>
+      <td>EXACT_ROW_DUPLICATE</td>
+      <td>sessions</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>87</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC10</td>
+      <td>중복</td>
+      <td>NATURAL_KEY_UNIQUE</td>
+      <td>drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>파일별 자연키 중복</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC11</td>
+      <td>중복</td>
+      <td>EXACT_ROW_DUPLICATE</td>
+      <td>drivers</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC10</td>
+      <td>중복</td>
+      <td>NATURAL_KEY_UNIQUE</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>파일별 자연키 중복</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC11</td>
+      <td>중복</td>
+      <td>EXACT_ROW_DUPLICATE</td>
+      <td>laps</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC10</td>
+      <td>중복</td>
+      <td>NATURAL_KEY_UNIQUE</td>
+      <td>stints</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>파일별 자연키 중복</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC11</td>
+      <td>중복</td>
+      <td>EXACT_ROW_DUPLICATE</td>
+      <td>stints</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC10</td>
+      <td>중복</td>
+      <td>NATURAL_KEY_UNIQUE</td>
+      <td>weather</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>파일별 자연키 중복</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC11</td>
+      <td>중복</td>
+      <td>EXACT_ROW_DUPLICATE</td>
+      <td>weather</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC10</td>
+      <td>중복</td>
+      <td>NATURAL_KEY_UNIQUE</td>
+      <td>pit</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>파일별 자연키 중복</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC11</td>
+      <td>중복</td>
+      <td>EXACT_ROW_DUPLICATE</td>
+      <td>pit</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC10</td>
+      <td>중복</td>
+      <td>NATURAL_KEY_UNIQUE</td>
+      <td>starting_grid</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,770</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>파일별 자연키 중복</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC11</td>
+      <td>중복</td>
+      <td>EXACT_ROW_DUPLICATE</td>
+      <td>starting_grid</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>1,770</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC10</td>
+      <td>중복</td>
+      <td>NATURAL_KEY_UNIQUE</td>
+      <td>session_result</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>파일별 자연키 중복</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC11</td>
+      <td>중복</td>
+      <td>EXACT_ROW_DUPLICATE</td>
+      <td>session_result</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC10</td>
+      <td>중복</td>
+      <td>NATURAL_KEY_UNIQUE</td>
+      <td>position</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>42,952</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>파일별 자연키 중복</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC11</td>
+      <td>중복</td>
+      <td>EXACT_ROW_DUPLICATE</td>
+      <td>position</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>42,952</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC11</td>
+      <td>중복</td>
+      <td>EXACT_ROW_DUPLICATE</td>
+      <td>race_control</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>9,499</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC10</td>
+      <td>중복</td>
+      <td>NATURAL_KEY_UNIQUE</td>
+      <td>intervals</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>2,107,568</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>파일별 자연키 중복</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC11</td>
+      <td>중복</td>
+      <td>EXACT_ROW_DUPLICATE</td>
+      <td>intervals</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>2,107,568</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC12</td>
+      <td>중복</td>
+      <td>POSITION_UNIQUE</td>
+      <td>session_result</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,546</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 세션 안 최종 순위·그리드 순위 중복</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC12</td>
+      <td>중복</td>
+      <td>POSITION_UNIQUE</td>
+      <td>starting_grid</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,770</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 세션 안 최종 순위·그리드 순위 중복</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC13</td>
+      <td>중복</td>
+      <td>DRIVER_IDENTITY_UNIQUE</td>
+      <td>drivers.full_name</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 세션에서 한 full_name·name_acronym이 여러 driver_number에 등장</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC13</td>
+      <td>중복</td>
+      <td>DRIVER_IDENTITY_UNIQUE</td>
+      <td>drivers.name_acronym</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 세션에서 한 full_name·name_acronym이 여러 driver_number에 등장</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC20</td>
+      <td>참조</td>
+      <td>SESSION_FK</td>
+      <td>drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key가 sessions에 없음(starting_grid 제외)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>참조</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 session_key의 meeting_key가 sessions와 다름</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC20</td>
+      <td>참조</td>
+      <td>SESSION_FK</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key가 sessions에 없음(starting_grid 제외)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>참조</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 session_key의 meeting_key가 sessions와 다름</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC20</td>
+      <td>참조</td>
+      <td>SESSION_FK</td>
+      <td>stints</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key가 sessions에 없음(starting_grid 제외)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>참조</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>stints</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 session_key의 meeting_key가 sessions와 다름</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC20</td>
+      <td>참조</td>
+      <td>SESSION_FK</td>
+      <td>weather</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key가 sessions에 없음(starting_grid 제외)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>참조</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>weather</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 session_key의 meeting_key가 sessions와 다름</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC20</td>
+      <td>참조</td>
+      <td>SESSION_FK</td>
+      <td>pit</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key가 sessions에 없음(starting_grid 제외)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>참조</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>pit</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 session_key의 meeting_key가 sessions와 다름</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC20</td>
+      <td>참조</td>
+      <td>SESSION_FK</td>
+      <td>session_result</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key가 sessions에 없음(starting_grid 제외)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>참조</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>session_result</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 session_key의 meeting_key가 sessions와 다름</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC20</td>
+      <td>참조</td>
+      <td>SESSION_FK</td>
+      <td>position</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>42,952</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key가 sessions에 없음(starting_grid 제외)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>참조</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>position</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>42,952</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 session_key의 meeting_key가 sessions와 다름</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC20</td>
+      <td>참조</td>
+      <td>SESSION_FK</td>
+      <td>race_control</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>9,499</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key가 sessions에 없음(starting_grid 제외)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>참조</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>race_control</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>9,499</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 session_key의 meeting_key가 sessions와 다름</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC20</td>
+      <td>참조</td>
+      <td>SESSION_FK</td>
+      <td>intervals</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>2,107,568</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key가 sessions에 없음(starting_grid 제외)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>참조</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>intervals</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>2,107,568</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 session_key의 meeting_key가 sessions와 다름</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC21</td>
+      <td>참조</td>
+      <td>SESSION_DRIVER_FK</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key+driver_number가 drivers에 없음</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC21</td>
+      <td>참조</td>
+      <td>SESSION_DRIVER_FK</td>
+      <td>stints</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key+driver_number가 drivers에 없음</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC21</td>
+      <td>참조</td>
+      <td>SESSION_DRIVER_FK</td>
+      <td>pit</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key+driver_number가 drivers에 없음</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC21</td>
+      <td>참조</td>
+      <td>SESSION_DRIVER_FK</td>
+      <td>session_result</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key+driver_number가 drivers에 없음</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC21</td>
+      <td>참조</td>
+      <td>SESSION_DRIVER_FK</td>
+      <td>position</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>42,952</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key+driver_number가 drivers에 없음</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC21</td>
+      <td>참조</td>
+      <td>SESSION_DRIVER_FK</td>
+      <td>intervals</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>2,107,568</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key+driver_number가 drivers에 없음</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC21</td>
+      <td>참조</td>
+      <td>SESSION_DRIVER_FK</td>
+      <td>race_control</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>2,745</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_key+driver_number가 drivers에 없음</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC23</td>
+      <td>참조</td>
+      <td>GRID_QUALIFYING_MAPPING</td>
+      <td>starting_grid</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,770</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>starting_grid가 Race session_key를 쓰거나 meeting_key당 Race 세션이 1개가 아님</td>
+      <td>Qualifying session_key → meeting_key → Race session_key</td>
+    </tr>
+    <tr>
+      <td>VC30</td>
+      <td>범위·형식</td>
+      <td>NUMERIC_PARSE</td>
+      <td>sessions</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>87</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC30</td>
+      <td>범위·형식</td>
+      <td>NUMERIC_PARSE</td>
+      <td>drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC30</td>
+      <td>범위·형식</td>
+      <td>NUMERIC_PARSE</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC30</td>
+      <td>범위·형식</td>
+      <td>NUMERIC_PARSE</td>
+      <td>stints</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC30</td>
+      <td>범위·형식</td>
+      <td>NUMERIC_PARSE</td>
+      <td>weather</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC30</td>
+      <td>범위·형식</td>
+      <td>NUMERIC_PARSE</td>
+      <td>pit</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC30</td>
+      <td>범위·형식</td>
+      <td>NUMERIC_PARSE</td>
+      <td>starting_grid</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,770</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC30</td>
+      <td>범위·형식</td>
+      <td>NUMERIC_PARSE</td>
+      <td>session_result</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC30</td>
+      <td>범위·형식</td>
+      <td>NUMERIC_PARSE</td>
+      <td>position</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>42,952</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC30</td>
+      <td>범위·형식</td>
+      <td>NUMERIC_PARSE</td>
+      <td>race_control</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>9,499</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC30</td>
+      <td>범위·형식</td>
+      <td>NUMERIC_PARSE</td>
+      <td>intervals</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>2,107,568</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC31</td>
+      <td>범위·형식</td>
+      <td>VALUE_RANGE</td>
+      <td>sessions</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>87</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 범위 위반(랩타임·섹터&gt;0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC31</td>
+      <td>범위·형식</td>
+      <td>VALUE_RANGE</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 범위 위반(랩타임·섹터&gt;0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC31</td>
+      <td>범위·형식</td>
+      <td>VALUE_RANGE</td>
+      <td>stints</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 범위 위반(랩타임·섹터&gt;0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC31</td>
+      <td>범위·형식</td>
+      <td>VALUE_RANGE</td>
+      <td>pit</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 범위 위반(랩타임·섹터&gt;0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC31</td>
+      <td>범위·형식</td>
+      <td>VALUE_RANGE</td>
+      <td>weather</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 범위 위반(랩타임·섹터&gt;0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC31</td>
+      <td>범위·형식</td>
+      <td>VALUE_RANGE</td>
+      <td>starting_grid</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,770</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 범위 위반(랩타임·섹터&gt;0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC31</td>
+      <td>범위·형식</td>
+      <td>VALUE_RANGE</td>
+      <td>session_result</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 범위 위반(랩타임·섹터&gt;0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC31</td>
+      <td>범위·형식</td>
+      <td>VALUE_RANGE</td>
+      <td>position</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>42,952</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 범위 위반(랩타임·섹터&gt;0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC31</td>
+      <td>범위·형식</td>
+      <td>VALUE_RANGE</td>
+      <td>race_control</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>9,499</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 범위 위반(랩타임·섹터&gt;0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC31</td>
+      <td>범위·형식</td>
+      <td>VALUE_RANGE</td>
+      <td>intervals.interval</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>2,107,568</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 범위 위반(랩타임·섹터&gt;0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC31</td>
+      <td>범위·형식</td>
+      <td>VALUE_RANGE</td>
+      <td>intervals.gap_to_leader</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>2,107,568</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 범위 위반(랩타임·섹터&gt;0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC31</td>
+      <td>범위·형식</td>
+      <td>VALUE_RANGE</td>
+      <td>session_result.gap_to_leader</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 범위 위반(랩타임·섹터&gt;0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC32</td>
+      <td>범위·형식</td>
+      <td>CODE_DOMAIN</td>
+      <td>sessions</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>87</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC32</td>
+      <td>범위·형식</td>
+      <td>CODE_DOMAIN</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC32</td>
+      <td>범위·형식</td>
+      <td>CODE_DOMAIN</td>
+      <td>weather</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC32</td>
+      <td>범위·형식</td>
+      <td>CODE_DOMAIN</td>
+      <td>stints</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC32</td>
+      <td>범위·형식</td>
+      <td>CODE_DOMAIN</td>
+      <td>session_result</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC32</td>
+      <td>범위·형식</td>
+      <td>CODE_DOMAIN</td>
+      <td>race_control</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>9,499</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC33</td>
+      <td>범위·형식</td>
+      <td>DATETIME_PARSE</td>
+      <td>sessions</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>87</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>일시 변환 실패 또는 세션 종료&lt;시작</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC33</td>
+      <td>범위·형식</td>
+      <td>DATETIME_PARSE</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>일시 변환 실패 또는 세션 종료&lt;시작</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC33</td>
+      <td>범위·형식</td>
+      <td>DATETIME_PARSE</td>
+      <td>pit</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>일시 변환 실패 또는 세션 종료&lt;시작</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC33</td>
+      <td>범위·형식</td>
+      <td>DATETIME_PARSE</td>
+      <td>weather</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>일시 변환 실패 또는 세션 종료&lt;시작</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC33</td>
+      <td>범위·형식</td>
+      <td>DATETIME_PARSE</td>
+      <td>position</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>42,952</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>일시 변환 실패 또는 세션 종료&lt;시작</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC33</td>
+      <td>범위·형식</td>
+      <td>DATETIME_PARSE</td>
+      <td>race_control</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>9,499</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>일시 변환 실패 또는 세션 종료&lt;시작</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC33</td>
+      <td>범위·형식</td>
+      <td>DATETIME_PARSE</td>
+      <td>intervals</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>2,107,568</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>일시 변환 실패 또는 세션 종료&lt;시작</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC34</td>
+      <td>범위·형식</td>
+      <td>RESULT_STATUS_EXCLUSIVE</td>
+      <td>session_result</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>dnf·dns·dsq 중 2개 이상 True</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC41</td>
+      <td>정합성</td>
+      <td>SEASON_NUMBER_IDENTITY</td>
+      <td>drivers</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>91</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 시즌 driver_number에 full_name이 여러 개</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC43</td>
+      <td>정합성</td>
+      <td>PIT_DURATION_SPLIT</td>
+      <td>pit</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>lane_duration과 pit_duration 불일치(격리 행 제외)</td>
+      <td>격리 행 2건 제외</td>
+    </tr>
+    <tr>
+      <td>VC44</td>
+      <td>정합성</td>
+      <td>RESULT_LAPS_VS_LAPS</td>
+      <td>session_result</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>1,759</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>session_result.number_of_laps와 laps 최대 랩 차이 1랩 초과</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC51</td>
+      <td>포인트</td>
+      <td>DRIVER_TEAM_POINTS_SUM</td>
+      <td>session_result×drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>91</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>Race별 드라이버 기본 포인트 합 ≠ 팀 기본 포인트 합</td>
+      <td>Race 87개·시즌 4개 대조, 행 수 1771→1771</td>
+    </tr>
+    <tr>
+      <td>VC52</td>
+      <td>포인트</td>
+      <td>RACE_TOTAL_101</td>
+      <td>session_result</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>87</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>Race별 기본 포인트 합계가 101점이 아님</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC53</td>
+      <td>포인트</td>
+      <td>TEAM_AT_RACE_KNOWN</td>
+      <td>session_result×drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>포인트 귀속 팀(drivers.team_name)이 공백</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC60</td>
+      <td>대사</td>
+      <td>ROW_RECONCILE</td>
+      <td>sessions</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>87</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본(bronze_manifest) 행 수와 정제 후 행 수 불일치</td>
+      <td>원본 87 / 정제 87</td>
+    </tr>
+    <tr>
+      <td>VC62</td>
+      <td>대사</td>
+      <td>CHANGE_WITHOUT_RECORD</td>
+      <td>sessions</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>87</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>original_* 와 값이 다른데 repair_status가 REPAIRED가 아님</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC60</td>
+      <td>대사</td>
+      <td>ROW_RECONCILE</td>
+      <td>drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본(bronze_manifest) 행 수와 정제 후 행 수 불일치</td>
+      <td>원본 1771 / 정제 1771</td>
+    </tr>
+    <tr>
+      <td>VC62</td>
+      <td>대사</td>
+      <td>CHANGE_WITHOUT_RECORD</td>
+      <td>drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>original_* 와 값이 다른데 repair_status가 REPAIRED가 아님</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC60</td>
+      <td>대사</td>
+      <td>ROW_RECONCILE</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본(bronze_manifest) 행 수와 정제 후 행 수 불일치</td>
+      <td>원본 97018 / 정제 97018</td>
+    </tr>
+    <tr>
+      <td>VC62</td>
+      <td>대사</td>
+      <td>CHANGE_WITHOUT_RECORD</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>original_* 와 값이 다른데 repair_status가 REPAIRED가 아님</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC60</td>
+      <td>대사</td>
+      <td>ROW_RECONCILE</td>
+      <td>stints</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본(bronze_manifest) 행 수와 정제 후 행 수 불일치</td>
+      <td>원본 5040 / 정제 5040</td>
+    </tr>
+    <tr>
+      <td>VC62</td>
+      <td>대사</td>
+      <td>CHANGE_WITHOUT_RECORD</td>
+      <td>stints</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>original_* 와 값이 다른데 repair_status가 REPAIRED가 아님</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC60</td>
+      <td>대사</td>
+      <td>ROW_RECONCILE</td>
+      <td>weather</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본(bronze_manifest) 행 수와 정제 후 행 수 불일치</td>
+      <td>원본 13928 / 정제 13928</td>
+    </tr>
+    <tr>
+      <td>VC62</td>
+      <td>대사</td>
+      <td>CHANGE_WITHOUT_RECORD</td>
+      <td>weather</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>original_* 와 값이 다른데 repair_status가 REPAIRED가 아님</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC60</td>
+      <td>대사</td>
+      <td>ROW_RECONCILE</td>
+      <td>pit</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>원본(bronze_manifest) 행 수와 정제 후 행 수 불일치</td>
+      <td>원본 3029 / 정제 3029</td>
+    </tr>
+    <tr>
+      <td>VC62</td>
+      <td>대사</td>
+      <td>CHANGE_WITHOUT_RECORD</td>
+      <td>pit</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>original_* 와 값이 다른데 repair_status가 REPAIRED가 아님</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC70</td>
+      <td>행 증폭</td>
+      <td>DRIVER_JOIN_FANOUT</td>
+      <td>laps×drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>97,018</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>laps·session_result를 drivers와 JOIN한 뒤 행 수 증가</td>
+      <td>97018→97018</td>
+    </tr>
+    <tr>
+      <td>VC70</td>
+      <td>행 증폭</td>
+      <td>DRIVER_JOIN_FANOUT</td>
+      <td>stints×drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>5,040</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>laps·session_result를 drivers와 JOIN한 뒤 행 수 증가</td>
+      <td>5040→5040</td>
+    </tr>
+    <tr>
+      <td>VC70</td>
+      <td>행 증폭</td>
+      <td>DRIVER_JOIN_FANOUT</td>
+      <td>pit×drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>3,029</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>laps·session_result를 drivers와 JOIN한 뒤 행 수 증가</td>
+      <td>3029→3029</td>
+    </tr>
+    <tr>
+      <td>VC70</td>
+      <td>행 증폭</td>
+      <td>DRIVER_JOIN_FANOUT</td>
+      <td>session_result×drivers</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>laps·session_result를 drivers와 JOIN한 뒤 행 수 증가</td>
+      <td>1771→1771</td>
+    </tr>
+  </tbody>
+</table><h2>5. 위반 샘플</h2><p class='meta'>검사·대상별 최대 샘플 행 (전체는 validation_samples.csv)</p><h3>VC04 session_result — session_result 순위 공백인데 dnf·dns·dsq 모두 False</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>session_key=9213; driver_number=44; number_of_laps=56; gap_to_leader=2.225</td>
+    </tr>
+    <tr>
+      <td>session_key=9213; driver_number=16; number_of_laps=56; gap_to_leader=24.662</td>
+    </tr>
+    <tr>
+      <td>session_key=11234; driver_number=18; number_of_laps=43; gap_to_leader=+15 LAPS</td>
+    </tr>
+    <tr>
+      <td>session_key=11307; driver_number=23; number_of_laps=55; gap_to_leader=+11 LAPS</td>
+    </tr>
+  </tbody>
+</table><h3>VC24 starting_grid — starting_grid(meeting_key+driver_number)가 Race 결과에 없음(예선 후 기권 확인)</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>meeting_key=1219; session_key=9161; race_session_key=9165; driver_number=18</td>
+    </tr>
+    <tr>
+      <td>meeting_key=1262; session_key=9967; race_session_key=9971; driver_number=18</td>
+    </tr>
+  </tbody>
+</table><h3>VC25 session_result — Race 결과에 그리드가 없음(피트레인 출발 등 원천 특성)</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>meeting_key=1143; session_key=7787; driver_number=11; position=5; dns=False</td>
+    </tr>
+    <tr>
+      <td>meeting_key=1143; session_key=7787; driver_number=77; position=11; dns=False</td>
+    </tr>
+    <tr>
+      <td>meeting_key=1217; session_key=9149; driver_number=20; position=16; dns=False</td>
+    </tr>
+  </tbody>
+</table><h3>VC26 pit — 피트 랩이 해당 드라이버 최대 랩보다 큼</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>session_key=11234; driver_number=18; lap_number=46; max_lap=43.0</td>
+    </tr>
+  </tbody>
+</table><h3>VC27 laps — 어느 스틴트 구간에도 속하지 않는 랩</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>session_key=7953; driver_number=81; lap_number=14</td>
+    </tr>
+    <tr>
+      <td>session_key=7953; driver_number=16; lap_number=40</td>
+    </tr>
+    <tr>
+      <td>session_key=7953; driver_number=31; lap_number=42</td>
+    </tr>
+    <tr>
+      <td>session_key=7779; driver_number=18; lap_number=17</td>
+    </tr>
+    <tr>
+      <td>session_key=7779; driver_number=23; lap_number=28</td>
+    </tr>
+    <tr>
+      <td>session_key=7779; driver_number=11; lap_number=51</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=23; lap_number=7</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=63; lap_number=18</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=20; lap_number=53</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=10; lap_number=57</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=31; lap_number=57</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=21; lap_number=57</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=2; lap_number=57</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=1; lap_number=59</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=44; lap_number=59</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=14; lap_number=59</td>
+    </tr>
+    <tr>
+      <td>session_key=9070; driver_number=21; lap_number=10</td>
+    </tr>
+    <tr>
+      <td>session_key=9070; driver_number=24; lap_number=37</td>
+    </tr>
+    <tr>
+      <td>session_key=9078; driver_number=1; lap_number=58</td>
+    </tr>
+    <tr>
+      <td>session_key=9094; driver_number=18; lap_number=54</td>
+    </tr>
+  </tbody>
+</table><h3>VC40 drivers — 세션별 팀 소속 드라이버 수가 2가 아님</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>session_key=9165; team_name=Aston Martin; drivers=1</td>
+    </tr>
+    <tr>
+      <td>session_key=9488; team_name=Williams; drivers=1</td>
+    </tr>
+    <tr>
+      <td>session_key=9971; team_name=Aston Martin; drivers=1</td>
+    </tr>
+  </tbody>
+</table><h3>VC42 laps — 섹터 3개 합과 랩타임 차이 0.5초 초과(잔여 검토)</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>session_key=9644; driver_number=77; lap_number=38; diff=0.508</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=63; lap_number=39; diff=0.509</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=77; lap_number=40; diff=0.509</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=63; lap_number=41; diff=0.509</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=81; lap_number=41; diff=0.512</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=16; lap_number=45; diff=0.51</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=30; lap_number=45; diff=0.513</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=63; lap_number=46; diff=0.513</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=44; lap_number=46; diff=0.514</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=77; lap_number=45; diff=0.518</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=55; lap_number=46; diff=0.515</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=1; lap_number=46; diff=0.513</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=16; lap_number=46; diff=0.511</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=31; lap_number=46; diff=0.512</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=30; lap_number=46; diff=0.513</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=63; lap_number=47; diff=0.509</td>
+    </tr>
+    <tr>
+      <td>session_key=9644; driver_number=4; lap_number=50; diff=0.504</td>
+    </tr>
+    <tr>
+      <td>session_key=9947; driver_number=63; lap_number=35; diff=1.454</td>
+    </tr>
+    <tr>
+      <td>session_key=9912; driver_number=31; lap_number=14; diff=0.88</td>
+    </tr>
+    <tr>
+      <td>session_key=9896; driver_number=4; lap_number=61; diff=0.67</td>
+    </tr>
+  </tbody>
+</table><h3>VC45 stints — 다음 스틴트 시작 &lt; 이전 스틴트 종료</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>session_key=9558; driver_number=24; stint_number=4; lap_start=20; prev_lap_end=37.0</td>
+    </tr>
+    <tr>
+      <td>session_key=9558; driver_number=31; stint_number=4; lap_start=22; prev_lap_end=38.0</td>
+    </tr>
+    <tr>
+      <td>session_key=9590; driver_number=18; stint_number=3; lap_start=20; prev_lap_end=50.0</td>
+    </tr>
+  </tbody>
+</table><h3>VC50 session_result — 원천 points와 재계산 race_base_points 차이(최속 랩 보너스·원천 누락 확인용)</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>year=2023; session_key=7779; driver_number=1; position=2; points=0.0; race_base_points=18.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=7787; driver_number=11; position=5; points=11.0; race_base_points=10.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9070; driver_number=63; position=8; points=5.0; race_base_points=4.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9078; driver_number=1; position=1; points=26.0; race_base_points=25.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9094; driver_number=44; position=4; points=13.0; race_base_points=12.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9102; driver_number=1; position=1; points=26.0; race_base_points=25.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9110; driver_number=11; position=6; points=9.0; race_base_points=8.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9118; driver_number=1; position=1; points=26.0; race_base_points=25.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9126; driver_number=1; position=1; points=26.0; race_base_points=25.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9133; driver_number=1; position=1; points=26.0; race_base_points=25.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9141; driver_number=44; position=4; points=13.0; race_base_points=12.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9149; driver_number=14; position=2; points=19.0; race_base_points=18.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9165; driver_number=44; position=3; points=16.0; race_base_points=15.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9173; driver_number=1; position=1; points=26.0; race_base_points=25.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9221; driver_number=1; position=1; points=26.0; race_base_points=25.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9213; driver_number=4; position=2; points=0.0; race_base_points=18.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9213; driver_number=55; position=3; points=0.0; race_base_points=15.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9213; driver_number=11; position=4; points=0.0; race_base_points=12.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9213; driver_number=63; position=5; points=0.0; race_base_points=10.0</td>
+    </tr>
+    <tr>
+      <td>year=2023; session_key=9213; driver_number=10; position=6; points=0.0; race_base_points=8.0</td>
+    </tr>
+  </tbody>
+</table><h3>VC61 pit — quarantine_flag=Y 행 수(격리 대상 참고)</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>session_key=9157; driver_number=2; lap_number=14; dq_codes=DQ021</td>
+    </tr>
+    <tr>
+      <td>session_key=9157; driver_number=18; lap_number=20; dq_codes=DQ021</td>
+    </tr>
+  </tbody>
+</table><h3>VC71 laps×stints — 랩이 2개 이상 스틴트 구간에 매칭(경계 랩 공유 → Silver에서 귀속 규칙 필요)</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>session_key=7787; driver_number=11; lap_number=1</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=77; lap_number=1</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=31; lap_number=1</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=24; lap_number=1</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=2; lap_number=1</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=2; lap_number=2</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=11; lap_number=2</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=63; lap_number=7</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=55; lap_number=7</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=20; lap_number=7</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=1; lap_number=8</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=14; lap_number=8</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=18; lap_number=8</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=10; lap_number=8</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=27; lap_number=8</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=63; lap_number=8</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=55; lap_number=8</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=22; lap_number=8</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=4; lap_number=8</td>
+    </tr>
+    <tr>
+      <td>session_key=7787; driver_number=81; lap_number=8</td>
+    </tr>
+  </tbody>
+</table><h2>6. 결측 프로파일</h2><p class='meta'>공백이 있는 컬럼만 표시 (전체는 null_profile.csv)</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>table</th>
+      <th>column</th>
+      <th>rows</th>
+      <th>blank</th>
+      <th>blank_rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>drivers</td>
+      <td>country_code</td>
+      <td>1,771</td>
+      <td>137</td>
+      <td>0.077357</td>
+    </tr>
+    <tr>
+      <td>drivers</td>
+      <td>headshot_url</td>
+      <td>1,771</td>
+      <td>49</td>
+      <td>0.027668</td>
+    </tr>
+    <tr>
+      <td>intervals</td>
+      <td>interval</td>
+      <td>2,107,568</td>
+      <td>25,497</td>
+      <td>0.012098</td>
+    </tr>
+    <tr>
+      <td>intervals</td>
+      <td>gap_to_leader</td>
+      <td>2,107,568</td>
+      <td>11,526</td>
+      <td>0.005469</td>
+    </tr>
+    <tr>
+      <td>laps</td>
+      <td>i1_speed</td>
+      <td>97,018</td>
+      <td>14,836</td>
+      <td>0.15292</td>
+    </tr>
+    <tr>
+      <td>laps</td>
+      <td>st_speed</td>
+      <td>97,018</td>
+      <td>8,043</td>
+      <td>0.082902</td>
+    </tr>
+    <tr>
+      <td>laps</td>
+      <td>i2_speed</td>
+      <td>97,018</td>
+      <td>1,222</td>
+      <td>0.012596</td>
+    </tr>
+    <tr>
+      <td>laps</td>
+      <td>duration_sector_3</td>
+      <td>97,018</td>
+      <td>375</td>
+      <td>0.003865</td>
+    </tr>
+    <tr>
+      <td>laps</td>
+      <td>lap_duration</td>
+      <td>97,018</td>
+      <td>371</td>
+      <td>0.003824</td>
+    </tr>
+    <tr>
+      <td>laps</td>
+      <td>duration_sector_1</td>
+      <td>97,018</td>
+      <td>319</td>
+      <td>0.003288</td>
+    </tr>
+    <tr>
+      <td>laps</td>
+      <td>duration_sector_2</td>
+      <td>97,018</td>
+      <td>306</td>
+      <td>0.003154</td>
+    </tr>
+    <tr>
+      <td>laps</td>
+      <td>segments_sector_3</td>
+      <td>97,018</td>
+      <td>194</td>
+      <td>0.002</td>
+    </tr>
+    <tr>
+      <td>laps</td>
+      <td>segments_sector_2</td>
+      <td>97,018</td>
+      <td>160</td>
+      <td>0.001649</td>
+    </tr>
+    <tr>
+      <td>laps</td>
+      <td>segments_sector_1</td>
+      <td>97,018</td>
+      <td>144</td>
+      <td>0.001484</td>
+    </tr>
+    <tr>
+      <td>laps</td>
+      <td>date_start</td>
+      <td>97,018</td>
+      <td>55</td>
+      <td>0.000567</td>
+    </tr>
+    <tr>
+      <td>pit</td>
+      <td>stop_duration</td>
+      <td>3,029</td>
+      <td>2,026</td>
+      <td>0.668868</td>
+    </tr>
+    <tr>
+      <td>race_control</td>
+      <td>qualifying_phase</td>
+      <td>9,499</td>
+      <td>9,499</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <td>race_control</td>
+      <td>sector</td>
+      <td>9,499</td>
+      <td>7,458</td>
+      <td>0.785135</td>
+    </tr>
+    <tr>
+      <td>race_control</td>
+      <td>driver_number</td>
+      <td>9,499</td>
+      <td>6,754</td>
+      <td>0.711022</td>
+    </tr>
+    <tr>
+      <td>race_control</td>
+      <td>flag</td>
+      <td>9,499</td>
+      <td>4,357</td>
+      <td>0.45868</td>
+    </tr>
+    <tr>
+      <td>race_control</td>
+      <td>scope</td>
+      <td>9,499</td>
+      <td>4,357</td>
+      <td>0.45868</td>
+    </tr>
+    <tr>
+      <td>race_control</td>
+      <td>lap_number</td>
+      <td>9,499</td>
+      <td>1</td>
+      <td>0.000105</td>
+    </tr>
+    <tr>
+      <td>session_result</td>
+      <td>duration</td>
+      <td>1,771</td>
+      <td>660</td>
+      <td>0.372671</td>
+    </tr>
+    <tr>
+      <td>session_result</td>
+      <td>gap_to_leader</td>
+      <td>1,771</td>
+      <td>255</td>
+      <td>0.143986</td>
+    </tr>
+    <tr>
+      <td>session_result</td>
+      <td>position</td>
+      <td>1,771</td>
+      <td>225</td>
+      <td>0.127047</td>
+    </tr>
+    <tr>
+      <td>session_result</td>
+      <td>number_of_laps</td>
+      <td>1,771</td>
+      <td>7</td>
+      <td>0.003953</td>
+    </tr>
+    <tr>
+      <td>starting_grid</td>
+      <td>lap_duration</td>
+      <td>1,770</td>
+      <td>59</td>
+      <td>0.033333</td>
+    </tr>
+    <tr>
+      <td>stints</td>
+      <td>lap_end</td>
+      <td>5,040</td>
+      <td>3</td>
+      <td>0.000595</td>
+    </tr>
+    <tr>
+      <td>stints</td>
+      <td>lap_start</td>
+      <td>5,040</td>
+      <td>3</td>
+      <td>0.000595</td>
+    </tr>
+  </tbody>
+</table></body></html>

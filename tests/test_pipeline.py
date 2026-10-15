@@ -1,7 +1,7 @@
 """파이프라인 결과와 리포트 생성 로직 검증.
 
 실행: python -m unittest discover -s tests -v
-입력 경로는 환경변수 F1_INPUT(기본 data/f1_recovery/F1_distribution)로 바꿀 수 있다.
+입력 경로는 환경변수 F1_INPUT(기본 data/01_raw/F1_distribution.zip)로 바꿀 수 있다.
 """
 import hashlib, os, sys, tempfile, unittest
 from pathlib import Path
@@ -12,20 +12,26 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from pipeline import recovery as rp  # noqa: E402
 
-INPUT = Path(os.environ.get("F1_INPUT", ROOT / "data" / "f1_recovery" / "F1_distribution"))
+INPUT = Path(os.environ.get("F1_INPUT", ROOT / "data" / "01_raw" / "F1_distribution.zip"))
+
+
+def source_hashes():
+    """원본(zip 파일 또는 폴더의 CSV)의 해시 — 실행 전후 원본이 그대로인지 확인용."""
+    files = [INPUT] if INPUT.is_file() else sorted((INPUT / "all_years").glob("*.csv"))
+    return {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
 
 
 def read(path):
     return pd.read_csv(path, dtype=str, keep_default_na=False)
 
 
-@unittest.skipUnless((INPUT / "all_years" / "laps.csv").exists() or (INPUT / "laps.csv").exists(), "입력 데이터 없음")
+@unittest.skipUnless(INPUT.is_file() or (INPUT / "all_years" / "laps.csv").exists() or (INPUT / "laps.csv").exists(), "입력 데이터 없음")
 class PipelineReportTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tmp = tempfile.TemporaryDirectory()
         cls.out = Path(cls.tmp.name) / "run1"
-        cls.before = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in (INPUT / "all_years").glob("*.csv")}
+        cls.before = source_hashes()
         cls.info = rp.run(INPUT, cls.out)
         reports = cls.out / "reports"
         cls.issues = read(reports / "validation_issues.csv")
@@ -39,7 +45,7 @@ class PipelineReportTest(unittest.TestCase):
         cls.tmp.cleanup()
 
     def test_source_files_untouched(self):
-        after = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in (INPUT / "all_years").glob("*.csv")}
+        after = source_hashes()
         self.assertEqual(self.before, after)
 
     def test_every_issue_has_known_code_and_type(self):

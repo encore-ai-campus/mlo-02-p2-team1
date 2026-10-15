@@ -51,10 +51,20 @@ flowchart LR
 | `sql/` | MySQL 스테이징 → 검증 → 정규화 스키마 적재 (01~05) → Decision Board Gold 테이블 (06) | [web/README.md](./web/README.md) |
 | `web/` | Django: `dashboard`(Decision Board·Gold), `viewer`(적재 테이블 조회), `ops`(파이프라인 실행·오류 분석·정합성 관리자 `/ops/`) | `run_web.bat` · [web/README.md](./web/README.md) |
 | `tests/` | `pipeline` 테스트 | `python -m unittest discover -s tests -v` |
-| `data/` | 원천 6종·추가 5종, 표준사전, 스키마 명세 | [data/standard_dictionary/README.md](./data/standard_dictionary/README.md) |
-| `outputs/` | 파이프라인 정제 결과·품질 리포트 | |
+| `data/` | 데이터 전체 — 메달리온 단계별 폴더 (아래 표) | |
+| `logs/` | 관리자 화면 실행 로그 (`ops_runs/`, git 제외) | |
 | `docs/` · `design/` | 데이터셋 상세 문서 · [발표자료](./docs/F1_TeamBuilder_발표자료.pptx) · 화면 디자인 시안 | |
 | `F1_P2_Spec.md` | 최종 기획서 | |
+
+#### `data/` 단계별 구성
+
+| 폴더 | 단계 | 내용 | 만드는 곳 |
+|---|---|---|---|
+| `01_raw/` | Bronze · 원본 (수정 금지) | `F1_distribution.zip`(오염 6종 + 명세·체크섬, 파이프라인이 zip을 직접 읽음), `f1_extra_data.zip`(추가 5종) | 받은 그대로 보관. `f1_extra_data/`는 실행 시 자동 압축 해제(git 제외) |
+| `02_reference/` | 기준표 | `standard_dictionary/`(표준사전·진단코드·검증 규칙), `schema/`(데이터 명세서·TO-BE 설계) | 사람이 관리 |
+| `03_cleaned/` | Silver · 정제 결과 | `repaired/`(전체 행 + 복구 이력 컬럼), `quarantine/`(격리 행) | `python -m pipeline.recovery` |
+| `04_reports/` | 품질·검증 리포트 | `quality/`([품질 리포트](./data/04_reports/quality/quality_report.md)·이슈·복구 이력), `validation/`([검증 리포트](./data/04_reports/validation/validation_report.md), VC01~VC71) | `pipeline.recovery` · `pipeline.validate_cleaned` |
+| `05_gold/` | Gold 내보내기 | `decision_board.json` → MySQL `gold_board_*` 적재 원천 | 분석 결과 (적재: `manage.py load_board_gold`) |
 
 ### 서비스 실행
 
@@ -77,7 +87,7 @@ flowchart LR
 | 구분 | 데이터 | 진행 상태 |
 |---|---|---|
 | 오염 데이터 6종 | `sessions`, `drivers`, `laps`, `stints`, `weather`, `pit` | 진단·복구 파이프라인 구현 및 결과 생성 |
-| 추가 데이터 5종 | `starting_grid`, `session_result`, `position`, `race_control`, `intervals` | [압축 파일](./data/f1_extra_data.zip) 확보, 검증·적재 코드 작성 |
+| 추가 데이터 5종 | `starting_grid`, `session_result`, `position`, `race_control`, `intervals` | [압축 파일](./data/01_raw/f1_extra_data.zip) 확보, 검증·적재 코드 작성 |
 | 표준화·검증 | 표준사전, 진단코드, 정제 후 검증 항목 | CSV 기준표와 pandas·SQL 검사 코드 작성 |
 | DB 연계 | MySQL 스테이징·정규화 스키마·적재 SQL | 설계 및 스크립트 작성, 실제 DB 실행 결과는 별도 확인 필요 |
 | 분석·서비스 | Gold 9개 마트, Django, 드라이버 비교·팀 추천 | 기획 및 HTML 화면 시안 작성, 최종 구현은 후속 단계 |
@@ -96,7 +106,7 @@ flowchart LR
 - 세션은 `session_key`, 드라이버는 `session_key + driver_number`로 연결합니다. 예선 기준인 `starting_grid`는 `meeting_key`로 Race 세션에 매핑합니다.
 - 오염 유형은 결측·이상치·값 오류·불일치·값 뒤바뀜·형식 오류·참조 위반·중복 8가지이며, 진단코드 `DQ001~DQ027`로 관리합니다.
 
-자세히: [01_원본데이터셋.md](./docs/01_원본데이터셋.md) · [11종 데이터 명세서](./data/schema/F1_데이터_명세서.md) · [배포 폴더](./data/f1_recovery/F1_distribution/README.md)
+자세히: [01_원본데이터셋.md](./docs/01_원본데이터셋.md) · [11종 데이터 명세서](./data/02_reference/schema/F1_데이터_명세서.md) · [배포 폴더](./data/01_raw/F1_distribution.zip)
 
 ### 2.2 데이터 사전
 
@@ -104,7 +114,7 @@ flowchart LR
 - 원본 값은 문자열로 보존하고 계산할 때만 숫자·일시로 해석합니다. 시간 길이는 초, 일시는 UTC 기준입니다.
 - 본경기 기본 포인트는 25-18-15-12-10-8-6-4-2-1을 적용합니다. 원천 포인트의 패스티스트 랩 보너스는 분리해 관리합니다.
 
-자세히: [02_데이터사전.md](./docs/02_데이터사전.md) · [표준사전 README](./data/standard_dictionary/README.md) · [TO-BE 모델](./data/schema/TO_BE_model_design.md)
+자세히: [02_데이터사전.md](./docs/02_데이터사전.md) · [표준사전 README](./data/02_reference/standard_dictionary/README.md) · [TO-BE 모델](./data/02_reference/schema/TO_BE_model_design.md)
 
 ### 2.3 데이터 정제 후
 
@@ -112,7 +122,7 @@ flowchart LR
 - 품질 이슈 28,052건을 탐지해 1,335셀을 근거 기반으로 복구했고, 24,824건은 원천 특성으로 허용했습니다. 미해결 1,893건은 검토 대상, 2행은 격리했습니다.
 - 결측은 일괄 대체하지 않으므로 분석할 때 지표별 유효 표본 수와 제외 기준을 함께 확인해야 합니다.
 
-자세히: [03_정제결과.md](./docs/03_정제결과.md) · [품질 리포트](./outputs/f1_recovery/reports/quality_report.md) (HTML판: `quality_report.html`)
+자세히: [03_정제결과.md](./docs/03_정제결과.md) · [품질 리포트](./data/04_reports/quality/quality_report.md) (HTML판: `quality_report.html`)
 
 ### 2.4 데이터 검증
 

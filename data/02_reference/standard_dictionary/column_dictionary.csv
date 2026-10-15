@@ -1,0 +1,108 @@
+file_name,column_name,standard_term,data_type,length,nullable,unit,domain,allowed_values,validation_rule
+sessions.csv,circuit_key,서킷 식별자,string,16,N,,IDENTIFIER,,정수 문자열
+sessions.csv,circuit_short_name,서킷 축약명,string,64,Y,,FREE_TEXT,,UTF-8
+sessions.csv,country_code,국가 코드,string,3,Y,,CODE,,ISO 국가 약어 권장
+sessions.csv,country_key,국가 식별자,string,16,N,,IDENTIFIER,,정수 문자열
+sessions.csv,country_name,국가명,string,64,N,,FREE_TEXT,,공백 금지
+sessions.csv,date_end,종료 일시,string,40,N,,DATETIME_OFFSET,,ISO 8601 오프셋
+sessions.csv,date_start,시작 일시,string,40,N,,DATETIME_OFFSET,,ISO 8601 오프셋
+sessions.csv,gmt_offset,현지 시차,string,16,Y,,FREE_TEXT,,UTC 시차 문자열
+sessions.csv,is_cancelled,취소 여부,string,5,N,,BOOLEAN_STRING,True|False,허용 코드
+sessions.csv,location,개최지,string,128,N,,FREE_TEXT,,공백 금지
+sessions.csv,meeting_key,대회 식별자,string,16,N,,IDENTIFIER,,session_key와 구분
+sessions.csv,session_key,세션 식별자,string,16,N,,IDENTIFIER,,고유 키
+sessions.csv,session_name,세션명,string,32,N,,FREE_TEXT,,공백 금지
+sessions.csv,session_type,세션 유형,string,32,N,,CODE,Race|Sprint|Qualifying|Practice,코드 테이블
+sessions.csv,year,연도,string,4,N,,INTEGER_STRING,,4자리 정수
+drivers.csv,broadcast_name,중계용 이름,string,128,Y,,FREE_TEXT,,UTF-8
+drivers.csv,country_code,드라이버 국가 코드,string,3,Y,,CODE,,세션 국가와 혼동 금지
+drivers.csv,driver_number,드라이버 번호,string,3,N,,INTEGER_STRING,,session_key와 복합 사용
+drivers.csv,first_name,이름,string,64,Y,,FREE_TEXT,,UTF-8
+drivers.csv,full_name,전체 이름,string,128,N,,FREE_TEXT,,UTF-8
+drivers.csv,headshot_url,프로필 이미지 URL,string,512,Y,,FREE_TEXT,,URL 형식 권장
+drivers.csv,last_name,성,string,64,Y,,FREE_TEXT,,UTF-8
+drivers.csv,meeting_key,대회 식별자,string,16,N,,IDENTIFIER,,원문 보존
+drivers.csv,name_acronym,이름 약어,string,3,Y,,CODE,,대문자 권장
+drivers.csv,session_key,세션 식별자,string,16,N,,IDENTIFIER,,sessions FK
+drivers.csv,team_colour,팀 색상 코드,string,8,Y,,CODE,,색상 코드 형식 권장
+drivers.csv,team_name,팀명,string,128,Y,,FREE_TEXT,,UTF-8
+laps.csv,date_start,랩 시작 일시,string,40,Y,,DATETIME_OFFSET,,오프셋 포함
+laps.csv,driver_number,드라이버 번호,string,3,N,,INTEGER_STRING,,세션별 식별
+laps.csv,duration_sector_1,1섹터 소요시간,string,24,Y,초,DECIMAL_SECONDS,,음수 금지
+laps.csv,duration_sector_2,2섹터 소요시간,string,24,Y,초,DECIMAL_SECONDS,,음수 금지
+laps.csv,duration_sector_3,3섹터 소요시간,string,24,Y,초,DECIMAL_SECONDS,,음수 금지
+laps.csv,i1_speed,1차 중간 속도,string,24,Y,,SPEED,,음수 금지
+laps.csv,i2_speed,2차 중간 속도,string,24,Y,,SPEED,,음수 금지
+laps.csv,is_pit_out_lap,피트아웃 랩 여부,string,5,Y,,BOOLEAN_STRING,True|False,허용 코드
+laps.csv,lap_duration,랩 소요시간,string,24,Y,초,DECIMAL_SECONDS,,300초 초과 검토
+laps.csv,lap_number,랩 번호,string,8,N,,INTEGER_STRING,,양의 정수
+laps.csv,meeting_key,대회 식별자,string,16,N,,IDENTIFIER,,원문 보존
+laps.csv,segments_sector_1,1섹터 미니구간 상태,string,4096,Y,,LIST_STRING,,원문 목록 보존
+laps.csv,segments_sector_2,2섹터 미니구간 상태,string,4096,Y,,LIST_STRING,,원문 목록 보존
+laps.csv,segments_sector_3,3섹터 미니구간 상태,string,4096,Y,,LIST_STRING,,원문 목록 보존
+laps.csv,session_key,세션 식별자,string,16,N,,IDENTIFIER,,sessions FK
+laps.csv,st_speed,스피드 트랩 속도,string,24,Y,,SPEED,,음수 금지
+pit.csv,date,피트 이벤트 일시,string,40,N,,DATETIME_OFFSET,,오프셋 포함 권장
+pit.csv,driver_number,드라이버 번호,string,3,N,,INTEGER_STRING,,세션별 식별
+pit.csv,lane_duration,피트레인 소요시간,string,24,Y,초,DECIMAL_SECONDS,,음수 금지
+pit.csv,lap_number,피트 발생 랩,string,8,N,,INTEGER_STRING,,양의 정수
+pit.csv,meeting_key,대회 식별자,string,16,N,,IDENTIFIER,,원문 보존
+pit.csv,pit_duration,피트 소요시간,string,24,Y,초,DECIMAL_SECONDS,,180초 초과 검토
+pit.csv,session_key,세션 식별자,string,16,N,,IDENTIFIER,,sessions FK
+pit.csv,stop_duration,정차 소요시간,string,24,Y,초,DECIMAL_SECONDS,,음수 금지
+stints.csv,compound,타이어 컴파운드,string,16,Y,,ENUM_COMPOUND,SOFT|MEDIUM|HARD|INTERMEDIATE|WET|UNKNOWN,허용 코드
+stints.csv,driver_number,드라이버 번호,string,3,N,,INTEGER_STRING,,세션별 식별
+stints.csv,lap_end,스틴트 종료 랩,string,8,Y,,INTEGER_STRING,,lap_start 이상
+stints.csv,lap_start,스틴트 시작 랩,string,8,Y,,INTEGER_STRING,,lap_end 이하
+stints.csv,meeting_key,대회 식별자,string,16,N,,IDENTIFIER,,원문 보존
+stints.csv,session_key,세션 식별자,string,16,N,,IDENTIFIER,,sessions FK
+stints.csv,stint_number,스틴트 번호,string,8,N,,INTEGER_STRING,,드라이버별 순번
+stints.csv,tyre_age_at_start,시작 시 타이어 수명,string,8,Y,랩,INTEGER_STRING,,음수 금지
+weather.csv,air_temperature,기온,string,24,Y,섭씨,TEMPERATURE,,실수
+weather.csv,date,측정 일시,string,40,N,,DATETIME_OFFSET,,오프셋 포함 권장
+weather.csv,humidity,상대습도,string,24,Y,%,PERCENT,,0~100 권장
+weather.csv,meeting_key,대회 식별자,string,16,N,,IDENTIFIER,,원문 보존
+weather.csv,pressure,기압,string,24,Y,,DECIMAL_SECONDS,,실수; 단위 원문 확인
+weather.csv,rainfall,강수 상태,string,8,Y,,INTEGER_STRING,,정수 문자열
+weather.csv,session_key,세션 식별자,string,16,N,,IDENTIFIER,,sessions FK
+weather.csv,track_temperature,노면 온도,string,24,Y,섭씨,TEMPERATURE,,실수
+weather.csv,wind_direction,풍향,string,24,Y,도,ANGLE,,0~360 권장
+weather.csv,wind_speed,풍속,string,24,Y,,SPEED,,음수 금지
+starting_grid.csv,position,그리드 순위,string,8,N,,POSITION,,1 이상 정수; 세션 내 중복 금지
+starting_grid.csv,driver_number,드라이버 번호,string,3,N,,INTEGER_STRING,,meeting_key와 함께 Race 결과에 연결
+starting_grid.csv,lap_duration,예선 기록 랩 소요시간,string,24,Y,초,DECIMAL_SECONDS,,음수 금지; 결측 0 대체 금지
+starting_grid.csv,meeting_key,대회 식별자,string,16,N,,IDENTIFIER,,Race 세션 매핑 키
+starting_grid.csv,session_key,예선 세션 식별자,string,16,N,,IDENTIFIER,,Qualifying 키; Race session_key와 직접 JOIN 금지
+session_result.csv,position,최종 순위,string,8,Y,,POSITION,,미분류(DNF·DNS·DSQ)는 공백; 세션 내 중복 금지
+session_result.csv,driver_number,드라이버 번호,string,3,N,,INTEGER_STRING,,session_key와 복합 사용
+session_result.csv,number_of_laps,완료 랩 수,string,8,Y,랩,INTEGER_STRING,,음수 금지
+session_result.csv,points,원천 포인트,string,8,Y,점,POINTS,,원천값 보존; 분석은 race_base_points 재계산값 사용
+session_result.csv,dnf,중도 리타이어 여부,string,5,N,,BOOLEAN_STRING,True|False,dnf·dns·dsq 중 최대 1개 True
+session_result.csv,dns,미출발 여부,string,5,N,,BOOLEAN_STRING,True|False,dnf·dns·dsq 중 최대 1개 True
+session_result.csv,dsq,실격 여부,string,5,N,,BOOLEAN_STRING,True|False,dnf·dns·dsq 중 최대 1개 True
+session_result.csv,duration,경기 소요시간,string,24,Y,초,DECIMAL_SECONDS,,음수 금지
+session_result.csv,gap_to_leader,선두와 격차,string,24,Y,초,GAP_TEXT,,초 실수 또는 +N LAP(S)
+session_result.csv,meeting_key,대회 식별자,string,16,N,,IDENTIFIER,,sessions와 일치
+session_result.csv,session_key,세션 식별자,string,16,N,,IDENTIFIER,,Race sessions FK
+position.csv,date,순위 기록 일시,string,40,N,,DATETIME_OFFSET,,ISO 8601 T 구분자 포함
+position.csv,session_key,세션 식별자,string,16,N,,IDENTIFIER,,sessions FK
+position.csv,meeting_key,대회 식별자,string,16,N,,IDENTIFIER,,sessions와 일치
+position.csv,driver_number,드라이버 번호,string,3,N,,INTEGER_STRING,,session_key와 복합 사용
+position.csv,position,경기 중 순위,string,8,N,,POSITION,,1 이상 정수; 시계열 이벤트(랩당 1행 아님)
+race_control.csv,meeting_key,대회 식별자,string,16,N,,IDENTIFIER,,sessions와 일치
+race_control.csv,session_key,세션 식별자,string,16,N,,IDENTIFIER,,sessions FK
+race_control.csv,date,관제 메시지 일시,string,40,N,,DATETIME_OFFSET,,ISO 8601 T 구분자 포함
+race_control.csv,driver_number,대상 드라이버 번호,string,3,Y,,INTEGER_STRING,,드라이버 대상 메시지만 값 존재
+race_control.csv,lap_number,발생 랩,string,8,Y,,INTEGER_STRING,,0 이상 정수
+race_control.csv,category,관제 분류,string,32,N,,RACE_CONTROL_CATEGORY,Flag|Other|SafetyCar|SessionStatus|Drs|CarEvent,허용 코드
+race_control.csv,flag,깃발,string,32,Y,,CODE,GREEN|YELLOW|DOUBLE YELLOW|RED|BLUE|CLEAR|CHEQUERED|BLACK AND WHITE,허용 코드
+race_control.csv,scope,적용 범위,string,16,Y,,CODE,Track|Sector|Driver,허용 코드
+race_control.csv,sector,미니 섹터 번호,string,8,Y,,INTEGER_STRING,,scope=Sector일 때 값 존재
+race_control.csv,qualifying_phase,예선 단계,string,8,Y,,INTEGER_STRING,,Race 세션에서는 공백
+race_control.csv,message,관제 메시지,string,1000,N,,FREE_TEXT,,원문 보존
+intervals.csv,date,격차 기록 일시,string,40,N,,DATETIME_OFFSET,,ISO 8601 T 구분자 포함
+intervals.csv,session_key,세션 식별자,string,16,N,,IDENTIFIER,,sessions FK
+intervals.csv,meeting_key,대회 식별자,string,16,N,,IDENTIFIER,,sessions와 일치
+intervals.csv,interval,앞차와 격차,string,24,Y,초,GAP_TEXT,,초 실수 또는 +N LAP(S)
+intervals.csv,driver_number,드라이버 번호,string,3,N,,INTEGER_STRING,,session_key와 복합 사용
+intervals.csv,gap_to_leader,선두와 격차,string,24,Y,초,GAP_TEXT,,초 실수 또는 +N LAP(S)

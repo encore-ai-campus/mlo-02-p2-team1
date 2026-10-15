@@ -1,4 +1,5 @@
 {
-  "input_path": "data/f1_recovery/F1_distribution",
-  "output_directory": "outputs/f1_recovery"
+  "input_path": "data/01_raw/F1_distribution.zip",
+  "output_directory": "data/03_cleaned",
+  "report_directory": "data/04_reports/quality"
 }

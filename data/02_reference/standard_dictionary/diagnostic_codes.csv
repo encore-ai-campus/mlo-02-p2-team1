@@ -1,0 +1,28 @@
+diagnostic_code,diagnostic_name,korean_name,error_type,error_type_korean,severity,applies_to,condition,default_action,default_confidence,active
+DQ001,MISSING_COUNTRY_CODE,국가 코드 결측,MISSING,결측,WARNING,drivers.country_code,값이 NULL 또는 공백,같은 드라이버(full_name)의 다른 세션 국가 코드로 복구,HIGH,Y
+DQ002,MISSING_LAP_DATE_START,랩 시작 시각 결측,MISSING,결측,WARNING,laps.date_start,값이 NULL 또는 공백,다음 랩 시작 시각 - 현재 랩 소요시간으로 복구 / 1랩은 원천 특성으로 허용,MEDIUM,Y
+DQ003,MISSING_SPEED,속도 측정값 결측,MISSING,결측,INFO,laps.i1_speed|laps.i2_speed|laps.st_speed,값이 NULL 또는 공백,원천 결측으로 허용(대체하지 않음),,Y
+DQ004,MISSING_SECTOR_DURATION,섹터 소요시간 결측,MISSING,결측,WARNING,laps.duration_sector_1|laps.duration_sector_2|laps.duration_sector_3,값이 NULL 또는 공백,랩타임 - 나머지 두 섹터로 복구(1개만 결측일 때),HIGH,Y
+DQ005,MISSING_SEGMENT_STATUS,미니 섹터 상태 결측,MISSING,결측,INFO,laps.segments_sector_1|laps.segments_sector_2|laps.segments_sector_3,값이 NULL 또는 공백,원문 결측 유지,,Y
+DQ006,LONG_LAP_DURATION,비정상 장시간 랩,OUTLIER,이상치,WARNING,laps.lap_duration,값이 300초 초과,자동 수정 없이 검토,,Y
+DQ007,LONG_PIT_DURATION,비정상 장시간 피트,OUTLIER,이상치,WARNING,pit.pit_duration,값이 180초 초과,자동 수정 없이 검토,,Y
+DQ008,MISSING_COMPOUND,컴파운드 결측,MISSING,결측,WARNING,stints.compound,값이 NULL 또는 공백,UNKNOWN 코드 부여,LOW,Y
+DQ009,MISSING_STINT_BOUNDARY,스틴트 경계 결측,MISSING,결측,WARNING,stints.lap_start|stints.lap_end,값이 NULL 또는 공백,앞뒤 스틴트 경계 또는 랩 기록으로 복구,MEDIUM,Y
+DQ010,INVALID_STINT_RANGE,스틴트 종료 범위 오류,INVALID,값 오류,ERROR,stints.lap_end,lap_end < lap_start,lap_end = lap_start - 1(빈 스틴트)은 원천 특성으로 허용 / 그 외 격리,,Y
+DQ011,OVERLAPPING_STINT,스틴트 구간 중첩,OVERLAP,구간 중첩,WARNING,stints.lap_start|stints.lap_end,next lap_start < previous lap_end (같은 랩 경계 공유는 원천 특성),자동 수정 없이 검토,,Y
+DQ012,UNRESOLVED_MISSING,근거 부족 미복구,MISSING,결측,INFO,all,복구 근거가 없음,미사용(결함 코드 + 상태 OPEN으로 대체),,N
+DQ013,SCHEMA_MISMATCH,컬럼 구조 불일치,SCHEMA,구조,ERROR,all,명세서 컬럼 누락 또는 추가,파일 단위 검토,,Y
+DQ014,INVALID_FORMAT,형식·도메인 위반,TYPE,형식,ERROR,all,숫자·일시·불리언·허용코드로 해석 불가,격리,,Y
+DQ015,MEETING_KEY_MISMATCH,대회 식별자 불일치,INCONSISTENT,파일 간 불일치,ERROR,sessions.meeting_key|*.meeting_key,같은 session_key의 meeting_key가 파일 간 다름,하위 5개 파일 합의값으로 복구,HIGH,Y
+DQ016,DRIVER_IDENTITY_SWAP,드라이버 신원 뒤바뀜,SWAP,값 뒤바뀜,ERROR,drivers.full_name|first_name|last_name|broadcast_name|name_acronym,시즌 내 차량 번호와 드라이버 신원 조합이 같은 세션의 다른 행과 서로 바뀜,시즌 합의값으로 교환 복구,HIGH,Y
+DQ017,TEAM_NAME_MISMATCH,소속 팀 불일치,SWAP,값 뒤바뀜,ERROR,drivers.team_name,앞뒤 세션 소속팀과 다르고 팀 색상은 원래 팀과 일치,앞뒤 세션 소속팀으로 복구,HIGH,Y
+DQ018,MISSING_LAP_DURATION,랩 소요시간 결측,MISSING,결측,WARNING,laps.lap_duration,값이 NULL 또는 공백,다음 랩 시작 시각 - 현재 랩 시작 시각으로 복구 / 1랩은 원천 특성으로 허용,MEDIUM,Y
+DQ019,LAP_DATE_INCONSISTENT,랩 시작 시각 불일치,INVALID,값 오류,ERROR,laps.date_start,앞 랩 시작+소요시간과 1초 이상 차이,인접 랩과 교환 또는 앞뒤 랩 기준 복구 / 근거 부족 시 검토,MEDIUM,Y
+DQ020,SECTOR_SUM_MISMATCH,섹터 합계 불일치,INCONSISTENT,파일 내 불일치,WARNING,laps.duration_sector_1~3|laps.lap_duration,섹터 3개 합과 랩타임 차이 0.5초 초과,자동 수정 없이 검토,,Y
+DQ021,PIT_DURATION_CONFLICT,피트 시간 컬럼 충돌,INCONSISTENT,파일 내 불일치,ERROR,pit.lane_duration|pit.pit_duration,두 컬럼이 원천에서 동일해야 하나 값이 다름,어느 쪽이 맞는지 근거 없음 → 격리,,Y
+DQ022,LONG_STOP_DURATION,비정상 장시간 정지,OUTLIER,이상치,INFO,pit.stop_duration,값이 10초 초과,자동 수정 없이 검토(벤치마크 집계 시 분리),,Y
+DQ023,INVALID_WEATHER_VALUE,기상 측정값 오류,INVALID,값 오류,WARNING,weather.track_temperature|humidity|wind_direction,범위 위반 또는 앞뒤 1분 측정값과 10도 이상 튀는 단일값,앞뒤 측정값 평균으로 복구,MEDIUM,Y
+DQ024,MISSING_HEADSHOT_URL,프로필 사진 주소 결측,MISSING,결측,INFO,drivers.headshot_url,값이 NULL 또는 공백,같은 드라이버·시즌의 유일한 주소로 복구,MEDIUM,Y
+DQ025,PIT_LAP_OUT_OF_RANGE,피트 랩 범위 초과,REFERENTIAL,참조 무결성,WARNING,pit.lap_number,해당 드라이버의 최대 랩 번호보다 큼,자동 수정 없이 검토,,Y
+DQ026,DUPLICATE_KEY,식별키 중복,DUPLICATE,중복,ERROR,all,파일별 자연키 중복,격리,,Y
+DQ027,ORPHAN_REFERENCE,참조 대상 없음,REFERENTIAL,참조 무결성,ERROR,all,session_key 또는 session_key+driver_number가 상위 파일에 없음,격리,,Y

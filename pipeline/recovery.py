@@ -50,7 +50,7 @@ IDENTITY = ["full_name", "first_name", "last_name", "broadcast_name", "name_acro
 CHILD_FILES = ["drivers.csv", "laps.csv", "stints.csv", "weather.csv", "pit.csv"]
 CONFIDENCE_RANK = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}
 ROOT = Path(__file__).resolve().parents[1]
-DICT_PATH = ROOT / "data" / "standard_dictionary" / "diagnostic_codes.csv"
+DICT_PATH = ROOT / "data" / "02_reference" / "standard_dictionary" / "diagnostic_codes.csv"
 
 
 def blank(series):
@@ -632,8 +632,7 @@ def md_table(df, limit=None):
     return "\n".join(lines) + "\n" + more
 
 
-def build_report(out, annotated, ledger, manifest, dq_summary, files_df, run_info):
-    report_dir = out / "reports"
+def build_report(report_dir, annotated, ledger, manifest, dq_summary, files_df, run_info):
     report_dir.mkdir(parents=True, exist_ok=True)
     issue_cols = ["issue_id", "diagnostic_code", "diagnostic_name", "korean_name", "error_type", "error_type_korean", "severity", "file",
                   "source_row", "row_key", "session_key", "driver_number", "field", "observed_value", "expected_value", "evidence",
@@ -700,7 +699,9 @@ def build_report(out, annotated, ledger, manifest, dq_summary, files_df, run_inf
     return issues, repairs
 
 
-def run(input_path: Path, out: Path, catalogue_path: Path = DICT_PATH):
+def run(input_path: Path, out: Path, catalogue_path: Path = DICT_PATH, report_dir: Path | None = None):
+    """out에 정제 결과(repaired/·quarantine/), report_dir(기본 out/reports)에 리포트를 쓴다."""
+    report_dir = report_dir or out / "reports"
     catalogue = load_catalogue(catalogue_path)
     raw, checksums, spec = load_source(input_path)
     pre = Ledger(catalogue)
@@ -719,14 +720,14 @@ def run(input_path: Path, out: Path, catalogue_path: Path = DICT_PATH):
     dq_summary = summarize(data, ledger, residual, catalogue)
     files_df = file_summary(annotated, ledger)
     run_id = hashlib.sha256(("".join(manifest["sha256"]) + PIPELINE_VERSION).encode()).hexdigest()[:12]
-    run_info = {"run_id": run_id, "pipeline_version": PIPELINE_VERSION, "input": str(input_path), "output": str(out),
+    run_info = {"run_id": run_id, "pipeline_version": PIPELINE_VERSION, "input": str(input_path), "output": str(out), "report_output": str(report_dir),
                 "issues": len(ledger.issues), "repaired_cells": len(ledger.repairs),
                 "open_issues": sum(r["status"] == "OPEN" for r in ledger.issues),
                 "accepted_issues": sum(r["status"] == "ACCEPTED" for r in ledger.issues),
                 "quarantined_rows": int(files_df["quarantined_rows"].sum()),
                 "checksum_ok": bool((manifest["checksum"] != "MISMATCH").all()),
                 "spec_ok": bool((manifest["spec_row_count"] != "MISMATCH").all() and (manifest["schema"] == "OK").all())}
-    build_report(out, annotated, ledger, manifest, dq_summary, files_df, run_info)
+    build_report(report_dir, annotated, ledger, manifest, dq_summary, files_df, run_info)
     return run_info
 
 
@@ -738,7 +739,8 @@ def main():
     source = config.get("input_path") or config["input_archive"]
     # config의 상대 경로는 저장소 루트 기준 (리포트에 PC별 절대 경로가 남지 않도록 루트로 이동해 상대 경로로 실행)
     os.chdir(ROOT)
-    info = run(Path(source), Path(config["output_directory"]))
+    reports = config.get("report_directory")
+    info = run(Path(source), Path(config["output_directory"]), report_dir=Path(reports) if reports else None)
     print(json.dumps(info, ensure_ascii=False))
 
 

@@ -2,14 +2,14 @@
 
 파이프라인이 만든 정제 결과(repaired/)와 미오염 추가 데이터 5종을 읽어
 결측·중복·참조·범위·정합성·포인트·대사·JOIN 행 증폭을 검사한다.
-검사 항목 정의는 data/standard_dictionary/validation_checks.csv(VC01~VC71)이며,
+검사 항목 정의는 data/02_reference/standard_dictionary/validation_checks.csv(VC01~VC71)이며,
 같은 ID로 sql/03_validate_cleaned.sql 도 같은 검사를 수행한다.
 
 실행(저장소 루트):
     python -m pipeline.validate_cleaned
-    python -m pipeline.validate_cleaned --cleaned outputs/f1_recovery --extra data/f1_extra_data.zip
+    python -m pipeline.validate_cleaned --cleaned data/03_cleaned --extra data/01_raw/f1_extra_data.zip
 
-출력(--out, 기본 <cleaned>/validation):
+출력(--out, 기본 data/04_reports/validation):
     validation_result.csv    검사ID × 대상 파일별 위반 건수·상태(PASS/FAIL/WARN/INFO)
     validation_samples.csv   위반 행 샘플(검사·대상별 최대 --samples 행)
     null_profile.csv         파일·컬럼별 공백 건수와 비율
@@ -23,7 +23,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-DICT = ROOT / "data" / "standard_dictionary"
+DICT = ROOT / "data" / "02_reference" / "standard_dictionary"
 
 ORIGINAL = ["sessions", "drivers", "laps", "stints", "weather", "pit"]
 EXTRA = ["starting_grid", "session_result", "position", "race_control", "intervals"]
@@ -463,8 +463,8 @@ def check_points(T, R):
     R.add("VC53", "session_result×drivers", mask.sum(), len(merged), merged.loc[mask, ["session_key", "driver_number", "race_base_points"]])
 
 
-def check_reconcile(T, R, cleaned):
-    manifest_path = cleaned / "reports" / "bronze_manifest.csv"
+def check_reconcile(T, R, cleaned, reports):
+    manifest_path = reports / "bronze_manifest.csv"
     manifest = pd.read_csv(manifest_path, encoding="utf-8-sig") if manifest_path.exists() else None
     for name in ORIGINAL:
         df = T[name]
@@ -494,13 +494,13 @@ def check_reconcile(T, R, cleaned):
             R.add("VC62", name, fail, len(df), pd.concat(sample) if sample else None)
 
 
-def row_reconciliation(T, cleaned):
+def row_reconciliation(T, cleaned, reports):
     """파일별 행 수 대사.
 
     처리 결과를 서로 겹치지 않는 4개 구간으로 나눠 합계가 원본 행 수와 같은지 본다.
       원본 유지(UNCHANGED, 격리 아님) + 복구(REPAIRED, 격리 아님) + 격리(quarantine_flag=Y) + 제거(원본 - 정제 후)
     """
-    manifest_path = cleaned / "reports" / "bronze_manifest.csv"
+    manifest_path = reports / "bronze_manifest.csv"
     manifest = pd.read_csv(manifest_path, encoding="utf-8-sig") if manifest_path.exists() else None
     rows = []
     for name, df in T.items():
@@ -514,7 +514,7 @@ def row_reconciliation(T, cleaned):
             quarantined = int(q.sum())
             qfile = cleaned / "quarantine" / f"{name}.csv"
             qfile_rows = len(pd.read_csv(qfile, dtype=str, keep_default_na=False, encoding="utf-8-sig")) if qfile.exists() else None
-            group, note = "오염 정제 6종", "원본 행 수는 reports/bronze_manifest.csv"
+            group, note = "오염 정제 6종", "원본 행 수는 04_reports/quality/bronze_manifest.csv"
         else:
             raw_rows, unchanged, repaired, quarantined, qfile_rows = len(df), len(df), 0, 0, None
             group, note = "추가 5종", "정제 단계 없음(원본 그대로 검증)"
@@ -556,8 +556,9 @@ def check_join_fanout(T, R):
 
 
 # ---------- 실행 ----------
-def run(cleaned, extra, out, samples=20):
+def run(cleaned, extra, out, samples=20, reports=None):
     cleaned, out = Path(cleaned), Path(out)
+    reports = Path(reports) if reports else cleaned / "reports"
     repaired = cleaned / "repaired"
     T = {name: read_csv(repaired / f"{name}.csv", name) for name in ORIGINAL}
     if extra:
@@ -572,7 +573,7 @@ def run(cleaned, extra, out, samples=20):
     check_ranges(T, R, codes)
     check_consistency(T, R)
     check_points(T, R)
-    check_reconcile(T, R, cleaned)
+    check_reconcile(T, R, cleaned, reports)
     check_join_fanout(T, R)
 
     out.mkdir(parents=True, exist_ok=True)
@@ -580,7 +581,7 @@ def run(cleaned, extra, out, samples=20):
     result.to_csv(out / "validation_result.csv", index=False, encoding="utf-8-sig")
     R.sample_frame().to_csv(out / "validation_samples.csv", index=False, encoding="utf-8-sig")
     profile.to_csv(out / "null_profile.csv", index=False, encoding="utf-8-sig")
-    recon = row_reconciliation(T, cleaned)
+    recon = row_reconciliation(T, cleaned, reports)
     recon.to_csv(out / "row_reconciliation.csv", index=False, encoding="utf-8-sig")
     write_report(result, T, out / "validation_report.md", recon)
     write_html(result, R.sample_frame(), profile, T, cleaned, extra, out / "validation_report.html", recon)
@@ -650,7 +651,7 @@ def write_html(result, samples, profile, T, cleaned, extra, path, recon):
              ".badge{color:#fff;border-radius:4px;padding:2px 6px;font-size:11.5px;font-weight:bold}")
     body = (f"<h1>F1 정제 후 데이터 검증 리포트</h1>"
             f"<p class='meta'>정제 결과 {html.escape(str(cleaned))} · 추가 데이터 {html.escape(str(extra) if extra else '없음')} · "
-            f"검사 정의 data/standard_dictionary/validation_checks.csv · 생성 {pd.Timestamp.now():%Y-%m-%d %H:%M}</p>"
+            f"검사 정의 data/02_reference/standard_dictionary/validation_checks.csv · 생성 {pd.Timestamp.now():%Y-%m-%d %H:%M}</p>"
             f"<div class='cards'>{cards}</div>"
             "<p class='meta'>FAIL = ERROR 등급 위반, WARN = WARNING 등급 위반(검토), INFO = 참고 건수(통과/실패 판정 없음)</p>"
             "<h2>1. 행 수 대사</h2><p class='meta'>처리 결과를 겹치지 않는 4개 구간으로 나눠 <b>② 원본 유지 + ③ 복구 + ④ 격리 + ⑤ 제거 = ① 원본</b>인지 확인한다. "
@@ -668,17 +669,18 @@ def write_html(result, samples, profile, T, cleaned, extra, path, recon):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--cleaned", default=str(ROOT / "outputs" / "f1_recovery"), help="파이프라인 출력 폴더(repaired/, reports/ 포함)")
-    parser.add_argument("--extra", default=None, help="추가 데이터 5종 폴더 또는 zip (기본: data/f1_extra_data, 없으면 zip)")
-    parser.add_argument("--out", default=None, help="검증 결과 폴더 (기본: <cleaned>/validation)")
+    parser.add_argument("--cleaned", default=str(ROOT / "data" / "03_cleaned"), help="정제 결과 폴더(repaired/, quarantine/)")
+    parser.add_argument("--reports", default=str(ROOT / "data" / "04_reports" / "quality"), help="정제 리포트 폴더(bronze_manifest.csv)")
+    parser.add_argument("--extra", default=None, help="추가 데이터 5종 폴더 또는 zip (기본: data/01_raw/f1_extra_data, 없으면 zip)")
+    parser.add_argument("--out", default=None, help="검증 결과 폴더 (기본: data/04_reports/validation)")
     parser.add_argument("--samples", type=int, default=20, help="검사·대상별 위반 샘플 행 수")
     args = parser.parse_args()
     extra = args.extra
     if extra is None:
-        folder, archive = ROOT / "data" / "f1_extra_data", ROOT / "data" / "f1_extra_data.zip"
+        folder, archive = ROOT / "data" / "01_raw" / "f1_extra_data", ROOT / "data" / "01_raw" / "f1_extra_data.zip"
         extra = folder if (folder / "session_result.csv").exists() else archive if archive.exists() else None
-    out = Path(args.out) if args.out else Path(args.cleaned) / "validation"
-    result = run(args.cleaned, extra, out, args.samples)
+    out = Path(args.out) if args.out else ROOT / "data" / "04_reports" / "validation"
+    result = run(args.cleaned, extra, out, args.samples, args.reports)
     shown = result[result["status"] != "PASS"][["check_id", "target", "status", "fail_count", "total_count", "note"]]
     print(shown.to_string(index=False))
     print(result["status"].value_counts().to_string())

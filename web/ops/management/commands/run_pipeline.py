@@ -2,7 +2,7 @@
 
     venv\\Scripts\\python.exe web\\manage.py run_pipeline <run_id>
 
-단계가 실패하면 그 자리에서 멈춘다(뒤 단계는 skipped). 로그는 outputs/ops_runs/run_<id>.log.
+단계가 실패하면 그 자리에서 멈춘다(뒤 단계는 skipped). 로그는 logs/ops_runs/run_<id>.log.
 """
 import os, traceback
 

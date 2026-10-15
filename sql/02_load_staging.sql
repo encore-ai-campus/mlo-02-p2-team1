@@ -3,8 +3,8 @@
 -- 저장소 루트에서 실행한다(LOCAL INFILE 경로는 mysql 클라이언트 실행 위치 기준).
 --   mysql --local-infile=1 -u <user> -p <db> < sql/02_load_staging.sql
 -- 서버에 SET GLOBAL local_infile = 1; 이 필요하다.
--- 정제 결과 경로가 다르면 아래 'outputs/f1_recovery/' 를 바꾼다.
--- data/f1_extra_data.zip 은 먼저 data/f1_extra_data/ 로 압축 해제한다.
+-- 정제 결과 경로가 다르면 아래 'data/03_cleaned/'·'data/04_reports/quality/' 를 바꾼다.
+-- data/01_raw/f1_extra_data.zip 은 먼저 data/01_raw/f1_extra_data/ 로 압축 해제한다 (run_web.bat·python -m pipeline.extra_data가 자동 처리).
 -- CSV는 UTF-8(BOM 포함 가능)이며 헤더 1행은 건너뛴다. CRLF 파일도 마지막 컬럼의 \r을 제거한다.
 -- 04 스키마가 ref_* 를 FK로 참조하므로 재적재(TRUNCATE) 동안 FK 검사를 잠시 끈다.
 -- =====================================================================
@@ -12,7 +12,7 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 TRUNCATE TABLE stg_sessions;
-LOAD DATA LOCAL INFILE 'outputs/f1_recovery/repaired/sessions.csv'
+LOAD DATA LOCAL INFILE 'data/03_cleaned/repaired/sessions.csv'
 INTO TABLE stg_sessions CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -20,7 +20,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `quarantine_flag` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE stg_drivers;
-LOAD DATA LOCAL INFILE 'outputs/f1_recovery/repaired/drivers.csv'
+LOAD DATA LOCAL INFILE 'data/03_cleaned/repaired/drivers.csv'
 INTO TABLE stg_drivers CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -28,7 +28,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `quarantine_flag` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE stg_laps;
-LOAD DATA LOCAL INFILE 'outputs/f1_recovery/repaired/laps.csv'
+LOAD DATA LOCAL INFILE 'data/03_cleaned/repaired/laps.csv'
 INTO TABLE stg_laps CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -36,7 +36,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `quarantine_flag` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE stg_stints;
-LOAD DATA LOCAL INFILE 'outputs/f1_recovery/repaired/stints.csv'
+LOAD DATA LOCAL INFILE 'data/03_cleaned/repaired/stints.csv'
 INTO TABLE stg_stints CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -44,7 +44,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `quarantine_flag` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE stg_weather;
-LOAD DATA LOCAL INFILE 'outputs/f1_recovery/repaired/weather.csv'
+LOAD DATA LOCAL INFILE 'data/03_cleaned/repaired/weather.csv'
 INTO TABLE stg_weather CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -52,7 +52,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `quarantine_flag` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE stg_pit;
-LOAD DATA LOCAL INFILE 'outputs/f1_recovery/repaired/pit.csv'
+LOAD DATA LOCAL INFILE 'data/03_cleaned/repaired/pit.csv'
 INTO TABLE stg_pit CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -60,7 +60,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `quarantine_flag` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE stg_starting_grid;
-LOAD DATA LOCAL INFILE 'data/f1_extra_data/starting_grid.csv'
+LOAD DATA LOCAL INFILE 'data/01_raw/f1_extra_data/starting_grid.csv'
 INTO TABLE stg_starting_grid CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -68,7 +68,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `session_key` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE stg_session_result;
-LOAD DATA LOCAL INFILE 'data/f1_extra_data/session_result.csv'
+LOAD DATA LOCAL INFILE 'data/01_raw/f1_extra_data/session_result.csv'
 INTO TABLE stg_session_result CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -76,7 +76,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `session_key` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE stg_position;
-LOAD DATA LOCAL INFILE 'data/f1_extra_data/position.csv'
+LOAD DATA LOCAL INFILE 'data/01_raw/f1_extra_data/position.csv'
 INTO TABLE stg_position CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -84,7 +84,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `position` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE stg_race_control;
-LOAD DATA LOCAL INFILE 'data/f1_extra_data/race_control.csv'
+LOAD DATA LOCAL INFILE 'data/01_raw/f1_extra_data/race_control.csv'
 INTO TABLE stg_race_control CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -92,7 +92,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `message` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE stg_intervals;
-LOAD DATA LOCAL INFILE 'data/f1_extra_data/intervals.csv'
+LOAD DATA LOCAL INFILE 'data/01_raw/f1_extra_data/intervals.csv'
 INTO TABLE stg_intervals CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -100,7 +100,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `gap_to_leader` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE ref_validation_check;
-LOAD DATA LOCAL INFILE 'data/standard_dictionary/validation_checks.csv'
+LOAD DATA LOCAL INFILE 'data/02_reference/standard_dictionary/validation_checks.csv'
 INTO TABLE ref_validation_check CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -108,7 +108,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `spec_ref` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE ref_race_points_rule;
-LOAD DATA LOCAL INFILE 'data/standard_dictionary/race_points_rules.csv'
+LOAD DATA LOCAL INFILE 'data/02_reference/standard_dictionary/race_points_rules.csv'
 INTO TABLE ref_race_points_rule CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -116,7 +116,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `note` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE ref_diagnostic;
-LOAD DATA LOCAL INFILE 'data/standard_dictionary/diagnostic_codes.csv'
+LOAD DATA LOCAL INFILE 'data/02_reference/standard_dictionary/diagnostic_codes.csv'
 INTO TABLE ref_diagnostic CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -124,7 +124,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `active` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE ref_code;
-LOAD DATA LOCAL INFILE 'data/standard_dictionary/codes.csv'
+LOAD DATA LOCAL INFILE 'data/02_reference/standard_dictionary/codes.csv'
 INTO TABLE ref_code CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -132,7 +132,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `active` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE stg_validation_issues;
-LOAD DATA LOCAL INFILE 'outputs/f1_recovery/reports/validation_issues.csv'
+LOAD DATA LOCAL INFILE 'data/04_reports/quality/validation_issues.csv'
 INTO TABLE stg_validation_issues CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
@@ -140,7 +140,7 @@ LINES TERMINATED BY '\n' IGNORE 1 LINES
 SET `confidence` = TRIM(TRAILING '\r' FROM @last_col);
 
 TRUNCATE TABLE stg_repair_detail;
-LOAD DATA LOCAL INFILE 'outputs/f1_recovery/reports/repair_detail.csv'
+LOAD DATA LOCAL INFILE 'data/04_reports/quality/repair_detail.csv'
 INTO TABLE stg_repair_detail CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 -- CRLF + 마지막 칸 따옴표라 '\n'으로는 1,335행 중 3행만 들어감 → 줄 끝을 '\r\n'으로 지정
@@ -148,7 +148,7 @@ LINES TERMINATED BY '\r\n' IGNORE 1 LINES
 (`issue_id`, `diagnostic_code`, `error_type`, `file`, `source_row`, `row_key`, `session_key`, `driver_number`, `field`, `old_value`, `new_value`, `method`, `confidence`, `reason`);
 
 TRUNCATE TABLE stg_bronze_manifest;
-LOAD DATA LOCAL INFILE 'outputs/f1_recovery/reports/bronze_manifest.csv'
+LOAD DATA LOCAL INFILE 'data/04_reports/quality/bronze_manifest.csv'
 INTO TABLE stg_bronze_manifest CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES

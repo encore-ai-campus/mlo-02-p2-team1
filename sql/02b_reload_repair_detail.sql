@@ -4,7 +4,7 @@
 -- 스키마 repair_detail은 04 이후 05가 stg_repair_detail에서 채운다(04 전에 실행해도 실패하지 않음).
 SET NAMES utf8mb4;
 TRUNCATE TABLE stg_repair_detail;
-LOAD DATA LOCAL INFILE 'outputs/f1_recovery/reports/repair_detail.csv'
+LOAD DATA LOCAL INFILE 'data/04_reports/quality/repair_detail.csv'
 INTO TABLE stg_repair_detail CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\r\n' IGNORE 1 LINES

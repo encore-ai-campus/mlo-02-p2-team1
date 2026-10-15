@@ -1,0 +1,23 @@
+﻿file,diagnostic_code,diagnostic_name,korean_name,error_type,error_type_korean,severity,detected,repaired,accepted,open,quarantined_rows,residual_after_repair
+drivers.csv,DQ001,MISSING_COUNTRY_CODE,국가 코드 결측,MISSING,결측,WARNING,853,716,0,137,0,137
+drivers.csv,DQ016,DRIVER_IDENTITY_SWAP,드라이버 신원 뒤바뀜,SWAP,값 뒤바뀜,ERROR,20,20,0,0,0,0
+drivers.csv,DQ017,TEAM_NAME_MISMATCH,소속 팀 불일치,SWAP,값 뒤바뀜,ERROR,4,4,0,0,0,0
+drivers.csv,DQ024,MISSING_HEADSHOT_URL,프로필 사진 주소 결측,MISSING,결측,INFO,51,2,49,0,0,49
+laps.csv,DQ002,MISSING_LAP_DATE_START,랩 시작 시각 결측,MISSING,결측,WARNING,55,0,55,0,0,55
+laps.csv,DQ003,MISSING_SPEED,속도 측정값 결측,MISSING,결측,INFO,24101,0,24101,0,0,24101
+laps.csv,DQ004,MISSING_SECTOR_DURATION,섹터 소요시간 결측,MISSING,결측,WARNING,1489,489,0,1000,0,1000
+laps.csv,DQ005,MISSING_SEGMENT_STATUS,미니 섹터 상태 결측,MISSING,결측,INFO,498,0,498,0,0,498
+laps.csv,DQ006,LONG_LAP_DURATION,비정상 장시간 랩,OUTLIER,이상치,WARNING,195,0,0,195,0,195
+laps.csv,DQ018,MISSING_LAP_DURATION,랩 소요시간 결측,MISSING,결측,WARNING,373,2,110,261,0,371
+laps.csv,DQ019,LAP_DATE_INCONSISTENT,랩 시작 시각 불일치,INVALID,값 오류,ERROR,83,36,0,47,0,47
+laps.csv,DQ020,SECTOR_SUM_MISMATCH,섹터 합계 불일치,INCONSISTENT,파일 내 불일치,WARNING,20,0,0,20,0,20
+pit.csv,DQ007,LONG_PIT_DURATION,비정상 장시간 피트,OUTLIER,이상치,WARNING,164,0,0,164,0,164
+pit.csv,DQ021,PIT_DURATION_CONFLICT,피트 시간 컬럼 충돌,INCONSISTENT,파일 내 불일치,ERROR,2,0,0,2,2,2
+pit.csv,DQ022,LONG_STOP_DURATION,비정상 장시간 정지,OUTLIER,이상치,INFO,57,0,0,57,0,57
+pit.csv,DQ025,PIT_LAP_OUT_OF_RANGE,피트 랩 범위 초과,REFERENTIAL,참조 무결성,WARNING,1,0,0,1,0,1
+sessions.csv,DQ015,MEETING_KEY_MISMATCH,대회 식별자 불일치,INCONSISTENT,파일 간 불일치,ERROR,2,2,0,0,0,0
+stints.csv,DQ008,MISSING_COMPOUND,컴파운드 결측,MISSING,결측,WARNING,7,7,0,0,0,0
+stints.csv,DQ009,MISSING_STINT_BOUNDARY,스틴트 경계 결측,MISSING,결측,WARNING,58,52,0,6,0,6
+stints.csv,DQ010,INVALID_STINT_RANGE,스틴트 종료 범위 오류,INVALID,값 오류,ERROR,11,0,11,0,0,11
+stints.csv,DQ011,OVERLAPPING_STINT,스틴트 구간 중첩,OVERLAP,구간 중첩,WARNING,3,0,0,3,0,3
+weather.csv,DQ023,INVALID_WEATHER_VALUE,기상 측정값 오류,INVALID,값 오류,WARNING,5,5,0,0,0,0

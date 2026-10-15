@@ -2,11 +2,11 @@
 
 프로젝트 개요와 진행 현황은 [저장소 README](../README.md)에 있습니다. 이 문서는 정제·검증 패키지의 실행 안내입니다.
 
-F1 경기 데이터 배포본(CSV 6종)을 데이터 명세서와 비교하고, 진단코드(DQ001~DQ027)별로 오염을 탐지·복구·격리한 뒤 복구 CSV와 품질 리포트를 생성합니다. 원본 CSV는 수정하지 않습니다. 기준 문서는 [`F1_P2_Spec.md`](../F1_P2_Spec.md) 5.1절(Silver 정제 규칙)과 11장(품질 검수 체크리스트)입니다. 정제 결과와 미오염 추가 데이터 5종(`data/f1_extra_data`)을 함께 검증하고 MySQL에 적재하는 SQL도 포함합니다.
+F1 경기 데이터 배포본(CSV 6종)을 데이터 명세서와 비교하고, 진단코드(DQ001~DQ027)별로 오염을 탐지·복구·격리한 뒤 복구 CSV와 품질 리포트를 생성합니다. 원본 CSV는 수정하지 않습니다. 기준 문서는 [`F1_P2_Spec.md`](../F1_P2_Spec.md) 5.1절(Silver 정제 규칙)과 11장(품질 검수 체크리스트)입니다. 정제 결과와 미오염 추가 데이터 5종(`data/01_raw/f1_extra_data`)을 함께 검증하고 MySQL에 적재하는 SQL도 포함합니다.
 
 ## 입력 데이터
 
-`data/f1_recovery/F1_distribution/`(풀린 폴더) 또는 같은 구성의 zip을 입력으로 씁니다. `all_years/` 아래 `sessions.csv`, `drivers.csv`, `laps.csv`, `stints.csv`, `weather.csv`, `pit.csv`가 있어야 하며, `SHA256SUMS.txt`와 `00. 데이터_명세서.md`가 있으면 체크섬·행 수·컬럼 순서를 함께 검증합니다.
+`data/01_raw/F1_distribution.zip`(풀린 폴더) 또는 같은 구성의 zip을 입력으로 씁니다. `all_years/` 아래 `sessions.csv`, `drivers.csv`, `laps.csv`, `stints.csv`, `weather.csv`, `pit.csv`가 있어야 하며, `SHA256SUMS.txt`와 `00. 데이터_명세서.md`가 있으면 체크섬·행 수·컬럼 순서를 함께 검증합니다.
 
 ## 설정
 
@@ -14,8 +14,8 @@ F1 경기 데이터 배포본(CSV 6종)을 데이터 명세서와 비교하고, 
 
 ```json
 {
-  "input_path": "data/f1_recovery/F1_distribution",
-  "output_directory": "outputs/f1_recovery"
+  "input_path": "data/01_raw/F1_distribution.zip",
+  "output_directory": "data/03_cleaned"
 }
 ```
 
@@ -47,7 +47,7 @@ python -m unittest discover -s tests -v   # 결과·리포트 로직 검증 (약
 | DQ021 | `lane_duration`≠`pit_duration` | 격리 |
 | DQ023 | 노면온도 단일 튐값 | 앞뒤 측정 평균 |
 
-전체 목록과 오류 유형·심각도는 `data/standard_dictionary/diagnostic_codes.csv`에 있고, 파이프라인이 이 파일을 직접 읽습니다.
+전체 목록과 오류 유형·심각도는 `data/02_reference/standard_dictionary/diagnostic_codes.csv`에 있고, 파이프라인이 이 파일을 직접 읽습니다.
 
 ## 출력
 
@@ -68,18 +68,18 @@ reports/run_result.json       실행 요약 (run_id는 입력 체크섬+버전 �
 
 ## 정제 후 검증
 
-파이프라인 실행 뒤 정제 결과와 추가 데이터 5종을 결측·중복·참조·범위·정합성·포인트·대사·JOIN 행 증폭 기준으로 검사합니다. 검사 정의는 `data/standard_dictionary/validation_checks.csv`(VC01~VC71)이고 pandas와 SQL이 같은 ID·규칙을 씁니다.
+파이프라인 실행 뒤 정제 결과와 추가 데이터 5종을 결측·중복·참조·범위·정합성·포인트·대사·JOIN 행 증폭 기준으로 검사합니다. 검사 정의는 `data/02_reference/standard_dictionary/validation_checks.csv`(VC01~VC71)이고 pandas와 SQL이 같은 ID·규칙을 씁니다.
 
 ```powershell
-python -m pipeline.validate_cleaned               # 기본: outputs/f1_recovery + data/f1_extra_data(없으면 zip)
-python -m pipeline.validate_cleaned --extra data/f1_extra_data.zip
+python -m pipeline.validate_cleaned               # 기본: data/03_cleaned + data/01_raw/f1_extra_data(없으면 zip)
+python -m pipeline.validate_cleaned --extra data/01_raw/f1_extra_data.zip
 ```
 
-출력은 `outputs/f1_recovery/validation/`의 `validation_report.html`(첫 표가 행 수 대사: 원본 = 원본 유지 + 복구 + 격리 + 제거), `row_reconciliation.csv`, `validation_result.csv`, `validation_samples.csv`, `null_profile.csv`, `validation_report.md`입니다. ERROR 등급 위반이 있으면 종료 코드 1을 반환합니다.
+출력은 `data/04_reports/validation/`의 `validation_report.html`(첫 표가 행 수 대사: 원본 = 원본 유지 + 복구 + 격리 + 제거), `row_reconciliation.csv`, `validation_result.csv`, `validation_samples.csv`, `null_profile.csv`, `validation_report.md`입니다. ERROR 등급 위반이 있으면 종료 코드 1을 반환합니다.
 
 ## MySQL 적재 (sql/)
 
-저장소 루트에서 순서대로 실행합니다. `data/f1_extra_data.zip`은 먼저 `data/f1_extra_data/`로 압축 해제하고, 서버에 `SET GLOBAL local_infile = 1;`이 필요합니다.
+저장소 루트에서 순서대로 실행합니다. `data/01_raw/f1_extra_data.zip`은 먼저 `data/01_raw/f1_extra_data/`로 압축 해제하고, 서버에 `SET GLOBAL local_infile = 1;`이 필요합니다.
 
 ```powershell
 mysql --local-infile=1 -u <user> -p <db> < sql/01_create_staging.sql   # 문자열 스테이징·기준표 테이블
@@ -90,7 +90,7 @@ mysql -u <user> -p <db> < sql/05_insert_schema.sql                      # 스테
 mysql -u <user> -p <db> < sql/06_create_gold_board.sql                  # Decision Board Gold 테이블 (적재: manage.py load_board_gold)
 ```
 
-`04`에서 변환 함수 생성 권한 오류가 나면 `SET GLOBAL log_bin_trust_function_creators = 1;` 후 다시 실행합니다. 설계 설명은 `data/schema/TO_BE_model_design.md`, 원천 11종 명세는 `data/schema/F1_데이터_명세서.md`에 있습니다.
+`04`에서 변환 함수 생성 권한 오류가 나면 `SET GLOBAL log_bin_trust_function_creators = 1;` 후 다시 실행합니다. 설계 설명은 `data/02_reference/schema/TO_BE_model_design.md`, 원천 11종 명세는 `data/02_reference/schema/F1_데이터_명세서.md`에 있습니다.
 
 ## Django 연동
 
@@ -98,7 +98,7 @@ mysql -u <user> -p <db> < sql/06_create_gold_board.sql                  # Decisi
 
 ## AI 데이터 표준사전
 
-`data/standard_dictionary/`에 표준단어·용어·도메인·코드·컬럼사전·진단코드·조합 규칙이 있습니다.
+`data/02_reference/standard_dictionary/`에 표준단어·용어·도메인·코드·컬럼사전·진단코드·조합 규칙이 있습니다.
 
 ## 의존성
 

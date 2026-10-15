@@ -2,7 +2,7 @@
 -- 화면(/)이 읽는 Gold 테이블이다. 기획서 Gold 9개 마트와의 대응은 각 테이블 주석과 web/dashboard/board_gold.py 참고.
 -- 실행: 05 이후 저장소 루트에서
 --   mysql --default-character-set=utf8mb4 -u <user> -p <db> < sql/06_create_gold_board.sql
---   venv\Scripts\python.exe web\manage.py load_board_gold      # 데이터 적재 (web/dashboard/snapshot/decision_board.json → 이 테이블)
+--   venv\Scripts\python.exe web\manage.py load_board_gold      # 데이터 적재 (data/05_gold/decision_board.json → 이 테이블)
 -- 관리자 화면(/ops/)의 'Gold 갱신'은 06 → 적재 → build_gold를 차례로 실행한다.
 -- 아직 별도 테이블이 없는 마트: 2 tyre_performance(스틴트 단위), 4 pit_strategy(피트 이벤트 단위) — 팀 단위 집계는 team_profile에 있음.
 SET NAMES utf8mb4;

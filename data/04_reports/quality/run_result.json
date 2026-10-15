@@ -1,0 +1,14 @@
+{
+  "run_id": "3d8d8eebc0fc",
+  "pipeline_version": "0.2.0",
+  "input": "data\\01_raw\\F1_distribution.zip",
+  "output": "data\\03_cleaned",
+  "report_output": "data\\04_reports\\quality",
+  "issues": 28052,
+  "repaired_cells": 1335,
+  "open_issues": 1893,
+  "accepted_issues": 24824,
+  "quarantined_rows": 2,
+  "checksum_ok": true,
+  "spec_ok": true
+}

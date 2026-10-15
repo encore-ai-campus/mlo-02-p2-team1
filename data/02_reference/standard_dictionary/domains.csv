@@ -1,0 +1,24 @@
+domain_id,domain_name,korean_name,base_type,length_rule,scale,unit,nullable,validation_rule
+D001,IDENTIFIER,식별자,string,최대 64자,,없음,N,공백 금지; 원문 문자열 보존
+D002,INTEGER_STRING,정수 문자열,string,최대 16자,,없음,Y,정수로 변환 가능
+D003,DECIMAL_SECONDS,초 단위 실수,string,최대 24자,6,초,Y,실수; 음수 금지
+D004,SPEED,속도,string,최대 24자,3,속도 원문 단위 유지,Y,실수; 음수 금지
+D005,TEMPERATURE,온도,string,최대 24자,3,섭씨,Y,실수
+D006,PERCENT,백분율,string,최대 24자,3,%,Y,0 이상 100 이하 권장
+D007,ANGLE,각도,string,최대 24자,3,도,Y,0 이상 360 이하 권장
+D008,DATETIME_OFFSET,오프셋 포함 일시,string,최대 40자,,ISO 8601,Y,UTC 오프셋 포함 권장
+D009,BOOLEAN_STRING,불리언 문자열,string,최대 5자,,없음,Y,True|False
+D010,CODE,업무 코드,string,최대 32자,,없음,Y,코드 테이블 허용값 사용
+D011,ENUM_COMPOUND,타이어 컴파운드,string,최대 16자,,없음,Y,SOFT|MEDIUM|HARD|INTERMEDIATE|WET|UNKNOWN
+D012,LIST_STRING,목록 문자열,string,최대 4096자,,없음,Y,원문 보존; 임의 JSON 변환 금지
+D013,FREE_TEXT,설명 문자열,string,최대 1000자,,없음,Y,표준 인코딩 UTF-8
+D014,DIAGNOSTIC_CODE,품질 진단 코드,string,최대 16자,,없음,N,DQ001~DQ027
+D015,DIAGNOSTIC_STATUS,진단 처리 상태,string,최대 16자,,없음,N,OPEN|REPAIRED|ACCEPTED|WAIVED
+D016,REPAIR_METHOD,복구 방법 코드,string,최대 64자,,없음,N,codes.csv REPAIR_METHOD 그룹(active=Y)
+D017,CONFIDENCE_CODE,복구 신뢰도 코드,string,최대 16자,,없음,N,HIGH|MEDIUM|LOW
+D018,ROW_KEY,업무 행 식별자,string,최대 128자,,없음,N,행 번호 단독 사용 금지
+D019,POSITION,순위,string,최대 8자,,없음,Y,1 이상 정수
+D020,POINTS,포인트,string,최대 8자,1,점,Y,0 이상 실수; 원천 최대 26(최속 랩 보너스 포함)
+D021,GAP_TEXT,격차 문자열,string,최대 24자,3,초,Y,0 이상 실수 또는 +N LAP(S)
+D022,RACE_CONTROL_CATEGORY,관제 분류 코드,string,최대 32자,,없음,N,codes.csv RACE_CONTROL_CATEGORY 그룹
+D023,VALIDATION_CHECK_ID,정제 후 검증 ID,string,최대 8자,,없음,N,VC + 2자리 숫자

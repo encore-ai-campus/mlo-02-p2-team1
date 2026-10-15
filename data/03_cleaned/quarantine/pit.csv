@@ -1,0 +1,3 @@
+﻿source_row,date,driver_number,lane_duration,lap_number,meeting_key,pit_duration,session_key,stop_duration,original_date,original_driver_number,original_lane_duration,original_lap_number,original_meeting_key,original_pit_duration,original_session_key,original_stop_duration,source_file,repair_status,repair_method,repair_confidence,repair_reason,dq_codes,quarantine_flag
+342,2023-09-03 13:44:22.740000+00:00,2,29.3,14,1218,24.7,9157,,2023-09-03 13:44:22.740000+00:00,2,29.3,14,1218,24.7,9157,,pit.csv,UNCHANGED,NONE,HIGH,원본값 유지,DQ021,Y
+349,2023-09-03 13:53:16.531000+00:00,18,32.4,20,1218,25.6,9157,,2023-09-03 13:53:16.531000+00:00,18,32.4,20,1218,25.6,9157,,pit.csv,UNCHANGED,NONE,HIGH,원본값 유지,DQ021,Y

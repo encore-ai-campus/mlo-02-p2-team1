@@ -1,0 +1,88 @@
+code_group,code,code_name,korean_name,description,active
+COMPOUND,SOFT,SOFT,소프트,마른 노면용 소프트 타이어,Y
+COMPOUND,MEDIUM,MEDIUM,미디엄,마른 노면용 미디엄 타이어,Y
+COMPOUND,HARD,HARD,하드,마른 노면용 하드 타이어,Y
+COMPOUND,INTERMEDIATE,INTERMEDIATE,인터미디어트,젖은 노면 초기 대응 타이어,Y
+COMPOUND,WET,WET,웻,젖은 노면용 타이어,Y
+COMPOUND,UNKNOWN,UNKNOWN,미상,원본 타이어 정보 없음,Y
+SESSION_TYPE,Race,Race,레이스,정규 레이스 세션,Y
+SESSION_TYPE,Sprint,Sprint,스프린트,스프린트 레이스 세션,Y
+SESSION_TYPE,Qualifying,Qualifying,예선,예선 세션,Y
+SESSION_TYPE,Practice,Practice,연습,연습 세션,Y
+BOOLEAN,True,True,참,참 상태,Y
+BOOLEAN,False,False,거짓,거짓 상태,Y
+REPAIR_STATUS,UNCHANGED,UNCHANGED,원본 유지,복구 없이 원본값 유지,Y
+REPAIR_STATUS,REPAIRED,REPAIRED,복구됨,복구 로직으로 값 변경,Y
+CONFIDENCE,HIGH,HIGH,높음,직접 키 조인 또는 명확한 원천값,Y
+CONFIDENCE,MEDIUM,MEDIUM,중간,인접 랩·측정값 등 간접 근거,Y
+CONFIDENCE,LOW,LOW,낮음,근거 부족 상태의 명시적 표시,Y
+DIAGNOSTIC_STATUS,OPEN,OPEN,미처리,진단 후 조치 전,Y
+DIAGNOSTIC_STATUS,REPAIRED,REPAIRED,복구 완료,복구 로직 적용 완료,Y
+DIAGNOSTIC_STATUS,ACCEPTED,ACCEPTED,허용,오염을 확인했으나 업무상 허용,Y
+DIAGNOSTIC_STATUS,WAIVED,WAIVED,제외,검토 후 품질 대상에서 제외,Y
+REPAIR_METHOD,NONE,NONE,복구 없음,원본값 유지,Y
+REPAIR_METHOD,session_key_join,session_key_join,세션 조인,sessions.csv의 같은 session_key 값,Y
+REPAIR_METHOD,child_file_consensus,child_file_consensus,하위 파일 합의,하위 5개 파일이 모두 같은 값,Y
+REPAIR_METHOD,season_number_consensus_swap,season_number_consensus_swap,시즌 번호 합의 교환,시즌 차량번호별 신원 합의값으로 교환,Y
+REPAIR_METHOD,adjacent_session_team,adjacent_session_team,앞뒤 세션 소속팀,앞뒤 세션 소속팀과 팀 색상 근거,Y
+REPAIR_METHOD,driver_consensus,driver_consensus,드라이버 합의값,같은 드라이버의 다른 세션 값,Y
+REPAIR_METHOD,driver_season_unique,driver_season_unique,드라이버·시즌 유일값,같은 드라이버·시즌의 유일한 값,Y
+REPAIR_METHOD,adjacent_swap,adjacent_swap,인접 랩 교환,인접 랩과 바뀐 값 교환,Y
+REPAIR_METHOD,prev_lap_plus_duration,prev_lap_plus_duration,앞 랩 기준,앞 랩 시작+소요시간,Y
+REPAIR_METHOD,next_lap_minus_duration,next_lap_minus_duration,다음 랩 기준,다음 랩 시작-현재 소요시간,Y
+REPAIR_METHOD,next_lap_start_gap,next_lap_start_gap,다음 랩 간격,다음 랩 시작-현재 랩 시작,Y
+REPAIR_METHOD,lap_minus_other_sectors,lap_minus_other_sectors,섹터 역산,랩타임-나머지 두 섹터,Y
+REPAIR_METHOD,first_stint_start,first_stint_start,첫 스틴트 시작,첫 스틴트는 1랩,Y
+REPAIR_METHOD,previous_stint_end_plus_one,previous_stint_end_plus_one,이전 스틴트 기준,이전 스틴트 종료+1,Y
+REPAIR_METHOD,next_stint_start_minus_one,next_stint_start_minus_one,다음 스틴트 기준,다음 스틴트 시작-1,Y
+REPAIR_METHOD,driver_last_lap,driver_last_lap,드라이버 최종 랩,laps.csv 최대 랩,Y
+REPAIR_METHOD,neighbour_mean,neighbour_mean,앞뒤 측정 평균,앞뒤 측정값 평균,Y
+REPAIR_METHOD,explicit_unknown,explicit_unknown,미상 표시,UNKNOWN 코드로 명시,Y
+REPAIR_METHOD,median_session_driver_or_session,median_session_driver_or_session,중앙값 추정,F1_P2_Spec.md 5.1(임의 결측 보간 금지)에 따라 폐기,N
+REPAIR_METHOD,unresolved,unresolved,미복구,상태 OPEN으로 대체,N
+ISSUE_ACTION,AUTO_FIX,AUTO_FIX,자동 복구,근거 있는 규칙으로 값 변경,Y
+ISSUE_ACTION,REVIEW,REVIEW,검토,자동 수정 없이 검토 대상,Y
+ISSUE_ACTION,ACCEPT,ACCEPT,허용,원천 특성으로 판단해 유지,Y
+ISSUE_ACTION,QUARANTINE,QUARANTINE,격리,quarantine 폴더로 분리,Y
+SEVERITY,ERROR,ERROR,오류,분석 결과를 왜곡하는 결함,Y
+SEVERITY,WARNING,WARNING,경고,검토가 필요한 결함,Y
+SEVERITY,INFO,INFO,정보,원천 특성일 가능성이 높은 항목,Y
+ERROR_TYPE,MISSING,MISSING,결측,진단코드의 오류 유형 분류,Y
+ERROR_TYPE,INVALID,INVALID,값 오류,진단코드의 오류 유형 분류,Y
+ERROR_TYPE,OUTLIER,OUTLIER,이상치,진단코드의 오류 유형 분류,Y
+ERROR_TYPE,INCONSISTENT,INCONSISTENT,불일치,진단코드의 오류 유형 분류,Y
+ERROR_TYPE,SWAP,SWAP,값 뒤바뀜,진단코드의 오류 유형 분류,Y
+ERROR_TYPE,SCHEMA,SCHEMA,구조,진단코드의 오류 유형 분류,Y
+ERROR_TYPE,TYPE,TYPE,형식,진단코드의 오류 유형 분류,Y
+ERROR_TYPE,REFERENTIAL,REFERENTIAL,참조 무결성,진단코드의 오류 유형 분류,Y
+ERROR_TYPE,DUPLICATE,DUPLICATE,중복,진단코드의 오류 유형 분류,Y
+ERROR_TYPE,OVERLAP,OVERLAP,구간 중첩,진단코드의 오류 유형 분류,Y
+RACE_CONTROL_CATEGORY,Flag,Flag,깃발,깃발 신호,Y
+RACE_CONTROL_CATEGORY,Other,Other,기타,일반 공지,Y
+RACE_CONTROL_CATEGORY,SafetyCar,SafetyCar,세이프티카,SC·VSC 투입·해제,Y
+RACE_CONTROL_CATEGORY,SessionStatus,SessionStatus,세션 상태,세션 시작·종료·중단,Y
+RACE_CONTROL_CATEGORY,Drs,Drs,DRS,DRS 사용 가능 여부,Y
+RACE_CONTROL_CATEGORY,CarEvent,CarEvent,차량 이벤트,차량 관련 이벤트,Y
+RACE_CONTROL_FLAG,GREEN,GREEN,녹색,녹색 깃발,Y
+RACE_CONTROL_FLAG,YELLOW,YELLOW,황색,황색 깃발,Y
+RACE_CONTROL_FLAG,DOUBLE YELLOW,DOUBLE YELLOW,이중 황색,이중 황색 깃발,Y
+RACE_CONTROL_FLAG,RED,RED,적색,적색 깃발,Y
+RACE_CONTROL_FLAG,BLUE,BLUE,청색,청색 깃발,Y
+RACE_CONTROL_FLAG,CLEAR,CLEAR,해제,해제 깃발,Y
+RACE_CONTROL_FLAG,CHEQUERED,CHEQUERED,체커,체커 깃발,Y
+RACE_CONTROL_FLAG,BLACK AND WHITE,BLACK AND WHITE,흑백,흑백 깃발,Y
+RACE_CONTROL_SCOPE,Track,Track,트랙 전체,메시지 적용 범위: 트랙 전체,Y
+RACE_CONTROL_SCOPE,Sector,Sector,섹터,메시지 적용 범위: 섹터,Y
+RACE_CONTROL_SCOPE,Driver,Driver,드라이버,메시지 적용 범위: 드라이버,Y
+CLASSIFICATION_STATUS,CLASSIFIED,CLASSIFIED,분류 완료,최종 순위가 있음,Y
+CLASSIFICATION_STATUS,DNF,DNF,중도 리타이어,dnf=True,Y
+CLASSIFICATION_STATUS,DNS,DNS,미출발,dns=True,Y
+CLASSIFICATION_STATUS,DSQ,DSQ,실격,dsq=True,Y
+CLASSIFICATION_STATUS,NOT_CLASSIFIED,NOT_CLASSIFIED,미분류,순위 공백이고 상태 플래그 없음 → 검토,Y
+POINTS_RULE_STATUS,STANDARD,STANDARD,표준 배점,1~10위 표준 배점 적용,Y
+POINTS_RULE_STATUS,EXCLUDED_NONSTANDARD,EXCLUDED_NONSTANDARD,예외 경기 제외,단축·중단 등 비표준 배점 경기,Y
+POINTS_RULE_STATUS,NOT_CLASSIFIED,NOT_CLASSIFIED,미분류,순위 없음 → 0점,Y
+VALIDATION_STATUS,PASS,PASS,통과,위반 0건,Y
+VALIDATION_STATUS,FAIL,FAIL,실패,ERROR 항목 위반,Y
+VALIDATION_STATUS,WARN,WARN,경고,WARNING 항목 위반,Y
+VALIDATION_STATUS,INFO,INFO,정보,참고용 건수,Y

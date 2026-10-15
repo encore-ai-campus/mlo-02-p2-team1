@@ -1,0 +1,39 @@
+term_id,standard_term,korean_term,definition,term_pattern,identifier_rule
+T001,session_key,세션 식별자,세션을 식별하는 문자열 키,session_key,FK sessions.session_key
+T002,meeting_key,대회 식별자,대회를 식별하는 문자열 키,meeting_key,세션과 동일 개념으로 취급하지 않음
+T003,driver_number,드라이버 번호,해당 시즌 세션에서 차량을 식별하는 번호,driver_number,session_key와 함께 사용
+T004,lap_number,랩 번호,세션 내 랩 순번,lap_number,session_key+driver_number+lap_number
+T005,stint_number,스틴트 번호,드라이버별 스틴트 순번,stint_number,session_key+driver_number+stint_number
+T006,date_start,시작 일시,세션 또는 랩 시작 시각,date_start,ISO 8601 UTC offset 권장
+T007,date_end,종료 일시,세션 종료 시각,date_end,ISO 8601 UTC offset 권장
+T008,lap_duration,랩 소요시간,랩 전체 소요 시간(초),lap_duration,0 이상; 300 초과 검토
+T009,pit_duration,피트 소요시간,피트 관련 소요 시간(초),pit_duration,0 이상; 180 초과 검토
+T010,stop_duration,정차 소요시간,피트 정차 상태의 소요 시간(초),stop_duration,0 이상
+T011,lane_duration,피트레인 소요시간,피트레인 구간 소요 시간(초),lane_duration,0 이상
+T012,lap_start,스틴트 시작 랩,스틴트가 시작된 랩 번호,lap_start,정수; lap_end 이상 아님
+T013,lap_end,스틴트 종료 랩,스틴트가 종료된 랩 번호,lap_end,정수; lap_start 이상
+T014,segments_sector,섹터 미니구간 상태,섹터별 미니구간 상태 목록 문자열,segments_sector_[1-3],목록 원문 보존
+T015,repair_status,복구 상태,복구 여부를 나타내는 관리 상태,repair_status,UNCHANGED|REPAIRED
+T016,repair_method,복구 방법,복구에 사용한 처리 방법,repair_method,codes.csv REPAIR_METHOD 그룹(active=Y)
+T017,repair_confidence,복구 신뢰도,복구 판단의 신뢰 수준,repair_confidence,HIGH|MEDIUM|LOW
+T018,repair_reason,복구 근거,복구값을 결정한 이유,repair_reason,문자열
+T019,diagnostic_code,진단 코드,오염 또는 품질 문제의 표준 식별 코드,diagnostic_code,DQ001~DQ027
+T020,diagnostic_status,진단 상태,진단 결과의 처리 상태,diagnostic_status,OPEN|REPAIRED|ACCEPTED|WAIVED
+T021,quality_issue,품질 이슈,검증에서 발견된 결함 기록,quality_issue,diagnostic_code와 연결
+T022,original_value,원본값,복구 전 원본 데이터 값,original_value,원본 보존 전용
+T023,repaired_value,복구값,복구 로직 적용 후의 값,repaired_value,repair_status와 함께 사용
+T024,source_row_key,원본 행 식별자,행 번호가 아닌 업무키 기반 원본 식별 정보,source_row_key,session_key+업무키 조합
+T025,grid_position,그리드 순위,Qualifying 결과로 정해진 Race 출발 순위,grid_position,meeting_key+driver_number로 Race에 연결
+T026,finish_position,최종 순위,Race 최종 분류 순위,finish_position,session_result.position; 미분류는 NULL
+T027,classification_status,분류 상태,완주·DNF·DNS·DSQ 최종 분류,classification_status,CLASSIFIED|DNF|DNS|DSQ|NOT_CLASSIFIED
+T028,race_base_points,본경기 기본 포인트,Race 최종 순위에 표준 배점(25-18-15-12-10-8-6-4-2-1)을 적용한 값,race_base_points,최속 랩 보너스·Sprint 제외; 공식 챔피언십 점수와 구분
+T029,cumulative_race_base_points,누적 본경기 기본 포인트,평가 기준일까지 시즌 Race 기본 포인트 합계,cumulative_race_base_points,기준일 이후 경기 제외
+T030,race_base_points_team_rank,기본 포인트 팀 순위,팀별 누적 기본 포인트 순위,race_base_points_team_rank,동률은 동률 표시; 공식 순위 아님
+T031,scoring_rule_year,배점 규칙 연도,적용한 배점 규칙의 시즌,scoring_rule_year,race_points_rules.csv의 year
+T032,points_rule_status,배점 적용 상태,표준 배점 적용 여부와 제외 사유,points_rule_status,STANDARD|EXCLUDED_NONSTANDARD|NOT_CLASSIFIED
+T033,team_at_race,경기 당시 팀,해당 Race의 drivers.team_name,team_at_race,이적 시 소급 귀속 금지
+T034,qualifying_session_key,예선 세션 식별자,starting_grid 원본 session_key,qualifying_session_key,Race session_key와 직접 JOIN 금지
+T035,race_session_key,본경기 세션 식별자,같은 meeting_key의 Race session_key,race_session_key,meeting_key당 1개
+T036,gap_to_leader,선두와 격차,선두 차량과의 시간 차이(초) 또는 +N LAP(S),gap_to_leader,숫자 아닌 랩 차이는 원문 보존
+T037,interval,앞차와 격차,바로 앞 차량과의 시간 차이,interval,MySQL 예약어이므로 백틱 사용
+T038,validation_check_id,정제 후 검증 ID,정제 후 데이터 검증 항목 식별자,validation_check_id,"VC01~VC99, validation_checks.csv"

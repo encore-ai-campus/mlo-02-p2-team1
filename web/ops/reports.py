@@ -1,4 +1,4 @@
-"""관리자 페이지에 보여줄 결과 읽기: 파이프라인 출력 파일(outputs/f1_recovery)과 MySQL 적재 상태.
+"""관리자 페이지에 보여줄 결과 읽기: 파이프라인 출력 파일(data/03_cleaned, data/04_reports)과 MySQL 적재 상태.
 
 파일이 없거나 테이블이 아직 없으면 예외 대신 {"missing": 사유}를 돌려 화면에 안내한다.
 """
@@ -13,9 +13,8 @@ from django.db import connection, DatabaseError
 
 from .steps import ROOT
 
-OUT = ROOT / "outputs" / "f1_recovery"
-REPORTS = OUT / "reports"
-VALIDATION = OUT / "validation"
+REPORTS = ROOT / "data" / "04_reports" / "quality"
+VALIDATION = ROOT / "data" / "04_reports" / "validation"
 INT_COLS = {"rows", "issue_count", "repaired_cells", "repaired_rows", "open_issues", "quarantined_rows", "detected",
             "repaired", "accepted", "open", "residual_after_repair", "fail_count", "total_count", "raw_rows",
             "unchanged_rows", "removed_rows", "processed_sum", "difference", "cleaned_rows", "analysis_rows"}

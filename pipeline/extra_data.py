@@ -1,4 +1,4 @@
-"""추가 데이터 5종 압축 해제 (data/f1_extra_data.zip → data/f1_extra_data/).
+"""추가 데이터 5종 압축 해제 (data/01_raw/f1_extra_data.zip → data/01_raw/f1_extra_data/).
 
 서비스 시작(run_web.bat) 때 자동으로 실행된다. 이미 풀려 있으면 건너뛴다.
 
@@ -11,8 +11,8 @@ import argparse, shutil, sys, tempfile, zipfile
 from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVE = ROOT / "data" / "f1_extra_data.zip"
-DEST = ROOT / "data" / "f1_extra_data"
+ARCHIVE = ROOT / "data" / "01_raw" / "f1_extra_data.zip"
+DEST = ROOT / "data" / "01_raw" / "f1_extra_data"
 FILES = ["starting_grid.csv", "session_result.csv", "position.csv", "race_control.csv", "intervals.csv"]
 
 

@@ -1,0 +1,13 @@
+﻿file,group,raw_rows,unchanged_rows,repaired_rows,quarantined_rows,removed_rows,processed_sum,difference,cleaned_rows,analysis_rows,quarantine_file_rows,duplicate_key_rows,status,note
+sessions,오염 정제 6종,87,85,2,0,0,87,0,87,87,0,0,PASS,원본 행 수는 04_reports/quality/bronze_manifest.csv
+drivers,오염 정제 6종,1771,1047,724,0,0,1771,0,1771,1771,0,0,PASS,원본 행 수는 04_reports/quality/bronze_manifest.csv
+laps,오염 정제 6종,97018,96493,525,0,0,97018,0,97018,97018,0,0,PASS,원본 행 수는 04_reports/quality/bronze_manifest.csv
+stints,오염 정제 6종,5040,5004,36,0,0,5040,0,5040,5040,0,0,PASS,원본 행 수는 04_reports/quality/bronze_manifest.csv
+weather,오염 정제 6종,13928,13923,5,0,0,13928,0,13928,13928,0,0,PASS,원본 행 수는 04_reports/quality/bronze_manifest.csv
+pit,오염 정제 6종,3029,3027,0,2,0,3029,0,3029,3027,2,0,PASS,원본 행 수는 04_reports/quality/bronze_manifest.csv
+starting_grid,추가 5종,1770,1770,0,0,0,1770,0,1770,1770,,0,PASS,정제 단계 없음(원본 그대로 검증)
+session_result,추가 5종,1771,1771,0,0,0,1771,0,1771,1771,,0,PASS,정제 단계 없음(원본 그대로 검증)
+position,추가 5종,42952,42952,0,0,0,42952,0,42952,42952,,0,PASS,정제 단계 없음(원본 그대로 검증)
+race_control,추가 5종,9499,9499,0,0,0,9499,0,9499,9499,,0,PASS,정제 단계 없음(원본 그대로 검증)
+intervals,추가 5종,2107568,2107568,0,0,0,2107568,0,2107568,2107568,,0,PASS,정제 단계 없음(원본 그대로 검증)
+합계(오염 정제 6종),,120873,119579,1292,2,0,120873,0,120873,120871,2,0,PASS,

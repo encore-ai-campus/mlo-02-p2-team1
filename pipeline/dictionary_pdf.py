@@ -1,4 +1,4 @@
-"""data/standard_dictionary의 기준표로 표준사전 PDF를 만든다.
+"""data/02_reference/standard_dictionary의 기준표로 표준사전 PDF를 만든다.
 
 실행(저장소 루트): python -m pipeline.dictionary_pdf
 """
@@ -13,7 +13,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / 'data' / 'standard_dictionary'
+SRC = ROOT / 'data' / '02_reference' / 'standard_dictionary'
 OUT = SRC / 'F1_AI_data_standard_dictionary.pdf'
 FONT = Path('C:/Windows/Fonts/malgun.ttf')
 if FONT.exists(): pdfmetrics.registerFont(TTFont('Malgun', str(FONT)))

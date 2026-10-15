@@ -1,4 +1,4 @@
-"""Decision Board Gold 적재: snapshot/decision_board.json → MySQL gold_board_* (테이블은 sql/06이 만든다).
+"""Decision Board Gold 적재: data/05_gold/decision_board.json → MySQL gold_board_* (테이블은 sql/06이 만든다).
 
     venv\\Scripts\\python.exe web\\manage.py load_board_gold [--source 파일]
 

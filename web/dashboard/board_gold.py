@@ -1,7 +1,7 @@
 """Decision Board Gold ↔ MySQL.
 
 화면(/)은 이 모듈의 read_board()로 MySQL의 gold_board_* 테이블을 읽는다.
-적재 원천은 분석 결과 내보내기 파일 snapshot/decision_board.json이다
+적재 원천은 분석 결과 내보내기 파일 data/05_gold/decision_board.json이다
 (이 수치를 만든 분석 코드는 저장소에 없으므로, 재계산 대신 결과를 그대로 정규화해 적재한다).
 
     sql/06_create_gold_board.sql                                 # 테이블 생성 (컬럼 정의는 이 SQL이 기준)
@@ -32,7 +32,7 @@ from django.conf import settings
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.engine import URL
 
-SNAPSHOT = Path(__file__).resolve().parent / "snapshot" / "decision_board.json"
+SNAPSHOT = Path(settings.BASE_DIR).parent / "data" / "05_gold" / "decision_board.json"
 P = "gold_board_"
 
 # 스냅샷 키 → 테이블. 행 순서를 지키려고 seq를 둔다.

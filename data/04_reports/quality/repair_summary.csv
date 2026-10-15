@@ -1,0 +1,7 @@
+﻿file,rows,issue_count,repaired_cells,repaired_rows,open_issues,quarantined_rows,status
+sessions.csv,87,2,2,2,0,0,PASS
+drivers.csv,1771,928,742,724,137,0,REVIEW
+laps.csv,97018,26814,527,525,1523,0,REVIEW
+stints.csv,5040,79,59,36,9,0,REVIEW
+weather.csv,13928,5,5,5,0,0,PASS
+pit.csv,3029,224,0,0,224,2,REVIEW

@@ -1,6 +1,6 @@
 -- =====================================================================
 -- 04_create_schema.sql : F1 TO-BE 정규화 스키마 (MySQL 8.0+)
--- 기준: data/schema/TO_BE_model_design.md, data/standard_dictionary/column_dictionary.csv, F1_P2_Spec.md
+-- 기준: data/schema/TO_BE_model_design.md, data/02_reference/standard_dictionary/column_dictionary.csv, F1_P2_Spec.md
 -- 원천 11종(오염 정제 6종 + 추가 5종)과 품질 이력(quality_issue, repair_detail)을 담는다.
 -- 데이터 적재는 05_insert_schema.sql(스테이징 → 이 스키마)에서 한다.
 -- 선행: 01_create_staging.sql, 02_load_staging.sql (ref_* 기준표를 FK로 참조)
