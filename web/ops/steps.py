@@ -3,7 +3,7 @@
 단계는 모두 저장소 루트에서 별도 프로세스로 실행한다.
 - 정제·검증: pipeline 패키지 (python -m pipeline.*)
 - DB 적재: mysql 클라이언트로 sql/01~05 실행 (접속 정보는 Django DB 설정과 같음)
-- Gold: manage.py build_gold
+- Gold: sql/06 → manage.py load_board_gold → manage.py build_gold
 """
 from __future__ import annotations
 
@@ -38,15 +38,17 @@ STEPS = [
     Step("sql05", "스키마 적재·행 수 대사, 약 20분 (sql/05)", "DB 적재", sql="05_insert_schema.sql"),
     # 02가 수정 이력 CSV를 1,335행 모두 적재하도록 고쳐져 평소에는 필요 없음. 예전 방식으로 적재한 DB 보정용
     Step("sql02b", "[보정용] 수정 이력(repair_detail)만 스테이징에 다시 적재 (sql/02b)", "DB 적재", sql="02b_reload_repair_detail.sql"),
-    Step("gold", "Gold 마트 갱신", "Gold", command=("web/manage.py", "build_gold")),
+    Step("sql06", "Decision Board Gold 테이블 생성 (sql/06)", "Gold", sql="06_create_gold_board.sql"),
+    Step("board", "Decision Board Gold 적재·검증 (gold_board_*)", "Gold", command=("web/manage.py", "load_board_gold")),
+    Step("gold", "이전 시안용 Gold 계산 (gold_driver/team_profile)", "Gold", command=("web/manage.py", "build_gold")),
 ]
 STEP_BY_KEY = {s.key: s for s in STEPS}
 
 PRESETS = {
     "clean": ("정제·검증", ["extract", "recovery", "validate"]),
     "load": ("DB 적재", ["extract", "sql01", "sql02", "sql03", "sql04", "sql05"]),
-    "gold": ("Gold 갱신", ["gold"]),
-    "all": ("전체 실행", ["extract", "recovery", "validate", "sql01", "sql02", "sql03", "sql04", "sql05", "gold"]),
+    "gold": ("Gold 갱신", ["sql06", "board", "gold"]),
+    "all": ("전체 실행", ["extract", "recovery", "validate", "sql01", "sql02", "sql03", "sql04", "sql05", "sql06", "board", "gold"]),
 }
 
 

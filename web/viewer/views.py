@@ -5,11 +5,14 @@ from django.shortcuts import render
 PAGE_SIZE = 50
 EXCLUDE_PREFIX = ("auth_", "django_")  # Django 기본 테이블은 목록에서 제외
 
-# 테이블 이름 접두사로 묶어서 보여준다 (팀 SQL 01~05 구조)
+# 테이블 이름 접두사로 묶어서 보여준다 (팀 SQL 01~06 구조)
 GROUPS = [
     ("stg_", "스테이징 (정제 결과·추가 데이터 원문)"),
     ("ref_", "코드·규칙 테이블"),
     ("vc_", "검증 결과 (03_validate_cleaned)"),
+    ("gold_board_", "Decision Board Gold (06_create_gold_board · 화면이 읽는 테이블)"),
+    ("gold_", "이전 시안 Gold (build_gold)"),
+    ("ops_", "파이프라인 실행 기록 (/ops/)"),
     ("v_", "뷰"),
 ]
 

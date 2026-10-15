@@ -620,6 +620,18 @@ def table(df, limit=None):
     return shown.to_html(index=False, escape=True, border=0) if len(shown) else "<p>없음</p>"
 
 
+def md_table(df, limit=None):
+    """GitHub에서 표로 보이는 마크다운 표 (칸 안의 |·줄바꿈은 이스케이프)."""
+    shown = df if limit is None else df.head(limit)
+    if not len(shown):
+        return "없음\n"
+    cell = lambda v: "" if pd.isna(v) else (f"{v:,}" if isinstance(v, int) else str(v)).replace("|", "\\|").replace("\r", " ").replace("\n", " ")
+    lines = ["| " + " | ".join(map(str, shown.columns)) + " |", "|" + "---|" * len(shown.columns)]
+    lines += ["| " + " | ".join(cell(v) for v in row) + " |" for row in shown.astype(object).itertuples(index=False)]
+    more = f"\n_{len(df):,}건 중 {len(shown):,}건 표시_\n" if len(shown) < len(df) else ""
+    return "\n".join(lines) + "\n" + more
+
+
 def build_report(out, annotated, ledger, manifest, dq_summary, files_df, run_info):
     report_dir = out / "reports"
     report_dir.mkdir(parents=True, exist_ok=True)
@@ -661,6 +673,29 @@ def build_report(out, annotated, ledger, manifest, dq_summary, files_df, run_inf
             "<h2>5. 진단코드별 상세 샘플 (허용 제외, 코드당 20건)</h2>" + "".join(samples) +
             "<h2>6. 복구 이력 샘플</h2>" + table(repairs, 200))
     (report_dir / "quality_report.html").write_text(f"<!doctype html><html lang='ko'><head><meta charset='utf-8'><title>F1 품질 리포트</title><style>{style}</style></head><body>{body}</body></html>", encoding="utf-8")
+
+    # 같은 내용의 마크다운판: GitHub에서는 HTML이 코드로만 보이므로 표로 바로 읽히게 만든다 (샘플은 줄여서)
+    counts = [("탐지", len(issues)), ("자동 복구", int((issues["status"] == "REPAIRED").sum())),
+              ("허용(원천 특성)", int((issues["status"] == "ACCEPTED").sum())), ("검토 필요", int((issues["status"] == "OPEN").sum())),
+              ("격리 행", int(files_df["quarantined_rows"].sum()))]
+    md_samples = "".join(
+        f"\n#### {code} {group['korean_name'].iat[0]} ({len(group):,}건)\n\n" +
+        md_table(group[["severity", "file", "row_key", "field", "observed_value", "expected_value", "evidence", "action", "status"]], 5)
+        for code, group in issues[issues["status"] != "ACCEPTED"].groupby("diagnostic_code"))
+    md = (f"# F1 오염 데이터 검증·복구 리포트\n\n"
+          f"파이프라인 {PIPELINE_VERSION} · 입력 `{run_info['input']}` · run_id `{run_info['run_id']}`  \n"
+          f"전체 샘플과 원자료: [quality_report.html](./quality_report.html) (내려받아 브라우저로 열기) · `validation_issues.csv` · `repair_detail.csv`\n\n"
+          "| " + " | ".join(label for label, _ in counts) + " |\n|" + "---:|" * len(counts) + "\n| " +
+          " | ".join(f"{value:,}" for _, value in counts) + " |\n\n"
+          "## 1. Bronze 매니페스트\n\n원본 파일이 배포본 그대로인지(체크섬)와 명세서의 행·컬럼 구성과 같은지 확인한다. "
+          "판정 컬럼(spec_row_count·schema·column_order·checksum)이 모두 MATCH/OK이면 정상이다.\n\n" +
+          md_table(manifest.drop(columns=["sha256", "sha256_expected"], errors="ignore")) +
+          "\n## 2. 파일별 처리 결과\n\n" + md_table(files_df) +
+          "\n## 3. 오류 유형별 집계\n\n" + md_table(by_type) +
+          "\n## 4. 진단코드별 집계\n\nresidual_after_repair: 복구 후 같은 규칙으로 다시 검사했을 때 남은 건수 (= accepted + open 이어야 함)\n\n" + md_table(dq_summary) +
+          "\n## 5. 진단코드별 상세 샘플 (허용 제외, 코드당 5건)\n" + md_samples +
+          "\n## 6. 복구 이력 샘플\n\n" + md_table(repairs[["diagnostic_code", "file", "row_key", "field", "old_value", "new_value", "method", "confidence", "reason"]], 30))
+    (report_dir / "quality_report.md").write_text(md, encoding="utf-8")
     (report_dir / "run_result.json").write_text(json.dumps(run_info, ensure_ascii=False, indent=2), encoding="utf-8")
     return issues, repairs
 

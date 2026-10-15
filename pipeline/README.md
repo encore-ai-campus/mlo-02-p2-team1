@@ -59,7 +59,8 @@ reports/validation_issues.csv 진단 이슈 전체 (코드·오류유형·심각
 reports/repair_detail.csv     값 변경 이력 (issue_id로 이슈와 연결)
 reports/dq_summary.csv        파일×진단코드별 탐지/복구/허용/미해결/격리/잔여
 reports/repair_summary.csv    파일별 요약
-reports/quality_report.html   위 내용을 묶은 리포트
+reports/quality_report.md     위 내용을 묶은 리포트 (GitHub에서 표로 보임, 샘플 축약)
+reports/quality_report.html   같은 리포트의 HTML판 (전체 샘플)
 reports/run_result.json       실행 요약 (run_id는 입력 체크섬+버전 기반, 재실행 시 동일)
 ```
 
@@ -86,6 +87,7 @@ mysql --local-infile=1 -u <user> -p <db> < sql/02_load_staging.sql     # CSV·�
 mysql -u <user> -p <db> < sql/03_validate_cleaned.sql                   # 정제 후 검증 (FAIL 0 확인)
 mysql -u <user> -p <db> < sql/04_create_schema.sql                      # TO-BE 정규화 스키마·변환 함수·뷰
 mysql -u <user> -p <db> < sql/05_insert_schema.sql                      # 스테이징 → 스키마 INSERT, 행 수 대사
+mysql -u <user> -p <db> < sql/06_create_gold_board.sql                  # Decision Board Gold 테이블 (적재: manage.py load_board_gold)
 ```
 
 `04`에서 변환 함수 생성 권한 오류가 나면 `SET GLOBAL log_bin_trust_function_creators = 1;` 후 다시 실행합니다. 설계 설명은 `data/schema/TO_BE_model_design.md`, 원천 11종 명세는 `data/schema/F1_데이터_명세서.md`에 있습니다.
