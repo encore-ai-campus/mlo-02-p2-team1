@@ -1,0 +1,17 @@
+{
+  "removed_section": "EVERY DRIVER, SIDE BY SIDE",
+  "removed_controls_and_navigation": true,
+  "remaining_sections": 6,
+  "operations_section_number": "05",
+  "data_section_number": "06",
+  "season_team_seat_selections": 90,
+  "selection_failures": [],
+  "metric_columns_per_team": 8,
+  "selected_team_rows": 1,
+  "distribution_counts_match_denominator": true,
+  "distribution_percent_sum": 100,
+  "candidate_click_after_removal": "2025 George RUSSELL -> Aston Martin, 3 trust questions rendered",
+  "mobile": {"document_width": 375, "document_scroll_width": 375, "table_viewport": 308, "table_scroll_width": 820, "horizontal_scroll_verified": true, "observed_scroll_left": 375.2},
+  "themes_inspected": ["dark desktop", "light mobile"],
+  "analytic_payload_modified": false
+}

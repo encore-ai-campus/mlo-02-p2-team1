@@ -1,0 +1,17 @@
+{
+  "section": "03 / CANDIDATE EXPLORER",
+  "layout": "pinned reference plus five candidates per page",
+  "season_team_seat_selections": 90,
+  "selection_failures": [],
+  "first_review_criteria_selections_checked": 90,
+  "first_review_failures": [],
+  "sort_and_pool_combinations_checked": 15,
+  "sort_failures": [],
+  "candidate_clicks_across_pages": 19,
+  "candidate_click_failures": [],
+  "insufficient_reference_case": "2025 Jack DOOHAN: performance metrics and percentiles N/A; no first review candidates",
+  "desktop": {"columns": 3, "card_width": 272, "card_scroll_width": 272},
+  "mobile": {"columns": 1, "document_width": 375, "document_scroll_width": 375, "card_width": 306, "card_scroll_width": 306},
+  "analytic_payload_modified": false,
+  "baseline_hash_note": "verify_data.py found README_progress.md differs from its original baseline. This active document was not written by this UI task; it was preserved. All analytic checks and protected analysis-file hashes passed."
+}

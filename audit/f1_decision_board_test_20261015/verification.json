@@ -1,0 +1,12 @@
+{
+  "checks": 49307,
+  "failures": [
+    "Existing files changed: README_progress.md"
+  ],
+  "all_candidate_cases": 1824,
+  "prior_case_values_checked": 36,
+  "existing_files_hashed": 126,
+  "existing_files_changed": [
+    "README_progress.md"
+  ]
+}
