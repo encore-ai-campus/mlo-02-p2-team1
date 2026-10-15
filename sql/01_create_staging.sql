@@ -3,8 +3,10 @@
 -- 정제 결과(repaired/ 6종)와 추가 데이터 5종을 원문 문자열 그대로 적재한다.
 -- 타입 변환은 검증 쿼리(03)에서 형식 확인 후에만 수행한다(변환 실패를 0으로 바꾸지 않음).
 -- 실행: mysql --local-infile=1 -u <user> -p <db> < sql/01_create_staging.sql
+-- 04 스키마가 ref_* 를 FK로 참조하므로 재실행할 때를 위해 FK 검사를 잠시 끈다.
 -- =====================================================================
 SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS stg_sessions;
 CREATE TABLE stg_sessions (
@@ -324,7 +326,9 @@ CREATE TABLE stg_repair_detail (
 
 DROP TABLE IF EXISTS stg_bronze_manifest;
 CREATE TABLE stg_bronze_manifest (
-  file VARCHAR(64), bytes BIGINT, `rows` BIGINT, `columns` INT, encoding VARCHAR(16),
-  sha256 VARCHAR(64), checksum VARCHAR(16), `schema` VARCHAR(16), column_order VARCHAR(16),
-  spec_rows VARCHAR(16), spec_columns VARCHAR(16), spec_row_count VARCHAR(16)
+  file VARCHAR(64), `rows` BIGINT, `columns` INT, spec_rows VARCHAR(16), spec_columns VARCHAR(16),
+  spec_row_count VARCHAR(16), `schema` VARCHAR(16), column_order VARCHAR(16), checksum VARCHAR(16),
+  encoding VARCHAR(16), bytes BIGINT, sha256 VARCHAR(64), sha256_expected VARCHAR(64)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 1;

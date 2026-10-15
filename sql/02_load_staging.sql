@@ -6,8 +6,10 @@
 -- 정제 결과 경로가 다르면 아래 'outputs/f1_recovery/' 를 바꾼다.
 -- data/f1_extra_data.zip 은 먼저 data/f1_extra_data/ 로 압축 해제한다.
 -- CSV는 UTF-8(BOM 포함 가능)이며 헤더 1행은 건너뛴다. CRLF 파일도 마지막 컬럼의 \r을 제거한다.
+-- 04 스키마가 ref_* 를 FK로 참조하므로 재적재(TRUNCATE) 동안 FK 검사를 잠시 끈다.
 -- =====================================================================
 SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
 TRUNCATE TABLE stg_sessions;
 LOAD DATA LOCAL INFILE 'outputs/f1_recovery/repaired/sessions.csv'
@@ -150,8 +152,10 @@ LOAD DATA LOCAL INFILE 'outputs/f1_recovery/reports/bronze_manifest.csv'
 INTO TABLE stg_bronze_manifest CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
 LINES TERMINATED BY '\n' IGNORE 1 LINES
-(`file`, `bytes`, `rows`, `columns`, `encoding`, `sha256`, `checksum`, `schema`, `column_order`, `spec_rows`, `spec_columns`, @last_col)
-SET `spec_row_count` = TRIM(TRAILING '\r' FROM @last_col);
+(`file`, `rows`, `columns`, `spec_rows`, `spec_columns`, `spec_row_count`, `schema`, `column_order`, `checksum`, `encoding`, `bytes`, `sha256`, @last_col)
+SET `sha256_expected` = TRIM(TRAILING '\r' FROM @last_col);
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- 적재 행 수 확인
 SELECT 'sessions' t, COUNT(*) n FROM stg_sessions UNION ALL SELECT 'drivers', COUNT(*) FROM stg_drivers

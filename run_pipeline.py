@@ -133,6 +133,23 @@ def parse_sums(text):
     return out
 
 
+MANIFEST_COLUMNS = [
+    ("file", "파일명"),
+    ("rows", "실제 데이터 행 수 (헤더 제외)"),
+    ("columns", "실제 컬럼 수"),
+    ("spec_rows", "데이터 명세서(00. 데이터_명세서.md)에 적힌 행 수"),
+    ("spec_columns", "데이터 명세서에 적힌 컬럼 수"),
+    ("spec_row_count", "행·컬럼 수가 명세서와 같으면 MATCH, 다르면 MISMATCH, 명세서가 없으면 NO_SPEC"),
+    ("schema", "명세서 컬럼 이름이 빠짐없이 있고 추가 컬럼이 없으면 OK"),
+    ("column_order", "컬럼 순서까지 명세서와 같으면 OK, 순서만 다르면 DIFFERENT"),
+    ("checksum", "파일이 배포본 그대로인지: sha256 = sha256_expected 이면 MATCH, 기준값이 없으면 NO_REFERENCE, 다르면 MISMATCH(파일 변경·손상)"),
+    ("encoding", "판별한 문자 인코딩 (utf-8, BOM이 있으면 utf-8-sig)"),
+    ("bytes", "파일 크기(바이트)"),
+    ("sha256", "이번에 읽은 파일 바이트의 SHA-256 해시 (원본 보존 증빙, 참고용)"),
+    ("sha256_expected", "배포본 SHA256SUMS.txt에 적힌 기준 해시 (참고용)"),
+]
+
+
 def bronze(raw, checksums, spec, ledger):
     data, manifest = {}, []
     spec_counts, spec_columns = parse_spec(spec) if spec else ({}, {})
@@ -146,13 +163,14 @@ def bronze(raw, checksums, spec, ledger):
         missing = sorted(set(expected_columns) - set(df.columns))
         extra = sorted(set(df.columns) - set(expected_columns))
         spec_rows, spec_cols = spec_counts.get(name, (None, None))
-        manifest.append({"file": name, "bytes": len(content), "rows": len(df), "columns": len(df.columns), "encoding": encoding,
-                         "sha256": digest, "sha256_expected": expected,
-                         "checksum": "MATCH" if expected == digest else ("NO_REFERENCE" if not expected else "MISMATCH"),
+        # 판정 컬럼을 앞에, 참고용 해시는 맨 뒤에 둔다 (컬럼 설명은 MANIFEST_COLUMNS)
+        manifest.append({"file": name, "rows": len(df), "columns": len(df.columns),
+                         "spec_rows": "" if spec_rows is None else spec_rows, "spec_columns": "" if spec_cols is None else spec_cols,
+                         "spec_row_count": "NO_SPEC" if spec_rows is None else ("MATCH" if spec_rows == len(df) and spec_cols == len(df.columns) else "MISMATCH"),
                          "schema": "OK" if not missing and not extra else "MISMATCH",
                          "column_order": "OK" if list(df.columns) == list(expected_columns) else "DIFFERENT",
-                         "spec_rows": "" if spec_rows is None else spec_rows, "spec_columns": "" if spec_cols is None else spec_cols,
-                         "spec_row_count": "NO_SPEC" if spec_rows is None else ("MATCH" if spec_rows == len(df) and spec_cols == len(df.columns) else "MISMATCH")})
+                         "checksum": "MATCH" if expected == digest else ("NO_REFERENCE" if not expected else "MISMATCH"),
+                         "encoding": encoding, "bytes": len(content), "sha256": digest, "sha256_expected": expected})
         if spec_rows is not None and (spec_rows != len(df) or spec_cols != len(df.columns)):
             ledger.issue(name, "DQ013", None, "", "", observed=f"행 {len(df)}·열 {len(df.columns)} / 명세서 행 {spec_rows}·열 {spec_cols}", action="REVIEW")
         if missing or extra:
@@ -630,7 +648,10 @@ def build_report(out, annotated, ledger, manifest, dq_summary, files_df, run_inf
              ".cards strong{display:block;font-size:24px;margin-top:6px}h2{margin-top:36px}.meta{color:#56636f;font-size:13px}")
     body = (f"<h1>F1 오염 데이터 검증·복구 리포트</h1><p class='meta'>파이프라인 {PIPELINE_VERSION} · 입력 {html.escape(run_info['input'])} · run_id {run_info['run_id']}</p>"
             f"<div class='cards'>{cards}</div>"
-            "<h2>1. Bronze 매니페스트</h2>" + table(manifest) +
+            "<h2>1. Bronze 매니페스트</h2><p class='meta'>원본 파일이 배포본 그대로인지(체크섬)와 명세서의 행·컬럼 구성과 같은지 확인한다. "
+            "판정 컬럼(spec_row_count·schema·column_order·checksum)이 모두 MATCH/OK이면 정상이다. 해시 값은 증빙용이라 맨 뒤에 앞 12자리만 표시한다(전체 값은 bronze_manifest.csv).</p>" + table(manifest.assign(
+                sha256=manifest["sha256"].str[:12] + "…", sha256_expected=manifest["sha256_expected"].astype(str).str[:12] + "…")) +
+            "<details open><summary>컬럼 설명</summary>" + table(pd.DataFrame(MANIFEST_COLUMNS, columns=["컬럼", "의미"])) + "</details>" +
             "<h2>2. 파일별 처리 결과</h2>" + table(files_df) +
             "<h2>3. 오류 유형별 집계</h2>" + table(by_type) +
             "<h2>4. 진단코드별 집계</h2><p class='meta'>residual_after_repair: 복구 후 같은 규칙으로 다시 검사했을 때 남은 건수 (= accepted + open 이어야 함)</p>" + table(dq_summary) +
