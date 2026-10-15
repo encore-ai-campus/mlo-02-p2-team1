@@ -37,8 +37,9 @@
 - 하나의 결함은 `diagnostic_code` 하나로 기록하고, 한 행에 여러 결함이 있으면 진단 상세 테이블에 별도 행으로 기록한다.
 - `MISSING_*`는 결측 자체를 의미하며, 복구 성공 여부는 `diagnostic_status`로 분리한다.
 - `LONG_*`, `INVALID_*`, `OVERLAPPING_*`은 자동으로 정상값으로 바꾸지 않고 검토 이슈로 남긴다.
-- `DQ001` 국가 코드 결측은 동일 `session_key`의 세션 국가 코드로 복구할 수 있을 때만 `REPAIRED`로 처리한다.
-- `DQ003`, `DQ004` 수치 결측은 동일 세션·드라이버 중앙값을 우선하고, 없을 때 세션 중앙값을 사용한다.
+- `DQ001` 국가 코드 결측은 같은 드라이버(`full_name`)의 다른 세션 국가 코드로 복구한다. 세션(개최국) 국가 코드는 드라이버 국적이 아니므로 사용하지 않는다.
+- 통계값(중앙값 등)으로 결측을 채우지 않는다(기획서 4.2). `DQ003` 속도 결측은 원천 결측으로 허용하고, `DQ004` 섹터 결측은 1개만 비었을 때 `랩타임 - 나머지 두 섹터`로 역산한다.
+- 진단 결과에는 `error_type`(MISSING·INVALID·OUTLIER·INCONSISTENT·SWAP·SCHEMA·TYPE·REFERENTIAL·DUPLICATE·OVERLAP), `severity`, `action`(AUTO_FIX·REVIEW·ACCEPT·QUARANTINE), `status`를 함께 기록한다.
 - `DQ008` 컴파운드 결측은 실제 타이어 종류를 추정하지 않고 `UNKNOWN`으로 표시한다.
-- `DQ010`은 `lap_end < lap_start`, `DQ011`은 `next lap_start < previous lap_end`일 때 발생한다.
+- `DQ010`은 `lap_end < lap_start`, `DQ011`은 `next lap_start < previous lap_end`일 때 발생한다. `lap_end = lap_start - 1`인 빈 스틴트는 원천 특성으로 `ACCEPTED` 처리한다.
 - 진단 상태는 `OPEN`(미처리), `REPAIRED`(복구 완료), `ACCEPTED`(오염을 업무상 허용), `WAIVED`(검토 후 제외)로 통제한다.

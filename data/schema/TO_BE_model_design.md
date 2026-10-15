@@ -155,11 +155,13 @@ erDiagram
 |---|---|
 | `ref_compound` | `SOFT`, `MEDIUM`, `HARD`, `INTERMEDIATE`, `WET`, `UNKNOWN` |
 | `ref_session_type` | `Race`, `Sprint`, `Qualifying`, `Practice` |
-| `ref_diagnostic` | `DQ001`~`DQ012` |
+| `ref_diagnostic` | `DQ001`~`DQ027` (오류 유형·심각도 포함, `diagnostic_codes.csv`) |
+| `ref_error_type` | `MISSING`, `INVALID`, `OUTLIER`, `INCONSISTENT`, `SWAP`, `SCHEMA`, `TYPE`, `REFERENTIAL`, `DUPLICATE`, `OVERLAP` |
+| `ref_issue_action` | `AUTO_FIX`, `REVIEW`, `ACCEPT`, `QUARANTINE` |
 | `ref_diagnostic_status` | `OPEN`, `REPAIRED`, `ACCEPTED`, `WAIVED` |
 | `ref_repair_status` | `UNCHANGED`, `REPAIRED` |
 | `ref_repair_confidence` | `HIGH`, `MEDIUM`, `LOW` |
-| `ref_repair_method` | `NONE`, `session_key_join`, `median_session_driver_or_session`, `explicit_unknown`, `unresolved` |
+| `ref_repair_method` | `codes.csv`의 `REPAIR_METHOD` 그룹 (중앙값 추정은 폐기) |
 
 ### 5.3 핵심 제약조건
 
@@ -227,6 +229,7 @@ WHERE a.lap_end IS NOT NULL
 - `DQ009`: 스틴트 시작·종료 랩 결측
 - `DQ010`: `lap_end < lap_start`
 - `DQ011`: 스틴트 구간 중첩
+- `DQ013`~`DQ027`: 구조·형식, 파일 간 `meeting_key` 불일치, 드라이버 신원·소속팀 뒤바뀜, 랩 시각 불일치, 섹터 합계, 피트 시간 충돌, 기상값 오류, 중복키, 참조 무결성 (전체 목록은 `diagnostic_codes.csv`)
 
 모든 진단 이슈는 `quality_issue`에 기록하고, 복구가 발생한 행은 `repair_detail`에 원본값·복구값·방법·신뢰도·근거를 기록한다.
 

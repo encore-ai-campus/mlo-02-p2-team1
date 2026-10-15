@@ -19,7 +19,7 @@
 - `compound`는 허용 코드 목록을 사용하고 결측은 `UNKNOWN`으로 표시합니다.
 - 스틴트는 `session_key + driver_number + stint_number`를 기준으로 관리하며 `lap_end < lap_start`와 실제 구간 중첩을 검증합니다.
 - `segments_sector_1~3`은 목록 원문을 보존하며 임의로 JSON으로 변환하지 않습니다.
-- 진단 코드는 `DQ001~DQ012`로 관리하고, 결함 종류와 복구 상태를 분리합니다.
+- 진단 코드는 `DQ001~DQ027`로 관리하고, 결함 종류와 복구 상태를 분리합니다. 각 코드는 오류 유형(`error_type`)과 심각도(`severity`)를 가집니다. `run_pipeline.py`가 `diagnostic_codes.csv`를 직접 읽습니다.
 
 ## 통합 PDF
 
