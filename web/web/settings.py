@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'viewer',
     'dashboard',
+    'ops',
 ]
 
 MIDDLEWARE = [
@@ -129,6 +130,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# 파이프라인 관리자 페이지(/ops/)는 staff 계정 로그인 필요 — Django 관리자 로그인 화면 사용
+LOGIN_URL = '/admin/login/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

@@ -4,3 +4,4 @@ pymysql
 cryptography
 django>=5.2,<6
 python-dotenv
+reportlab

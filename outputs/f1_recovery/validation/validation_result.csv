@@ -1,0 +1,152 @@
+﻿check_id,category,korean_category,check_name,target,severity,fail_count,total_count,status,description,note
+VC01,MISSING,결측,KEY_NOT_NULL,sessions,ERROR,0,87,PASS,식별키·meeting_key 컬럼 공백,
+VC02,MISSING,결측,NULL_PROFILE,sessions,INFO,0,1305,INFO,컬럼별 공백 건수(참고용 프로파일; null_profile 출력),null_profile.csv 참고
+VC01,MISSING,결측,KEY_NOT_NULL,drivers,ERROR,0,1771,PASS,식별키·meeting_key 컬럼 공백,
+VC02,MISSING,결측,NULL_PROFILE,drivers,INFO,186,21252,INFO,컬럼별 공백 건수(참고용 프로파일; null_profile 출력),null_profile.csv 참고
+VC01,MISSING,결측,KEY_NOT_NULL,laps,ERROR,0,97018,PASS,식별키·meeting_key 컬럼 공백,
+VC02,MISSING,결측,NULL_PROFILE,laps,INFO,26025,1552288,INFO,컬럼별 공백 건수(참고용 프로파일; null_profile 출력),null_profile.csv 참고
+VC01,MISSING,결측,KEY_NOT_NULL,stints,ERROR,0,5040,PASS,식별키·meeting_key 컬럼 공백,
+VC02,MISSING,결측,NULL_PROFILE,stints,INFO,6,40320,INFO,컬럼별 공백 건수(참고용 프로파일; null_profile 출력),null_profile.csv 참고
+VC01,MISSING,결측,KEY_NOT_NULL,weather,ERROR,0,13928,PASS,식별키·meeting_key 컬럼 공백,
+VC02,MISSING,결측,NULL_PROFILE,weather,INFO,0,139280,INFO,컬럼별 공백 건수(참고용 프로파일; null_profile 출력),null_profile.csv 참고
+VC01,MISSING,결측,KEY_NOT_NULL,pit,ERROR,0,3029,PASS,식별키·meeting_key 컬럼 공백,
+VC02,MISSING,결측,NULL_PROFILE,pit,INFO,2026,24232,INFO,컬럼별 공백 건수(참고용 프로파일; null_profile 출력),null_profile.csv 참고
+VC01,MISSING,결측,KEY_NOT_NULL,starting_grid,ERROR,0,1770,PASS,식별키·meeting_key 컬럼 공백,
+VC02,MISSING,결측,NULL_PROFILE,starting_grid,INFO,59,8850,INFO,컬럼별 공백 건수(참고용 프로파일; null_profile 출력),null_profile.csv 참고
+VC01,MISSING,결측,KEY_NOT_NULL,session_result,ERROR,0,1771,PASS,식별키·meeting_key 컬럼 공백,
+VC02,MISSING,결측,NULL_PROFILE,session_result,INFO,1147,19481,INFO,컬럼별 공백 건수(참고용 프로파일; null_profile 출력),null_profile.csv 참고
+VC01,MISSING,결측,KEY_NOT_NULL,position,ERROR,0,42952,PASS,식별키·meeting_key 컬럼 공백,
+VC02,MISSING,결측,NULL_PROFILE,position,INFO,0,214760,INFO,컬럼별 공백 건수(참고용 프로파일; null_profile 출력),null_profile.csv 참고
+VC01,MISSING,결측,KEY_NOT_NULL,race_control,ERROR,0,9499,PASS,식별키·meeting_key 컬럼 공백,
+VC02,MISSING,결측,NULL_PROFILE,race_control,INFO,32426,104489,INFO,컬럼별 공백 건수(참고용 프로파일; null_profile 출력),null_profile.csv 참고
+VC01,MISSING,결측,KEY_NOT_NULL,intervals,ERROR,0,2107568,PASS,식별키·meeting_key 컬럼 공백,
+VC02,MISSING,결측,NULL_PROFILE,intervals,INFO,37023,12645408,INFO,컬럼별 공백 건수(참고용 프로파일; null_profile 출력),null_profile.csv 참고
+VC03,MISSING,결측,NO_ZERO_IMPUTATION,laps,ERROR,0,97018,PASS,원본 공백인데 정제 후 0으로 채워진 시간·속도 값,
+VC03,MISSING,결측,NO_ZERO_IMPUTATION,pit,ERROR,0,3029,PASS,원본 공백인데 정제 후 0으로 채워진 시간·속도 값,
+VC03,MISSING,결측,NO_ZERO_IMPUTATION,stints,ERROR,0,5040,PASS,원본 공백인데 정제 후 0으로 채워진 시간·속도 값,
+VC04,MISSING,결측,UNCLASSIFIED_WITHOUT_STATUS,session_result,WARNING,4,1771,WARN,session_result 순위 공백인데 dnf·dns·dsq 모두 False,
+VC10,DUPLICATE,중복,NATURAL_KEY_UNIQUE,sessions,ERROR,0,87,PASS,파일별 자연키 중복,
+VC11,DUPLICATE,중복,EXACT_ROW_DUPLICATE,sessions,WARNING,0,87,PASS,모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함),
+VC10,DUPLICATE,중복,NATURAL_KEY_UNIQUE,drivers,ERROR,0,1771,PASS,파일별 자연키 중복,
+VC11,DUPLICATE,중복,EXACT_ROW_DUPLICATE,drivers,WARNING,0,1771,PASS,모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함),
+VC10,DUPLICATE,중복,NATURAL_KEY_UNIQUE,laps,ERROR,0,97018,PASS,파일별 자연키 중복,
+VC11,DUPLICATE,중복,EXACT_ROW_DUPLICATE,laps,WARNING,0,97018,PASS,모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함),
+VC10,DUPLICATE,중복,NATURAL_KEY_UNIQUE,stints,ERROR,0,5040,PASS,파일별 자연키 중복,
+VC11,DUPLICATE,중복,EXACT_ROW_DUPLICATE,stints,WARNING,0,5040,PASS,모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함),
+VC10,DUPLICATE,중복,NATURAL_KEY_UNIQUE,weather,ERROR,0,13928,PASS,파일별 자연키 중복,
+VC11,DUPLICATE,중복,EXACT_ROW_DUPLICATE,weather,WARNING,0,13928,PASS,모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함),
+VC10,DUPLICATE,중복,NATURAL_KEY_UNIQUE,pit,ERROR,0,3029,PASS,파일별 자연키 중복,
+VC11,DUPLICATE,중복,EXACT_ROW_DUPLICATE,pit,WARNING,0,3029,PASS,모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함),
+VC10,DUPLICATE,중복,NATURAL_KEY_UNIQUE,starting_grid,ERROR,0,1770,PASS,파일별 자연키 중복,
+VC11,DUPLICATE,중복,EXACT_ROW_DUPLICATE,starting_grid,WARNING,0,1770,PASS,모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함),
+VC10,DUPLICATE,중복,NATURAL_KEY_UNIQUE,session_result,ERROR,0,1771,PASS,파일별 자연키 중복,
+VC11,DUPLICATE,중복,EXACT_ROW_DUPLICATE,session_result,WARNING,0,1771,PASS,모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함),
+VC10,DUPLICATE,중복,NATURAL_KEY_UNIQUE,position,ERROR,0,42952,PASS,파일별 자연키 중복,
+VC11,DUPLICATE,중복,EXACT_ROW_DUPLICATE,position,WARNING,0,42952,PASS,모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함),
+VC11,DUPLICATE,중복,EXACT_ROW_DUPLICATE,race_control,WARNING,0,9499,PASS,모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함),
+VC10,DUPLICATE,중복,NATURAL_KEY_UNIQUE,intervals,ERROR,0,2107568,PASS,파일별 자연키 중복,
+VC11,DUPLICATE,중복,EXACT_ROW_DUPLICATE,intervals,WARNING,0,2107568,PASS,모든 업무 컬럼이 같은 행 중복(자연키 없는 race_control 포함),
+VC12,DUPLICATE,중복,POSITION_UNIQUE,session_result,ERROR,0,1546,PASS,같은 세션 안 최종 순위·그리드 순위 중복,
+VC12,DUPLICATE,중복,POSITION_UNIQUE,starting_grid,ERROR,0,1770,PASS,같은 세션 안 최종 순위·그리드 순위 중복,
+VC13,DUPLICATE,중복,DRIVER_IDENTITY_UNIQUE,drivers.full_name,ERROR,0,1771,PASS,같은 세션에서 한 full_name·name_acronym이 여러 driver_number에 등장,
+VC13,DUPLICATE,중복,DRIVER_IDENTITY_UNIQUE,drivers.name_acronym,ERROR,0,1771,PASS,같은 세션에서 한 full_name·name_acronym이 여러 driver_number에 등장,
+VC20,REFERENTIAL,참조,SESSION_FK,drivers,ERROR,0,1771,PASS,session_key가 sessions에 없음(starting_grid 제외),
+VC22,REFERENTIAL,참조,MEETING_KEY_CONSISTENT,drivers,ERROR,0,1771,PASS,같은 session_key의 meeting_key가 sessions와 다름,
+VC20,REFERENTIAL,참조,SESSION_FK,laps,ERROR,0,97018,PASS,session_key가 sessions에 없음(starting_grid 제외),
+VC22,REFERENTIAL,참조,MEETING_KEY_CONSISTENT,laps,ERROR,0,97018,PASS,같은 session_key의 meeting_key가 sessions와 다름,
+VC20,REFERENTIAL,참조,SESSION_FK,stints,ERROR,0,5040,PASS,session_key가 sessions에 없음(starting_grid 제외),
+VC22,REFERENTIAL,참조,MEETING_KEY_CONSISTENT,stints,ERROR,0,5040,PASS,같은 session_key의 meeting_key가 sessions와 다름,
+VC20,REFERENTIAL,참조,SESSION_FK,weather,ERROR,0,13928,PASS,session_key가 sessions에 없음(starting_grid 제외),
+VC22,REFERENTIAL,참조,MEETING_KEY_CONSISTENT,weather,ERROR,0,13928,PASS,같은 session_key의 meeting_key가 sessions와 다름,
+VC20,REFERENTIAL,참조,SESSION_FK,pit,ERROR,0,3029,PASS,session_key가 sessions에 없음(starting_grid 제외),
+VC22,REFERENTIAL,참조,MEETING_KEY_CONSISTENT,pit,ERROR,0,3029,PASS,같은 session_key의 meeting_key가 sessions와 다름,
+VC20,REFERENTIAL,참조,SESSION_FK,session_result,ERROR,0,1771,PASS,session_key가 sessions에 없음(starting_grid 제외),
+VC22,REFERENTIAL,참조,MEETING_KEY_CONSISTENT,session_result,ERROR,0,1771,PASS,같은 session_key의 meeting_key가 sessions와 다름,
+VC20,REFERENTIAL,참조,SESSION_FK,position,ERROR,0,42952,PASS,session_key가 sessions에 없음(starting_grid 제외),
+VC22,REFERENTIAL,참조,MEETING_KEY_CONSISTENT,position,ERROR,0,42952,PASS,같은 session_key의 meeting_key가 sessions와 다름,
+VC20,REFERENTIAL,참조,SESSION_FK,race_control,ERROR,0,9499,PASS,session_key가 sessions에 없음(starting_grid 제외),
+VC22,REFERENTIAL,참조,MEETING_KEY_CONSISTENT,race_control,ERROR,0,9499,PASS,같은 session_key의 meeting_key가 sessions와 다름,
+VC20,REFERENTIAL,참조,SESSION_FK,intervals,ERROR,0,2107568,PASS,session_key가 sessions에 없음(starting_grid 제외),
+VC22,REFERENTIAL,참조,MEETING_KEY_CONSISTENT,intervals,ERROR,0,2107568,PASS,같은 session_key의 meeting_key가 sessions와 다름,
+VC21,REFERENTIAL,참조,SESSION_DRIVER_FK,laps,ERROR,0,97018,PASS,session_key+driver_number가 drivers에 없음,
+VC21,REFERENTIAL,참조,SESSION_DRIVER_FK,stints,ERROR,0,5040,PASS,session_key+driver_number가 drivers에 없음,
+VC21,REFERENTIAL,참조,SESSION_DRIVER_FK,pit,ERROR,0,3029,PASS,session_key+driver_number가 drivers에 없음,
+VC21,REFERENTIAL,참조,SESSION_DRIVER_FK,session_result,ERROR,0,1771,PASS,session_key+driver_number가 drivers에 없음,
+VC21,REFERENTIAL,참조,SESSION_DRIVER_FK,position,ERROR,0,42952,PASS,session_key+driver_number가 drivers에 없음,
+VC21,REFERENTIAL,참조,SESSION_DRIVER_FK,intervals,ERROR,0,2107568,PASS,session_key+driver_number가 drivers에 없음,
+VC21,REFERENTIAL,참조,SESSION_DRIVER_FK,race_control,ERROR,0,2745,PASS,session_key+driver_number가 drivers에 없음,
+VC23,REFERENTIAL,참조,GRID_QUALIFYING_MAPPING,starting_grid,ERROR,0,1770,PASS,starting_grid가 Race session_key를 쓰거나 meeting_key당 Race 세션이 1개가 아님,Qualifying session_key → meeting_key → Race session_key
+VC24,REFERENTIAL,참조,GRID_WITHOUT_RESULT,starting_grid,WARNING,2,1770,WARN,starting_grid(meeting_key+driver_number)가 Race 결과에 없음(예선 후 기권 확인),
+VC25,REFERENTIAL,참조,RESULT_WITHOUT_GRID,session_result,INFO,3,1771,INFO,Race 결과에 그리드가 없음(피트레인 출발 등 원천 특성),그리드 없는 Race 결과(피트레인 출발 등)
+VC26,REFERENTIAL,참조,PIT_LAP_IN_RANGE,pit,WARNING,1,3029,WARN,피트 랩이 해당 드라이버 최대 랩보다 큼,
+VC27,REFERENTIAL,참조,LAP_COVERED_BY_STINT,laps,WARNING,280,97018,WARN,어느 스틴트 구간에도 속하지 않는 랩,
+VC71,JOIN,행 증폭,STINT_RANGE_JOIN_FANOUT,laps×stints,INFO,305,97018,INFO,랩이 2개 이상 스틴트 구간에 매칭(경계 랩 공유 → Silver에서 귀속 규칙 필요),경계 랩이 앞뒤 스틴트에 모두 속함
+VC30,RANGE,범위·형식,NUMERIC_PARSE,sessions,ERROR,0,87,PASS,숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용),
+VC30,RANGE,범위·형식,NUMERIC_PARSE,drivers,ERROR,0,1771,PASS,숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용),
+VC30,RANGE,범위·형식,NUMERIC_PARSE,laps,ERROR,0,97018,PASS,숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용),
+VC30,RANGE,범위·형식,NUMERIC_PARSE,stints,ERROR,0,5040,PASS,숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용),
+VC30,RANGE,범위·형식,NUMERIC_PARSE,weather,ERROR,0,13928,PASS,숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용),
+VC30,RANGE,범위·형식,NUMERIC_PARSE,pit,ERROR,0,3029,PASS,숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용),
+VC30,RANGE,범위·형식,NUMERIC_PARSE,starting_grid,ERROR,0,1770,PASS,숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용),
+VC30,RANGE,범위·형식,NUMERIC_PARSE,session_result,ERROR,0,1771,PASS,숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용),
+VC30,RANGE,범위·형식,NUMERIC_PARSE,position,ERROR,0,42952,PASS,숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용),
+VC30,RANGE,범위·형식,NUMERIC_PARSE,race_control,ERROR,0,9499,PASS,숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용),
+VC30,RANGE,범위·형식,NUMERIC_PARSE,intervals,ERROR,0,2107568,PASS,숫자 컬럼 변환 실패(격차 컬럼의 +N LAP(S)는 허용),
+VC31,RANGE,범위·형식,VALUE_RANGE,sessions,ERROR,0,87,PASS,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),
+VC31,RANGE,범위·형식,VALUE_RANGE,laps,ERROR,0,97018,PASS,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),
+VC31,RANGE,범위·형식,VALUE_RANGE,stints,ERROR,0,5040,PASS,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),
+VC31,RANGE,범위·형식,VALUE_RANGE,pit,ERROR,0,3029,PASS,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),
+VC31,RANGE,범위·형식,VALUE_RANGE,weather,ERROR,0,13928,PASS,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),
+VC31,RANGE,범위·형식,VALUE_RANGE,starting_grid,ERROR,0,1770,PASS,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),
+VC31,RANGE,범위·형식,VALUE_RANGE,session_result,ERROR,0,1771,PASS,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),
+VC31,RANGE,범위·형식,VALUE_RANGE,position,ERROR,0,42952,PASS,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),
+VC31,RANGE,범위·형식,VALUE_RANGE,race_control,ERROR,0,9499,PASS,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),
+VC31,RANGE,범위·형식,VALUE_RANGE,intervals.interval,ERROR,0,2107568,PASS,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),
+VC31,RANGE,범위·형식,VALUE_RANGE,intervals.gap_to_leader,ERROR,0,2107568,PASS,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),
+VC31,RANGE,범위·형식,VALUE_RANGE,session_result.gap_to_leader,ERROR,0,1771,PASS,허용 범위 위반(랩타임·섹터>0·습도 0~100·풍향 0~360·순위≥1·포인트 0~26 등),
+VC32,RANGE,범위·형식,CODE_DOMAIN,sessions,ERROR,0,87,PASS,허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위),
+VC32,RANGE,범위·형식,CODE_DOMAIN,laps,ERROR,0,97018,PASS,허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위),
+VC32,RANGE,범위·형식,CODE_DOMAIN,weather,ERROR,0,13928,PASS,허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위),
+VC32,RANGE,범위·형식,CODE_DOMAIN,stints,ERROR,0,5040,PASS,허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위),
+VC32,RANGE,범위·형식,CODE_DOMAIN,session_result,ERROR,0,1771,PASS,허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위),
+VC32,RANGE,범위·형식,CODE_DOMAIN,race_control,ERROR,0,9499,PASS,허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위),
+VC33,RANGE,범위·형식,DATETIME_PARSE,sessions,ERROR,0,87,PASS,일시 변환 실패 또는 세션 종료<시작,
+VC33,RANGE,범위·형식,DATETIME_PARSE,laps,ERROR,0,97018,PASS,일시 변환 실패 또는 세션 종료<시작,
+VC33,RANGE,범위·형식,DATETIME_PARSE,pit,ERROR,0,3029,PASS,일시 변환 실패 또는 세션 종료<시작,
+VC33,RANGE,범위·형식,DATETIME_PARSE,weather,ERROR,0,13928,PASS,일시 변환 실패 또는 세션 종료<시작,
+VC33,RANGE,범위·형식,DATETIME_PARSE,position,ERROR,0,42952,PASS,일시 변환 실패 또는 세션 종료<시작,
+VC33,RANGE,범위·형식,DATETIME_PARSE,race_control,ERROR,0,9499,PASS,일시 변환 실패 또는 세션 종료<시작,
+VC33,RANGE,범위·형식,DATETIME_PARSE,intervals,ERROR,0,2107568,PASS,일시 변환 실패 또는 세션 종료<시작,
+VC34,RANGE,범위·형식,RESULT_STATUS_EXCLUSIVE,session_result,ERROR,0,1771,PASS,dnf·dns·dsq 중 2개 이상 True,
+VC40,CONSISTENCY,정합성,TEAM_DRIVER_COUNT,drivers,WARNING,3,887,WARN,세션별 팀 소속 드라이버 수가 2가 아님,
+VC41,CONSISTENCY,정합성,SEASON_NUMBER_IDENTITY,drivers,WARNING,0,91,PASS,같은 시즌 driver_number에 full_name이 여러 개,
+VC42,CONSISTENCY,정합성,SECTOR_SUM,laps,WARNING,20,96597,WARN,섹터 3개 합과 랩타임 차이 0.5초 초과(잔여 검토),
+VC43,CONSISTENCY,정합성,PIT_DURATION_SPLIT,pit,ERROR,0,3029,PASS,lane_duration과 pit_duration 불일치(격리 행 제외),격리 행 2건 제외
+VC44,CONSISTENCY,정합성,RESULT_LAPS_VS_LAPS,session_result,WARNING,0,1759,PASS,session_result.number_of_laps와 laps 최대 랩 차이 1랩 초과,
+VC45,CONSISTENCY,정합성,STINT_OVERLAP,stints,WARNING,3,5040,WARN,다음 스틴트 시작 < 이전 스틴트 종료,
+VC50,POINTS,포인트,SOURCE_POINTS_DIFF,session_result,INFO,47,1771,INFO,원천 points와 재계산 race_base_points 차이(최속 랩 보너스·원천 누락 확인용),"-18점 2건, -15점 1건, -12점 1건, -10점 1건, -8점 1건, -6점 1건, -4점 1건, -2점 1건, -1점 1건, +1점 37건"
+VC51,POINTS,포인트,DRIVER_TEAM_POINTS_SUM,session_result×drivers,ERROR,0,91,PASS,Race별 드라이버 기본 포인트 합 ≠ 팀 기본 포인트 합,"Race 87개·시즌 4개 대조, 행 수 1771→1771"
+VC52,POINTS,포인트,RACE_TOTAL_101,session_result,WARNING,0,87,PASS,Race별 기본 포인트 합계가 101점이 아님,
+VC53,POINTS,포인트,TEAM_AT_RACE_KNOWN,session_result×drivers,ERROR,0,1771,PASS,포인트 귀속 팀(drivers.team_name)이 공백,
+VC60,RECONCILE,대사,ROW_RECONCILE,sessions,ERROR,0,87,PASS,원본(bronze_manifest) 행 수와 정제 후 행 수 불일치,원본 87 / 정제 87
+VC61,RECONCILE,대사,QUARANTINE_FLAG,sessions,INFO,0,87,INFO,quarantine_flag=Y 행 수(격리 대상 참고),quarantine/sessions.csv 0행
+VC62,RECONCILE,대사,CHANGE_WITHOUT_RECORD,sessions,ERROR,0,87,PASS,original_* 와 값이 다른데 repair_status가 REPAIRED가 아님,
+VC60,RECONCILE,대사,ROW_RECONCILE,drivers,ERROR,0,1771,PASS,원본(bronze_manifest) 행 수와 정제 후 행 수 불일치,원본 1771 / 정제 1771
+VC61,RECONCILE,대사,QUARANTINE_FLAG,drivers,INFO,0,1771,INFO,quarantine_flag=Y 행 수(격리 대상 참고),quarantine/drivers.csv 0행
+VC62,RECONCILE,대사,CHANGE_WITHOUT_RECORD,drivers,ERROR,0,1771,PASS,original_* 와 값이 다른데 repair_status가 REPAIRED가 아님,
+VC60,RECONCILE,대사,ROW_RECONCILE,laps,ERROR,0,97018,PASS,원본(bronze_manifest) 행 수와 정제 후 행 수 불일치,원본 97018 / 정제 97018
+VC61,RECONCILE,대사,QUARANTINE_FLAG,laps,INFO,0,97018,INFO,quarantine_flag=Y 행 수(격리 대상 참고),quarantine/laps.csv 0행
+VC62,RECONCILE,대사,CHANGE_WITHOUT_RECORD,laps,ERROR,0,97018,PASS,original_* 와 값이 다른데 repair_status가 REPAIRED가 아님,
+VC60,RECONCILE,대사,ROW_RECONCILE,stints,ERROR,0,5040,PASS,원본(bronze_manifest) 행 수와 정제 후 행 수 불일치,원본 5040 / 정제 5040
+VC61,RECONCILE,대사,QUARANTINE_FLAG,stints,INFO,0,5040,INFO,quarantine_flag=Y 행 수(격리 대상 참고),quarantine/stints.csv 0행
+VC62,RECONCILE,대사,CHANGE_WITHOUT_RECORD,stints,ERROR,0,5040,PASS,original_* 와 값이 다른데 repair_status가 REPAIRED가 아님,
+VC60,RECONCILE,대사,ROW_RECONCILE,weather,ERROR,0,13928,PASS,원본(bronze_manifest) 행 수와 정제 후 행 수 불일치,원본 13928 / 정제 13928
+VC61,RECONCILE,대사,QUARANTINE_FLAG,weather,INFO,0,13928,INFO,quarantine_flag=Y 행 수(격리 대상 참고),quarantine/weather.csv 0행
+VC62,RECONCILE,대사,CHANGE_WITHOUT_RECORD,weather,ERROR,0,13928,PASS,original_* 와 값이 다른데 repair_status가 REPAIRED가 아님,
+VC60,RECONCILE,대사,ROW_RECONCILE,pit,ERROR,0,3029,PASS,원본(bronze_manifest) 행 수와 정제 후 행 수 불일치,원본 3029 / 정제 3029
+VC61,RECONCILE,대사,QUARANTINE_FLAG,pit,INFO,2,3029,INFO,quarantine_flag=Y 행 수(격리 대상 참고),quarantine/pit.csv 2행
+VC62,RECONCILE,대사,CHANGE_WITHOUT_RECORD,pit,ERROR,0,3029,PASS,original_* 와 값이 다른데 repair_status가 REPAIRED가 아님,
+VC70,JOIN,행 증폭,DRIVER_JOIN_FANOUT,laps×drivers,ERROR,0,97018,PASS,laps·session_result를 drivers와 JOIN한 뒤 행 수 증가,97018→97018
+VC70,JOIN,행 증폭,DRIVER_JOIN_FANOUT,stints×drivers,ERROR,0,5040,PASS,laps·session_result를 drivers와 JOIN한 뒤 행 수 증가,5040→5040
+VC70,JOIN,행 증폭,DRIVER_JOIN_FANOUT,pit×drivers,ERROR,0,3029,PASS,laps·session_result를 drivers와 JOIN한 뒤 행 수 증가,3029→3029
+VC70,JOIN,행 증폭,DRIVER_JOIN_FANOUT,session_result×drivers,ERROR,0,1771,PASS,laps·session_result를 drivers와 JOIN한 뒤 행 수 증가,1771→1771

@@ -10,7 +10,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-import run_pipeline as rp  # noqa: E402
+from pipeline import recovery as rp  # noqa: E402
 
 INPUT = Path(os.environ.get("F1_INPUT", ROOT / "data" / "f1_recovery" / "F1_distribution"))
 

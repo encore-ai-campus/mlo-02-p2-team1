@@ -10,7 +10,7 @@
 - `codes.csv`: 허용 코드와 코드 설명
 - `column_dictionary.csv`: 원천 11종(오염 정제 6종 + 신규 5종)의 컬럼별 표준 정의
 - `race_points_rules.csv`: 연도별 본경기 기본 배점(1~10위 25-18-15-12-10-8-6-4-2-1, 최속 랩 보너스·Sprint 제외)
-- `validation_checks.csv`: 정제 후 검증 항목 VC01~VC71 (`tools/validate_cleaned.py`, `sql/03_validate_cleaned.sql` 공용)
+- `validation_checks.csv`: 정제 후 검증 항목 VC01~VC71 (`pipeline/validate_cleaned.py`, `sql/03_validate_cleaned.sql` 공용)
 - `composition_rules.md`: 표준명명·키·타입·검증 조합 규칙
 - `diagnostic_codes.csv`: 진단 결과 기반 오염 코드와 기본 처리 규칙
 
@@ -21,7 +21,7 @@
 - `compound`는 허용 코드 목록을 사용하고 결측은 `UNKNOWN`으로 표시합니다.
 - 스틴트는 `session_key + driver_number + stint_number`를 기준으로 관리하며 `lap_end < lap_start`와 실제 구간 중첩을 검증합니다.
 - `segments_sector_1~3`은 목록 원문을 보존하며 임의로 JSON으로 변환하지 않습니다.
-- 진단 코드는 `DQ001~DQ027`로 관리하고, 결함 종류와 복구 상태를 분리합니다. 각 코드는 오류 유형(`error_type`)과 심각도(`severity`)를 가집니다. `run_pipeline.py`가 `diagnostic_codes.csv`를 직접 읽습니다.
+- 진단 코드는 `DQ001~DQ027`로 관리하고, 결함 종류와 복구 상태를 분리합니다. 각 코드는 오류 유형(`error_type`)과 심각도(`severity`)를 가집니다. `pipeline/recovery.py`가 `diagnostic_codes.csv`를 직접 읽습니다.
 
 ## 통합 PDF
 

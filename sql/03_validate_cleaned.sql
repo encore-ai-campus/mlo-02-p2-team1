@@ -1,7 +1,7 @@
 -- =====================================================================
 -- 03_validate_cleaned.sql : 정제 후 데이터 검증 쿼리 (MySQL 8.0+)
 -- 검사 ID는 data/standard_dictionary/validation_checks.csv (VC01~VC71)와 같고,
--- tools/validate_cleaned.py(pandas)와 같은 규칙이다.
+-- pipeline/validate_cleaned.py(pandas)와 같은 규칙이다.
 -- 결과: vc_result (검사 × 대상별 위반 건수) → 마지막 SELECT가 PASS/FAIL/WARN/INFO를 붙여 보여준다.
 -- 각 블록 아래 '상세 조회' 주석의 쿼리로 위반 행을 직접 볼 수 있다.
 -- 실행: mysql -u <user> -p <db> < sql/03_validate_cleaned.sql

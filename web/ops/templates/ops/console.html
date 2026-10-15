@@ -1,0 +1,318 @@
+{% load ops_extras %}<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipeline Ops — F1 Data</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --ink:#1d2433; --muted:#667085; --line:#e4e7ec; --nav:#15151e;
+          --ok:#12805c; --ok-bg:#e7f6ef; --warn:#b54708; --warn-bg:#fef4e6; --bad:#c01048; --bad-bg:#fdecf1;
+          --info:#3e4784; --info-bg:#eef0fb; --run:#175cd3; --run-bg:#e8f0fe; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 "Malgun Gothic","Apple SD Gothic Neo",sans-serif; }
+  header { background:var(--nav); color:#fff; padding:12px 24px; display:flex; gap:20px; align-items:center; flex-wrap:wrap; }
+  header b { font-size:16px; } header a { color:#cfd3dc; text-decoration:none; font-size:13px; } header a:hover { color:#fff; }
+  header .sp { flex:1; }
+  .sub { position:sticky; top:0; z-index:5; background:#fff; border-bottom:1px solid var(--line); padding:0 24px; display:flex; gap:4px; overflow-x:auto; }
+  .sub a { padding:10px 12px; color:var(--muted); text-decoration:none; font-weight:600; white-space:nowrap; border-bottom:2px solid transparent; }
+  .sub a:hover { color:var(--ink); border-color:var(--ink); }
+  main { max-width:1280px; margin:0 auto; padding:20px 24px 60px; }
+  section { margin-top:28px; scroll-margin-top:52px; }
+  h2 { font-size:18px; margin:0 0 4px; } h3 { font-size:14px; margin:18px 0 8px; }
+  .lead { color:var(--muted); margin:0 0 12px; font-size:13px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  .grid { display:grid; gap:12px; } .g4 { grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); }
+  .g2 { grid-template-columns:repeat(auto-fit,minmax(380px,1fr)); }
+  .kpi .v { font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; } .kpi .l { color:var(--muted); font-size:12px; }
+  .kpi .s { font-size:12px; margin-top:2px; }
+  .badge { display:inline-block; padding:1px 8px; border-radius:999px; font-size:12px; font-weight:700; white-space:nowrap; }
+  .b-success,.b-PASS,.b-ok { background:var(--ok-bg); color:var(--ok); }
+  .b-failed,.b-FAIL,.b-ERROR,.b-MISSING { background:var(--bad-bg); color:var(--bad); }
+  .b-WARN,.b-WARNING,.b-cancelled,.b-REVIEW { background:var(--warn-bg); color:var(--warn); }
+  .b-INFO,.b-skipped,.b-pending,.b-queued { background:var(--info-bg); color:var(--info); }
+  .b-running { background:var(--run-bg); color:var(--run); }
+  .tbl { overflow-x:auto; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th,td { padding:7px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+  th { background:#f9fafb; color:var(--muted); font-weight:600; white-space:nowrap; position:sticky; top:0; }
+  tr:last-child td { border-bottom:0; }
+  td.n,th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  tr.sel td { background:#f0f5ff; }
+  .scroll { max-height:420px; overflow:auto; }
+  pre { margin:0; white-space:pre-wrap; word-break:break-all; font:12px/1.45 Consolas,"D2Coding",monospace; }
+  pre.log { background:#0f1117; color:#d8dee9; padding:12px; border-radius:8px; max-height:420px; overflow:auto; }
+  .tail { color:var(--muted); max-width:520px; }
+  .presets { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .preset h4 { margin:0 0 6px; font-size:15px; } .preset ol { margin:0 0 12px; padding-left:18px; color:var(--muted); font-size:12px; }
+  .preset { display:flex; flex-direction:column; } .preset form { margin-top:auto; }
+  button,select { font:inherit; } button { cursor:pointer; border-radius:8px; padding:7px 14px; border:1px solid var(--ink); background:var(--ink); color:#fff; font-weight:600; }
+  button:disabled { opacity:.4; cursor:not-allowed; } button.ghost { background:#fff; color:var(--ink); } button.danger { background:var(--bad); border-color:var(--bad); }
+  select { padding:6px 8px; border-radius:8px; border:1px solid var(--line); max-width:100%; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .msg { padding:10px 14px; border-radius:8px; margin-bottom:8px; } .msg.error { background:var(--bad-bg); color:var(--bad); }
+  .msg.success { background:var(--ok-bg); color:var(--ok); } .msg.warning,.msg.info { background:var(--warn-bg); color:var(--warn); }
+  .empty { padding:18px; border:1px dashed var(--line); border-radius:8px; color:var(--muted); background:#fff; }
+  .bar { height:8px; background:#eef0f3; border-radius:4px; overflow:hidden; min-width:120px; } .bar i { display:block; height:100%; background:#5b6bd5; }
+  .muted { color:var(--muted); } .small { font-size:12px; } a { color:var(--run); }
+  .banner { border-left:4px solid var(--run); }
+  @media (max-width:640px) { main,header,.sub { padding-left:16px; padding-right:16px; } .g2 { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <b>F1 Data · 파이프라인 관리</b>
+  <a href="{% url 'decision_board' %}">Decision Board</a>
+  <a href="{% url 'table_list' %}">적재 테이블 조회</a>
+  <a href="/admin/">Django 관리자</a>
+  <span class="sp"></span>
+  <span class="small" style="color:#9aa1b1">{{ request.user.get_username }}</span>
+  <form method="post" action="/admin/logout/" style="margin:0">{% csrf_token %}<button class="ghost" style="padding:3px 10px;font-size:12px">로그아웃</button></form>
+</header>
+<nav class="sub">
+  <a href="#run">실행</a><a href="#result">수행 결과</a><a href="#errors">오류 분석</a><a href="#integrity">데이터 정합성</a>
+</nav>
+<main>
+  {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+
+  {# ───────── 요약 ───────── #}
+  <div class="grid g4">
+    <div class="card kpi"><div class="l">최근 실행</div>
+      {% if runs %}<div class="v" style="font-size:18px">#{{ runs.0.pk }} {{ runs.0.title }}</div>
+      <div class="s"><span class="badge b-{{ runs.0.status }}">{{ runs.0.get_status_display }}</span> <span class="muted">{{ runs.0.created_at|date:"m-d H:i" }}</span></div>
+      {% else %}<div class="v muted" style="font-size:18px">기록 없음</div>{% endif %}</div>
+    <div class="card kpi"><div class="l">정제 이슈 탐지 → 복구 셀</div>
+      {% if recovery.data %}<div class="v">{{ recovery.data.issues|num }} → {{ recovery.data.repaired_cells|num }}</div>
+      <div class="s muted">미해결 {{ recovery.data.open_issues|num }} · 격리 {{ recovery.data.quarantined_rows|num }}행</div>
+      {% else %}<div class="v muted" style="font-size:18px">결과 없음</div>{% endif %}</div>
+    <div class="card kpi"><div class="l">정제 후 검증 (pandas · MySQL)</div>
+      <div style="margin-top:4px">
+        <div class="row small"><span class="muted" style="width:44px">pandas</span>{% if pandas_v.counts %}{% for s, c in pandas_v.counts %}{% if s == "FAIL" or s == "WARN" %}<span class="badge b-{{ s }}">{{ s }} {{ c }}</span>{% endif %}{% endfor %}{% else %}<span class="muted">결과 없음</span>{% endif %}</div>
+        <div class="row small" style="margin-top:4px"><span class="muted" style="width:44px">MySQL</span>{% if mysql_v.counts %}{% for s, c in mysql_v.counts %}{% if s == "FAIL" or s == "WARN" %}<span class="badge b-{{ s }}">{{ s }} {{ c }}</span>{% endif %}{% endfor %}{% else %}<span class="muted">결과 없음</span>{% endif %}</div>
+      </div>
+      <div class="s muted">{% if compare %}{% if compare.diffs %}두 결과 불일치 {{ compare.diffs|length }}건{% else %}두 결과 일치 ({{ compare.total }}개 검사){% endif %}{% else %}비교 불가{% endif %}</div></div>
+    <div class="card kpi"><div class="l">MySQL 적재 대사</div>
+      {% if mysql_v.load %}<div class="v" style="font-size:18px"><span class="badge {% if mysql_v.load_ok %}b-ok{% else %}b-FAIL{% endif %}">{% if mysql_v.load_ok %}13개 테이블 일치{% else %}불일치·누락 있음{% endif %}</span></div>
+      <div class="s muted">포인트 점검 {% if mysql_v.points_ok %}드라이버 합 = 팀 합{% else %}확인 필요{% endif %}</div>
+      {% else %}<div class="v muted" style="font-size:18px">적재 전</div>{% endif %}</div>
+  </div>
+
+  {# ───────── 실행 ───────── #}
+  <section id="run">
+    <h2>실행</h2>
+    <p class="lead">단계는 저장소 루트에서 순서대로 실행되고, 한 단계라도 실패하면 거기서 멈춥니다. 동시에 하나만 실행할 수 있습니다.
+      {% if not mysql_bin %}<br><b style="color:var(--bad)">mysql 클라이언트를 찾지 못했습니다 — DB 적재 단계는 실행할 수 없습니다 (.env에 MYSQL_BIN 지정).</b>{% else %}<br><span class="small">mysql: {{ mysql_bin }}</span>{% endif %}</p>
+    {% if active %}
+      <div class="card banner" style="margin-bottom:12px">
+        <div class="row"><b>#{{ active.pk }} {{ active.title }}</b> <span class="badge b-{{ active.status }}">{{ active.get_status_display }}</span>
+          <span class="muted small">다른 실행은 이 작업이 끝난 뒤 가능합니다.</span><span style="flex:1"></span>
+          <form method="post" action="{% url 'ops:cancel' active.pk %}" onsubmit="return confirm('실행을 중지할까요? 진행 중인 단계의 결과는 불완전할 수 있습니다.')">{% csrf_token %}<button class="danger">중지</button></form>
+        </div>
+      </div>
+    {% endif %}
+    <div class="presets">
+      {% for key, label, steps_ in presets %}
+      <div class="card preset">
+        <h4>{{ label }}</h4>
+        <ol>{% for s in steps_ %}<li>{{ s }}</li>{% endfor %}</ol>
+        <form method="post" action="{% url 'ops:start' %}" onsubmit="return confirm('{{ label }}을(를) 실행할까요?{% if key == 'load' or key == 'all' %}\nDB 적재는 f1_pipeline의 스테이징·스키마 테이블을 다시 만들며 약 20분 걸립니다.{% endif %}')">{% csrf_token %}
+          <input type="hidden" name="preset" value="{{ key }}"><button {% if active %}disabled{% endif %}>실행</button></form>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="card" style="margin-top:12px">
+      <form method="post" action="{% url 'ops:start' %}" class="row" onsubmit="return confirm('선택한 단계 하나만 실행할까요?')">{% csrf_token %}
+        <b>단계 하나만 실행</b>
+        <select name="step">{% for s in steps %}<option value="{{ s.key }}">[{{ s.group }}] {{ s.label }}</option>{% endfor %}</select>
+        <button class="ghost" {% if active %}disabled{% endif %}>실행</button>
+        <span class="muted small">앞 단계 결과가 있어야 하는 단계도 있습니다 (예: 03은 02 이후).</span>
+      </form>
+    </div>
+  </section>
+
+  {# ───────── 수행 결과 ───────── #}
+  <section id="result">
+    <h2>수행 결과</h2>
+    {% if selected %}
+    <p class="lead">#{{ selected.pk }} {{ selected.title }} · 요청 {{ selected.requested_by|default:"-" }} · 시작 {{ selected.started_at|date:"Y-m-d H:i:s"|default:"-" }} · 소요 <span id="dur">{{ selected.duration_s|dur }}</span>
+      · <span id="run-status" class="badge b-{{ selected.status }}">{{ selected.get_status_display }}</span>
+      {% if selected.log_path.exists %} · <a href="{% url 'ops:log' selected.pk %}" target="_blank">전체 로그</a>{% endif %}</p>
+    <div id="run-error">{% if selected.error %}<div class="msg {% if selected.status == 'cancelled' %}warning{% else %}error{% endif %}">{{ selected.error }}</div>{% endif %}</div>
+    <div class="grid g2">
+      <div class="tbl"><table>
+        <thead><tr><th>단계</th><th>상태</th><th class="n">소요</th><th class="n">종료 코드</th><th>마지막 출력</th></tr></thead>
+        <tbody id="step-rows">
+        {% for r in selected_json.results %}
+          <tr><td>{{ r.label }}</td><td><span class="badge b-{{ r.status }}">{{ r.status }}</span></td>
+            <td class="n">{{ r.seconds|dur }}</td><td class="n">{{ r.rc|default_if_none:"-" }}</td><td class="tail"><pre>{{ r.tail|default:"" }}</pre></td></tr>
+        {% endfor %}
+        </tbody></table></div>
+      <div><pre class="log" id="log">{{ log_tail|default:"(로그 없음)" }}</pre></div>
+    </div>
+    {% else %}<div class="empty">아직 실행 기록이 없습니다. 위에서 실행하세요.</div>{% endif %}
+
+    <h3>실행 이력 (최근 20건)</h3>
+    {% if runs %}
+    <div class="tbl"><table>
+      <thead><tr><th class="n">#</th><th>작업</th><th>상태</th><th>요청</th><th>시작</th><th class="n">소요</th><th>오류</th></tr></thead>
+      <tbody>{% for r in runs %}
+        <tr {% if selected and r.pk == selected.pk %}class="sel"{% endif %}><td class="n"><a href="?run={{ r.pk }}#result">{{ r.pk }}</a></td><td>{{ r.title }}</td>
+          <td><span class="badge b-{{ r.status }}">{{ r.get_status_display }}</span></td><td>{{ r.requested_by }}</td>
+          <td>{{ r.started_at|date:"m-d H:i:s"|default:"-" }}</td><td class="n">{{ r.duration_s|dur }}</td><td class="small muted">{{ r.error|truncatechars:70 }}</td></tr>
+      {% endfor %}</tbody></table></div>
+    {% else %}<div class="empty">기록 없음</div>{% endif %}
+  </section>
+
+  {# ───────── 오류 분석 ───────── #}
+  <section id="errors">
+    <h2>오류 분석</h2>
+    <p class="lead">오염 6종을 진단코드(DQ001~DQ027)별로 탐지·복구한 결과입니다. 허용(ACCEPTED)은 원천 특성으로 판단한 항목, 미해결(OPEN)은 검토 대상, 격리는 분석에서 제외한 행입니다.
+      {% if report_files.quality %}<a href="{% url 'ops:report' 'quality' %}" target="_blank">품질 리포트 HTML</a>{% endif %}</p>
+
+    {% if selected_errors %}
+      <h3>#{{ selected.pk }} 실행 오류 위치</h3>
+      <div class="tbl scroll"><table><thead><tr><th class="n">로그 줄</th><th>내용</th></tr></thead><tbody>
+        {% for e in selected_errors %}<tr><td class="n">{{ e.no }}</td><td><pre class="muted">{% for b in e.before %}{{ b }}
+{% endfor %}</pre><pre style="color:var(--bad);font-weight:700">{{ e.text }}</pre></td></tr>{% endfor %}
+      </tbody></table></div>
+    {% endif %}
+
+    {% if recovery.missing %}<div class="empty">{{ recovery.missing }}</div>{% else %}
+    <div class="grid g4" style="margin-top:4px">
+      <div class="card kpi"><div class="l">실행 ID · 버전</div><div class="v" style="font-size:18px">{{ recovery.data.run_id }}</div><div class="s muted">v{{ recovery.data.pipeline_version }} · 생성 {{ recovery.updated|date:"Y-m-d H:i" }}</div></div>
+      <div class="card kpi"><div class="l">탐지 이슈</div><div class="v">{{ recovery.data.issues|num }}</div><div class="s muted">허용 {{ recovery.data.accepted_issues|num }} · 미해결 {{ recovery.data.open_issues|num }}</div></div>
+      <div class="card kpi"><div class="l">복구 셀 · 격리 행</div><div class="v">{{ recovery.data.repaired_cells|num }} · {{ recovery.data.quarantined_rows|num }}</div><div class="s muted">근거 기반 복구만 (통계 대체 없음)</div></div>
+      <div class="card kpi"><div class="l">원본 체크섬 · 명세 일치</div><div class="v" style="font-size:18px"><span class="badge {% if recovery.data.checksum_ok %}b-ok{% else %}b-FAIL{% endif %}">체크섬 {% if recovery.data.checksum_ok %}OK{% else %}불일치{% endif %}</span> <span class="badge {% if recovery.data.spec_ok %}b-ok{% else %}b-FAIL{% endif %}">명세 {% if recovery.data.spec_ok %}OK{% else %}불일치{% endif %}</span></div></div>
+    </div>
+    {% endif %}
+
+    {% if errors.missing %}<div class="empty" style="margin-top:12px">{{ errors.missing }}</div>{% else %}
+    <div class="grid g2" style="margin-top:12px">
+      <div>
+        <h3>오류 유형별 탐지·처리</h3>
+        <div class="tbl"><table><thead><tr><th>유형</th><th class="n">탐지</th><th></th><th class="n">복구</th><th class="n">허용</th><th class="n">미해결</th><th class="n">처리율</th></tr></thead><tbody>
+          {% for t in errors.types %}<tr><td>{{ t.name }}</td><td class="n">{{ t.detected|num }}</td><td><div class="bar"><i style="width:{{ t.bar }}%"></i></div></td>
+            <td class="n">{{ t.repaired|num }}</td><td class="n">{{ t.accepted|num }}</td><td class="n">{{ t.open|num }}</td><td class="n">{{ t.fixed_pct }}%</td></tr>{% endfor %}
+        </tbody></table></div>
+        <h3>이슈 처리 상태</h3>
+        <div class="row">{% for s, c in errors.status %}<span class="badge b-{% if s == 'REPAIRED' %}ok{% elif s == 'OPEN' %}WARN{% elif s == 'QUARANTINED' %}FAIL{% else %}INFO{% endif %}">{{ s }} {{ c|num }}</span>{% endfor %}</div>
+      </div>
+      <div>
+        <h3>파일별 요약</h3>
+        <div class="tbl"><table><thead><tr><th>파일</th><th class="n">행</th><th class="n">이슈</th><th class="n">복구 셀</th><th class="n">미해결</th><th class="n">격리</th><th>상태</th></tr></thead><tbody>
+          {% for f in errors.files %}<tr><td>{{ f.file }}</td><td class="n">{{ f.rows|num }}</td><td class="n">{{ f.issue_count|num }}</td><td class="n">{{ f.repaired_cells|num }}</td>
+            <td class="n">{{ f.open_issues|num }}</td><td class="n">{{ f.quarantined_rows|num }}</td><td><span class="badge b-{{ f.status }}">{{ f.status }}</span></td></tr>{% endfor %}
+          <tr><td><b>합계</b></td><td class="n"><b>{{ errors.totals.rows|num }}</b></td><td class="n"><b>{{ errors.totals.issue_count|num }}</b></td><td class="n"><b>{{ errors.totals.repaired_cells|num }}</b></td>
+            <td class="n"><b>{{ errors.totals.open_issues|num }}</b></td><td class="n"><b>{{ errors.totals.quarantined_rows|num }}</b></td><td></td></tr>
+        </tbody></table></div>
+      </div>
+    </div>
+
+    <h3>진단코드별 상세 (심각도 → 탐지 건수 순)</h3>
+    <div class="tbl scroll"><table><thead><tr><th>코드</th><th>내용</th><th>유형</th><th>심각도</th><th>파일</th><th class="n">탐지</th><th class="n">복구</th><th class="n">허용</th><th class="n">미해결</th><th class="n">격리 행</th><th class="n">복구 후 잔여</th></tr></thead><tbody>
+      {% for r in errors.dq %}<tr><td>{{ r.diagnostic_code }}</td><td>{{ r.korean_name }}</td><td>{{ r.error_type_korean }}</td><td><span class="badge b-{{ r.severity }}">{{ r.severity }}</span></td><td>{{ r.file }}</td>
+        <td class="n">{{ r.detected|num }}</td><td class="n">{{ r.repaired|num }}</td><td class="n">{{ r.accepted|num }}</td><td class="n">{{ r.open|num }}</td><td class="n">{{ r.quarantined_rows|num }}</td><td class="n">{{ r.residual_after_repair|num }}</td></tr>{% endfor %}
+    </tbody></table></div>
+
+    <h3>미해결·격리 이슈 샘플 (최대 40건)</h3>
+    {% if errors.open_samples %}
+    <div class="tbl scroll"><table><thead><tr><th>코드</th><th>파일</th><th>행 키</th><th>컬럼</th><th>관측값</th><th>기대값</th><th>근거</th><th>상태</th></tr></thead><tbody>
+      {% for r in errors.open_samples %}<tr><td>{{ r.diagnostic_code }}</td><td>{{ r.file }}</td><td>{{ r.row_key }}</td><td>{{ r.field }}</td><td>{{ r.observed_value|truncatechars:40 }}</td>
+        <td>{{ r.expected_value|truncatechars:40 }}</td><td class="small">{{ r.evidence|truncatechars:80 }}</td><td><span class="badge b-{% if r.status == 'OPEN' %}WARN{% else %}FAIL{% endif %}">{{ r.status }}</span></td></tr>{% endfor %}
+    </tbody></table></div>
+    {% else %}<div class="empty">미해결·격리 이슈 없음</div>{% endif %}
+    {% endif %}
+  </section>
+
+  {# ───────── 데이터 정합성 ───────── #}
+  <section id="integrity">
+    <h2>데이터 정합성</h2>
+    <p class="lead">같은 검사 정의(VC01~VC71)를 pandas(정제 직후 파일)와 MySQL(적재 후)에서 각각 실행해 비교합니다. 행 수 대사는 원본 = 원본 유지 + 복구 + 격리 + 제거, 적재 대사는 스테이징 행 수 = 스키마 행 수입니다.
+      {% if report_files.validation %}<a href="{% url 'ops:report' 'validation' %}" target="_blank">검증 리포트 HTML</a>{% endif %}</p>
+
+    <div class="grid g4">
+      <div class="card kpi"><div class="l">pandas 검증 {% if pandas_v.updated %}<span class="muted">· {{ pandas_v.updated|date:"m-d H:i" }}</span>{% endif %}</div>
+        {% if pandas_v.missing %}<div class="s muted">{{ pandas_v.missing }}</div>{% else %}<div class="row" style="margin-top:6px">{% for s, c in pandas_v.counts %}<span class="badge b-{{ s }}">{{ s }} {{ c }}</span>{% endfor %}</div>{% endif %}</div>
+      <div class="card kpi"><div class="l">MySQL 검증 (sql/03)</div>
+        {% if mysql_v.missing %}<div class="s muted">{{ mysql_v.missing }}</div>{% elif mysql_v.checks %}<div class="row" style="margin-top:6px">{% for s, c in mysql_v.counts %}<span class="badge b-{{ s }}">{{ s }} {{ c }}</span>{% endfor %}</div>{% else %}<div class="s muted">03 검증 결과 없음</div>{% endif %}</div>
+      <div class="card kpi"><div class="l">pandas ↔ MySQL 결과 비교</div>
+        {% if compare %}<div class="v" style="font-size:18px"><span class="badge {% if compare.diffs %}b-FAIL{% else %}b-ok{% endif %}">{% if compare.diffs %}불일치 {{ compare.diffs|length }}건{% else %}{{ compare.total }}개 검사 일치{% endif %}</span></div>
+        {% else %}<div class="s muted">두 검증 결과가 모두 있어야 비교합니다.</div>{% endif %}</div>
+      <div class="card kpi"><div class="l">포인트 점검 (드라이버 합 = 팀 합)</div>
+        {% if mysql_v.points %}<div class="row" style="margin-top:6px">{% for p in mysql_v.points %}<span class="badge {% if p.ok %}b-ok{% else %}b-FAIL{% endif %}">{{ p.year }} {{ p.driver|floatformat:0 }}{% if not p.ok %}≠{{ p.team|floatformat:0 }}{% endif %}</span>{% endfor %}</div>
+        {% else %}<div class="s muted">적재 후 확인</div>{% endif %}</div>
+    </div>
+
+    {% if compare.diffs %}
+    <h3>pandas ↔ MySQL 위반 건수 불일치</h3>
+    <div class="tbl"><table><thead><tr><th>검사</th><th>대상</th><th class="n">pandas</th><th class="n">MySQL</th></tr></thead><tbody>
+      {% for d in compare.diffs %}<tr><td>{{ d.check_id }}</td><td>{{ d.target }}</td><td class="n">{{ d.pandas|default_if_none:"없음" }}</td><td class="n">{{ d.mysql|default_if_none:"없음" }}</td></tr>{% endfor %}
+    </tbody></table></div>
+    {% endif %}
+
+    <h3>FAIL·WARN 검사 항목</h3>
+    {% if pandas_v.issues or mysql_v.issues %}
+    <div class="tbl"><table><thead><tr><th>검사</th><th>분류</th><th>규칙</th><th>대상</th><th>상태</th><th class="n">위반</th><th class="n">대상 건수</th><th>설명</th></tr></thead><tbody>
+      {% for r in pandas_v.issues|default:mysql_v.issues %}<tr><td>{{ r.check_id }}</td><td>{{ r.korean_category }}</td><td>{{ r.check_name }}</td><td>{{ r.target }}</td>
+        <td><span class="badge b-{{ r.status }}">{{ r.status }}</span></td><td class="n">{{ r.fail_count|num }}</td><td class="n">{{ r.total_count|num }}</td><td class="small">{{ r.description }}</td></tr>{% endfor %}
+    </tbody></table></div>
+    <p class="small muted">WARN은 원천 특성상 남는 항목(예: 스틴트에 걸리지 않는 랩)으로, 분석에서 제외·보류 기준과 함께 관리합니다. FAIL(ERROR 등급 위반)이 있으면 정제 후 검증 단계가 실패로 끝납니다.</p>
+    {% elif pandas_v.missing and mysql_v.missing %}<div class="empty">검증 결과가 없습니다 — '정제·검증' 또는 'DB 적재'를 실행하세요.</div>
+    {% else %}<div class="empty">FAIL·WARN 없음</div>{% endif %}
+
+    <div class="grid g2">
+      <div>
+        <h3>행 수 대사 (원천 → 정제)</h3>
+        {% if pandas_v.recon %}
+        <div class="tbl"><table><thead><tr><th>파일</th><th class="n">원본</th><th class="n">유지</th><th class="n">복구</th><th class="n">격리</th><th class="n">제거</th><th class="n">차이</th><th>상태</th></tr></thead><tbody>
+          {% for r in pandas_v.recon %}<tr><td>{{ r.file }}</td><td class="n">{{ r.raw_rows|num }}</td><td class="n">{{ r.unchanged_rows|num }}</td><td class="n">{{ r.repaired_rows|num }}</td>
+            <td class="n">{{ r.quarantined_rows|num }}</td><td class="n">{{ r.removed_rows|num }}</td><td class="n">{{ r.difference|num }}</td><td><span class="badge b-{{ r.status }}">{{ r.status }}</span></td></tr>{% endfor %}
+        </tbody></table></div>
+        {% else %}<div class="empty">{{ pandas_v.missing|default:"결과 없음" }}</div>{% endif %}
+      </div>
+      <div>
+        <h3>MySQL 적재 대사 (스테이징 → 스키마)</h3>
+        {% if mysql_v.load %}
+        <div class="tbl"><table><thead><tr><th>스키마 테이블</th><th class="n">스테이징</th><th class="n">적재</th><th class="n">차이</th><th>상태</th></tr></thead><tbody>
+          {% for r in mysql_v.load %}<tr><td>{{ r.table }}</td><td class="n">{{ r.staged|num }}</td><td class="n">{{ r.loaded|num }}</td><td class="n">{{ r.diff|num }}</td>
+            <td><span class="badge b-{{ r.status }}">{{ r.status }}</span></td></tr>{% endfor %}
+        </tbody></table></div>
+        {% else %}<div class="empty">{{ mysql_v.missing|default:"결과 없음" }}</div>{% endif %}
+      </div>
+    </div>
+  </section>
+</main>
+
+{% if selected_json %}{{ selected_json|json_script:"run-data" }}{% endif %}
+<script>
+(function () {
+  const el = document.getElementById("run-data");
+  if (!el) return;
+  const run = JSON.parse(el.textContent);
+  if (run.status !== "queued" && run.status !== "running") return;
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const dur = s => { if (s == null) return "-"; s = Math.round(s); return s < 60 ? s + "초" : s < 3600 ? Math.floor(s/60) + "분 " + (s%60) + "초" : Math.floor(s/3600) + "시간 " + Math.floor(s%3600/60) + "분"; };
+  const logEl = document.getElementById("log");
+  async function poll() {
+    try {
+      const res = await fetch(`/ops/runs/${run.id}/status/`, {headers: {"Accept": "application/json"}});
+      if (!res.ok) throw new Error(res.status);
+      const d = await res.json();
+      document.getElementById("step-rows").innerHTML = d.results.map(r =>
+        `<tr><td>${esc(r.label)}</td><td><span class="badge b-${esc(r.status)}">${esc(r.status)}</span></td>` +
+        `<td class="n">${r.seconds != null ? dur(r.seconds) : "-"}</td><td class="n">${r.rc ?? "-"}</td><td class="tail"><pre>${esc(r.tail)}</pre></td></tr>`).join("");
+      const st = document.getElementById("run-status");
+      st.className = "badge b-" + d.status; st.textContent = d.status_label;
+      document.getElementById("dur").textContent = dur(d.duration_s);
+      const atBottom = logEl.scrollTop + logEl.clientHeight >= logEl.scrollHeight - 20;
+      logEl.textContent = d.log || "(로그 대기 중)";
+      if (atBottom) logEl.scrollTop = logEl.scrollHeight;
+      if (d.status === "queued" || d.status === "running") setTimeout(poll, 3000);
+      else location.replace(`/ops/?run=${run.id}#result`);  // 끝나면 결과·분석을 새로 읽는다
+    } catch (e) { setTimeout(poll, 6000); }
+  }
+  logEl.scrollTop = logEl.scrollHeight;
+  setTimeout(poll, 1500);
+})();
+</script>
+</body>
+</html>

@@ -143,9 +143,9 @@ TRUNCATE TABLE stg_repair_detail;
 LOAD DATA LOCAL INFILE 'outputs/f1_recovery/reports/repair_detail.csv'
 INTO TABLE stg_repair_detail CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' ESCAPED BY ''
-LINES TERMINATED BY '\n' IGNORE 1 LINES
-(`issue_id`, `diagnostic_code`, `error_type`, `file`, `source_row`, `row_key`, `session_key`, `driver_number`, `field`, `old_value`, `new_value`, `method`, `confidence`, @last_col)
-SET `reason` = TRIM(TRAILING '\r' FROM @last_col);
+-- CRLF + 마지막 칸 따옴표라 '\n'으로는 1,335행 중 3행만 들어감 → 줄 끝을 '\r\n'으로 지정
+LINES TERMINATED BY '\r\n' IGNORE 1 LINES
+(`issue_id`, `diagnostic_code`, `error_type`, `file`, `source_row`, `row_key`, `session_key`, `driver_number`, `field`, `old_value`, `new_value`, `method`, `confidence`, `reason`);
 
 TRUNCATE TABLE stg_bronze_manifest;
 LOAD DATA LOCAL INFILE 'outputs/f1_recovery/reports/bronze_manifest.csv'

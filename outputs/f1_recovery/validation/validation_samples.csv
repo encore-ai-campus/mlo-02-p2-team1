@@ -1,0 +1,99 @@
+﻿check_id,target,detail
+VC04,session_result,session_key=9213; driver_number=44; number_of_laps=56; gap_to_leader=2.225
+VC04,session_result,session_key=9213; driver_number=16; number_of_laps=56; gap_to_leader=24.662
+VC04,session_result,session_key=11234; driver_number=18; number_of_laps=43; gap_to_leader=+15 LAPS
+VC04,session_result,session_key=11307; driver_number=23; number_of_laps=55; gap_to_leader=+11 LAPS
+VC24,starting_grid,meeting_key=1219; session_key=9161; race_session_key=9165; driver_number=18
+VC24,starting_grid,meeting_key=1262; session_key=9967; race_session_key=9971; driver_number=18
+VC25,session_result,meeting_key=1143; session_key=7787; driver_number=11; position=5; dns=False
+VC25,session_result,meeting_key=1143; session_key=7787; driver_number=77; position=11; dns=False
+VC25,session_result,meeting_key=1217; session_key=9149; driver_number=20; position=16; dns=False
+VC26,pit,session_key=11234; driver_number=18; lap_number=46; max_lap=43.0
+VC27,laps,session_key=7953; driver_number=81; lap_number=14
+VC27,laps,session_key=7953; driver_number=16; lap_number=40
+VC27,laps,session_key=7953; driver_number=31; lap_number=42
+VC27,laps,session_key=7779; driver_number=18; lap_number=17
+VC27,laps,session_key=7779; driver_number=23; lap_number=28
+VC27,laps,session_key=7779; driver_number=11; lap_number=51
+VC27,laps,session_key=7787; driver_number=23; lap_number=7
+VC27,laps,session_key=7787; driver_number=63; lap_number=18
+VC27,laps,session_key=7787; driver_number=20; lap_number=53
+VC27,laps,session_key=7787; driver_number=10; lap_number=57
+VC27,laps,session_key=7787; driver_number=31; lap_number=57
+VC27,laps,session_key=7787; driver_number=21; lap_number=57
+VC27,laps,session_key=7787; driver_number=2; lap_number=57
+VC27,laps,session_key=7787; driver_number=1; lap_number=59
+VC27,laps,session_key=7787; driver_number=44; lap_number=59
+VC27,laps,session_key=7787; driver_number=14; lap_number=59
+VC27,laps,session_key=9070; driver_number=21; lap_number=10
+VC27,laps,session_key=9070; driver_number=24; lap_number=37
+VC27,laps,session_key=9078; driver_number=1; lap_number=58
+VC27,laps,session_key=9094; driver_number=18; lap_number=54
+VC71,laps×stints,session_key=7787; driver_number=11; lap_number=1
+VC71,laps×stints,session_key=7787; driver_number=77; lap_number=1
+VC71,laps×stints,session_key=7787; driver_number=31; lap_number=1
+VC71,laps×stints,session_key=7787; driver_number=24; lap_number=1
+VC71,laps×stints,session_key=7787; driver_number=2; lap_number=1
+VC71,laps×stints,session_key=7787; driver_number=2; lap_number=2
+VC71,laps×stints,session_key=7787; driver_number=11; lap_number=2
+VC71,laps×stints,session_key=7787; driver_number=63; lap_number=7
+VC71,laps×stints,session_key=7787; driver_number=55; lap_number=7
+VC71,laps×stints,session_key=7787; driver_number=20; lap_number=7
+VC71,laps×stints,session_key=7787; driver_number=1; lap_number=8
+VC71,laps×stints,session_key=7787; driver_number=14; lap_number=8
+VC71,laps×stints,session_key=7787; driver_number=18; lap_number=8
+VC71,laps×stints,session_key=7787; driver_number=10; lap_number=8
+VC71,laps×stints,session_key=7787; driver_number=27; lap_number=8
+VC71,laps×stints,session_key=7787; driver_number=63; lap_number=8
+VC71,laps×stints,session_key=7787; driver_number=55; lap_number=8
+VC71,laps×stints,session_key=7787; driver_number=22; lap_number=8
+VC71,laps×stints,session_key=7787; driver_number=4; lap_number=8
+VC71,laps×stints,session_key=7787; driver_number=81; lap_number=8
+VC40,drivers,session_key=9165; team_name=Aston Martin; drivers=1
+VC40,drivers,session_key=9488; team_name=Williams; drivers=1
+VC40,drivers,session_key=9971; team_name=Aston Martin; drivers=1
+VC42,laps,session_key=9644; driver_number=77; lap_number=38; diff=0.508
+VC42,laps,session_key=9644; driver_number=63; lap_number=39; diff=0.509
+VC42,laps,session_key=9644; driver_number=77; lap_number=40; diff=0.509
+VC42,laps,session_key=9644; driver_number=63; lap_number=41; diff=0.509
+VC42,laps,session_key=9644; driver_number=81; lap_number=41; diff=0.512
+VC42,laps,session_key=9644; driver_number=16; lap_number=45; diff=0.51
+VC42,laps,session_key=9644; driver_number=30; lap_number=45; diff=0.513
+VC42,laps,session_key=9644; driver_number=63; lap_number=46; diff=0.513
+VC42,laps,session_key=9644; driver_number=44; lap_number=46; diff=0.514
+VC42,laps,session_key=9644; driver_number=77; lap_number=45; diff=0.518
+VC42,laps,session_key=9644; driver_number=55; lap_number=46; diff=0.515
+VC42,laps,session_key=9644; driver_number=1; lap_number=46; diff=0.513
+VC42,laps,session_key=9644; driver_number=16; lap_number=46; diff=0.511
+VC42,laps,session_key=9644; driver_number=31; lap_number=46; diff=0.512
+VC42,laps,session_key=9644; driver_number=30; lap_number=46; diff=0.513
+VC42,laps,session_key=9644; driver_number=63; lap_number=47; diff=0.509
+VC42,laps,session_key=9644; driver_number=4; lap_number=50; diff=0.504
+VC42,laps,session_key=9947; driver_number=63; lap_number=35; diff=1.454
+VC42,laps,session_key=9912; driver_number=31; lap_number=14; diff=0.88
+VC42,laps,session_key=9896; driver_number=4; lap_number=61; diff=0.67
+VC45,stints,session_key=9558; driver_number=24; stint_number=4; lap_start=20; prev_lap_end=37.0
+VC45,stints,session_key=9558; driver_number=31; stint_number=4; lap_start=22; prev_lap_end=38.0
+VC45,stints,session_key=9590; driver_number=18; stint_number=3; lap_start=20; prev_lap_end=50.0
+VC50,session_result,year=2023; session_key=7779; driver_number=1; position=2; points=0.0; race_base_points=18.0
+VC50,session_result,year=2023; session_key=7787; driver_number=11; position=5; points=11.0; race_base_points=10.0
+VC50,session_result,year=2023; session_key=9070; driver_number=63; position=8; points=5.0; race_base_points=4.0
+VC50,session_result,year=2023; session_key=9078; driver_number=1; position=1; points=26.0; race_base_points=25.0
+VC50,session_result,year=2023; session_key=9094; driver_number=44; position=4; points=13.0; race_base_points=12.0
+VC50,session_result,year=2023; session_key=9102; driver_number=1; position=1; points=26.0; race_base_points=25.0
+VC50,session_result,year=2023; session_key=9110; driver_number=11; position=6; points=9.0; race_base_points=8.0
+VC50,session_result,year=2023; session_key=9118; driver_number=1; position=1; points=26.0; race_base_points=25.0
+VC50,session_result,year=2023; session_key=9126; driver_number=1; position=1; points=26.0; race_base_points=25.0
+VC50,session_result,year=2023; session_key=9133; driver_number=1; position=1; points=26.0; race_base_points=25.0
+VC50,session_result,year=2023; session_key=9141; driver_number=44; position=4; points=13.0; race_base_points=12.0
+VC50,session_result,year=2023; session_key=9149; driver_number=14; position=2; points=19.0; race_base_points=18.0
+VC50,session_result,year=2023; session_key=9165; driver_number=44; position=3; points=16.0; race_base_points=15.0
+VC50,session_result,year=2023; session_key=9173; driver_number=1; position=1; points=26.0; race_base_points=25.0
+VC50,session_result,year=2023; session_key=9221; driver_number=1; position=1; points=26.0; race_base_points=25.0
+VC50,session_result,year=2023; session_key=9213; driver_number=4; position=2; points=0.0; race_base_points=18.0
+VC50,session_result,year=2023; session_key=9213; driver_number=55; position=3; points=0.0; race_base_points=15.0
+VC50,session_result,year=2023; session_key=9213; driver_number=11; position=4; points=0.0; race_base_points=12.0
+VC50,session_result,year=2023; session_key=9213; driver_number=63; position=5; points=0.0; race_base_points=10.0
+VC50,session_result,year=2023; session_key=9213; driver_number=10; position=6; points=0.0; race_base_points=8.0
+VC61,pit,session_key=9157; driver_number=2; lap_number=14; dq_codes=DQ021
+VC61,pit,session_key=9157; driver_number=18; lap_number=20; dq_codes=DQ021

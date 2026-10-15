@@ -1,103 +1,92 @@
-# F1 오염 데이터 검증·복구 파이프라인
+﻿# F1 Team Builder Intelligence
 
-F1 경기 데이터 배포본(CSV 6종)을 데이터 명세서와 비교하고, 진단코드(DQ001~DQ027)별로 오염을 탐지·복구·격리한 뒤 복구 CSV와 품질 리포트를 생성합니다. 원본 CSV는 수정하지 않습니다. 기준 문서는 `F1_P2_Spec.md` 5.1절(Silver 정제 규칙)과 11장(품질 검수 체크리스트)입니다. 정제 결과와 미오염 추가 데이터 5종(`data/f1_extra_data`)을 함께 검증하고 MySQL에 적재하는 SQL도 포함합니다.
+F1 경기 데이터를 정제·분석해 드라이버와 팀의 특성을 파악하고, 드라이버 영입과 팀 운영 개선에 필요한 근거를 제시하는 프로젝트입니다.
 
-## 입력 데이터
+이 문서는 **현재 저장소의 코드와 저장된 실행 결과**를 기준으로 진행 상황을 정리합니다. 전체 기획은 [F1_P2_Spec.md](./F1_P2_Spec.md)에 있습니다.
 
-`data/f1_recovery/F1_distribution/`(풀린 폴더) 또는 같은 구성의 zip을 입력으로 씁니다. `all_years/` 아래 `sessions.csv`, `drivers.csv`, `laps.csv`, `stints.csv`, `weather.csv`, `pit.csv`가 있어야 하며, `SHA256SUMS.txt`와 `00. 데이터_명세서.md`가 있으면 체크섬·행 수·컬럼 순서를 함께 검증합니다.
+## 저장소 구성
 
-## 설정
-
-`config.json`에 경로를 입력합니다. `input_path`는 폴더와 zip 모두 받습니다(이전 키 `input_archive`도 동작).
-
-```json
-{
-  "input_path": "data/f1_recovery/F1_distribution",
-  "output_directory": "outputs/f1_recovery"
-}
-```
-
-## 실행
-
-```powershell
-python run_pipeline.py --config config.json
-python -m unittest discover -s tests -v   # 결과·리포트 로직 검증 (약 1~2분)
-```
-
-## 처리 원칙
-
-- 모든 값을 문자열로 읽고, 검사할 때만 숫자·일시로 해석합니다.
-- 근거가 있는 규칙으로만 복구합니다. 중앙값 같은 통계값으로 결측을 채우지 않습니다(F1_P2_Spec.md 5.1).
-- 원천 특성으로 판단되는 항목(1랩 랩타임·시작 시각 결측, 속도 결측, 빈 스틴트 등)은 `ACCEPTED`로 남깁니다.
-- 근거가 부족한 결함은 `OPEN`(검토)으로, 분석을 왜곡하는 미해결 결함은 `quarantine/`으로 격리합니다.
-- 복구 후 같은 규칙으로 다시 검사해 잔여 건수(`residual_after_repair`)를 리포트에 남깁니다.
-
-주요 탐지·복구 규칙
-
-| 코드 | 내용 | 조치 |
+| 경로 | 내용 | 실행·안내 |
 |---|---|---|
-| DQ015 | 파일 간 `meeting_key` 불일치 | 하위 5개 파일 합의값으로 sessions 복구 |
-| DQ016 | 드라이버 신원(이름·약어) 행 간 뒤바뀜 | 시즌 차량번호 합의값으로 교환 |
-| DQ017 | 소속팀 뒤바뀜 | 앞뒤 세션 소속팀 + 팀 색상 근거로 복구 |
-| DQ001 | 국가 코드 결측 | 같은 드라이버의 다른 세션 값 |
-| DQ019 | 랩 시작 시각 불일치(인접 랩 교환 등) | 인접 교환 또는 앞뒤 랩 기준 복구 |
-| DQ002·DQ018·DQ004 | 시작 시각·랩타임·섹터 결측 | 다음 랩 시각, 섹터 역산으로 복구 |
-| DQ021 | `lane_duration`≠`pit_duration` | 격리 |
-| DQ023 | 노면온도 단일 튐값 | 앞뒤 측정 평균 |
+| `pipeline/` | 정제·검증 패키지: 추가 데이터 압축 해제(`extra_data`), 오염 6종 진단·복구(`recovery`), 정제 후 검증 VC01~VC71(`validate_cleaned`), 표준사전 PDF(`dictionary_pdf`) | `python -m pipeline.recovery` · [pipeline/README.md](./pipeline/README.md) |
+| `sql/` | MySQL 스테이징 → 검증 → 정규화 스키마 적재 (01~05) | [web/README.md](./web/README.md) |
+| `web/` | Django: `dashboard`(Decision Board·Gold), `viewer`(적재 테이블 조회), `ops`(파이프라인 실행·오류 분석·정합성 관리자 `/ops/`) | `run_web.bat` · [web/README.md](./web/README.md) |
+| `tests/` | `pipeline` 테스트 | `python -m unittest discover -s tests -v` |
+| `data/` | 원천 6종·추가 5종, 표준사전, 스키마 명세 | [data/standard_dictionary/README.md](./data/standard_dictionary/README.md) |
+| `outputs/` | 파이프라인 정제 결과·품질 리포트 | |
+| `docs/` · `design/` | 데이터셋 상세 문서 · 화면 디자인 시안 | |
+| `F1_P2_Spec.md` | 최종 기획서 | |
 
-전체 목록과 오류 유형·심각도는 `data/standard_dictionary/diagnostic_codes.csv`에 있고, 파이프라인이 이 파일을 직접 읽습니다.
+## 1. 데이터에서 출발한 분석 방향
 
-## 출력
+### 분석의 출발점과 목적
 
-```text
-repaired/{sessions,drivers,laps,stints,weather,pit}.csv   전체 행 + 관리 컬럼
-quarantine/{...}.csv                                      격리 대상 행
-reports/bronze_manifest.csv   파일별 SHA256·행·열·명세서 일치 여부
-reports/validation_issues.csv 진단 이슈 전체 (코드·오류유형·심각도·조치·상태·근거)
-reports/repair_detail.csv     값 변경 이력 (issue_id로 이슈와 연결)
-reports/dq_summary.csv        파일×진단코드별 탐지/복구/허용/미해결/격리/잔여
-reports/repair_summary.csv    파일별 요약
-reports/quality_report.html   위 내용을 묶은 리포트
-reports/run_result.json       실행 요약 (run_id는 입력 체크섬+버전 기반, 재실행 시 동일)
-```
+출발점은 먼저 확보된 **세션·드라이버·랩·스틴트·기상·피트 데이터 6종**과 추가로 선정된 **출발 순위·경기 결과·주행 순위·경기 통제·격차 데이터 5종**입니다. 먼저 각 데이터의 범위와 품질을 확인하고, 연결 가능한 기록에서 어떤 차이와 패턴이 나타나는지 살펴봅니다.
 
-복구 CSV 관리 컬럼: `original_*`, `repair_status`, `repair_method`(코드:컬럼 목록), `repair_confidence`(행 내 최저), `repair_reason`, `dq_codes`, `quarantine_flag`.
+분석은 **데이터 확인 → 정제·검증 → 탐색·비교 → 결과에 근거한 결론 도출 → 의미 해석**의 순서로 진행합니다. 개인 랩타임, 팀 동료 대비 페이스·일관성, 타이어 사용 특성, 피트 운영과 본경기 기본 포인트를 비교하되, 실제 데이터 커버리지와 비교 조건을 확인한 뒤 분석 질문과 결론의 범위를 구체화합니다.
 
-## 정제 후 검증
+드라이버 영입과 팀 운영은 분석 결과를 활용해 의미를 해석할 수 있는 영역입니다. 관찰된 차이가 팀의 보완점이나 후보 비교에 어떤 시사점을 주는지 검토하며, 성적과 팀 배분금·스폰서십 기회의 관계는 확보한 경기 데이터로 직접 확인할 수 있는 범위를 구분해 정성적으로 논의합니다.
 
-파이프라인 실행 뒤 정제 결과와 추가 데이터 5종을 결측·중복·참조·범위·정합성·포인트·대사·JOIN 행 증폭 기준으로 검사합니다. 검사 정의는 `data/standard_dictionary/validation_checks.csv`(VC01~VC71)이고 pandas와 SQL이 같은 ID·규칙을 씁니다.
+### 데이터 구성과 현재 진행 범위
 
-```powershell
-python tools/validate_cleaned.py                     # 기본: outputs/f1_recovery + data/f1_extra_data(없으면 zip)
-python tools/validate_cleaned.py --extra data/f1_extra_data.zip
-```
+| 구분 | 데이터 | 진행 상태 |
+|---|---|---|
+| 오염 데이터 6종 | `sessions`, `drivers`, `laps`, `stints`, `weather`, `pit` | 진단·복구 파이프라인 구현 및 결과 생성 |
+| 추가 데이터 5종 | `starting_grid`, `session_result`, `position`, `race_control`, `intervals` | [압축 파일](./data/f1_extra_data.zip) 확보, 검증·적재 코드 작성 |
+| 표준화·검증 | 표준사전, 진단코드, 정제 후 검증 항목 | CSV 기준표와 pandas·SQL 검사 코드 작성 |
+| DB 연계 | MySQL 스테이징·정규화 스키마·적재 SQL | 설계 및 스크립트 작성, 실제 DB 실행 결과는 별도 확인 필요 |
+| 분석·서비스 | Gold 9개 마트, Django, 드라이버 비교·팀 추천 | 기획 및 HTML 화면 시안 작성, 최종 구현은 후속 단계 |
 
-출력은 `outputs/f1_recovery/validation/`의 `validation_report.html`(첫 표가 행 수 대사: 원본 = 원본 유지 + 복구 + 격리 + 제거), `row_reconciliation.csv`, `validation_result.csv`, `validation_samples.csv`, `null_profile.csv`, `validation_report.md`입니다. ERROR 등급 위반이 있으면 종료 코드 1을 반환합니다.
+기획상 분석 범위는 **2023년부터 2026-10-14까지 종료된 본경기(Race)**입니다. 실제 수집 범위와 분석 가능 경기는 데이터 커버리지 검증으로 확정해야 합니다. 데이터 선정 범위는 본경기 기본 데이터를 기준으로 정했습니다.
 
-## MySQL 적재 (sql/)
+추가 5종은 기본 6종에 출발 조건, 최종 결과, 경기 중 순위·격차, 경기 통제 상황을 연결해 비교와 해석의 근거를 보완합니다. 데이터별 보완 내용은 [원본 데이터셋 문서](./docs/01_원본데이터셋.md#추가-데이터-5종의-역할)에 정리했습니다.
 
-저장소 루트에서 순서대로 실행합니다. `data/f1_extra_data.zip`은 먼저 `data/f1_extra_data/`로 압축 해제하고, 서버에 `SET GLOBAL local_infile = 1;`이 필요합니다.
+## 2. 데이터셋 요약
 
-```powershell
-mysql --local-infile=1 -u <user> -p <db> < sql/01_create_staging.sql   # 문자열 스테이징·기준표 테이블
-mysql --local-infile=1 -u <user> -p <db> < sql/02_load_staging.sql     # CSV·리포트·기준표 적재
-mysql -u <user> -p <db> < sql/03_validate_cleaned.sql                   # 정제 후 검증 (FAIL 0 확인)
-mysql -u <user> -p <db> < sql/04_create_schema.sql                      # TO-BE 정규화 스키마·변환 함수·뷰
-mysql -u <user> -p <db> < sql/05_insert_schema.sql                      # 스테이징 → 스키마 INSERT, 행 수 대사
-```
+데이터셋 세부 내용은 `docs/`의 문서 4개로 나눴습니다. 이 절에는 대표 내용만 적습니다.
 
-`04`에서 변환 함수 생성 권한 오류가 나면 `SET GLOBAL log_bin_trust_function_creators = 1;` 후 다시 실행합니다. 설계 설명은 `data/schema/TO_BE_model_design.md`, 원천 11종 명세는 `data/schema/F1_데이터_명세서.md`에 있습니다.
+### 2.1 원본 데이터셋
 
-## Django 연동
+- **오염 데이터 6종**(`sessions`, `drivers`, `laps`, `stints`, `weather`, `pit`, 총 120,873행)과 **미오염 추가 데이터 5종**(`starting_grid`, `session_result`, `position`, `race_control`, `intervals`)으로 구성됩니다.
+- 세션은 `session_key`, 드라이버는 `session_key + driver_number`로 연결합니다. 예선 기준인 `starting_grid`는 `meeting_key`로 Race 세션에 매핑합니다.
+- 오염 유형은 결측·이상치·값 오류·불일치·값 뒤바뀜·형식 오류·참조 위반·중복 8가지이며, 진단코드 `DQ001~DQ027`로 관리합니다.
 
-`sql/04_create_schema.sql`로 만든 스키마를 `python manage.py inspectdb`로 모델화하거나 `managed = False` 모델로 연결합니다. `repaired/*.csv`와 추가 데이터 5종이 적재 원천이고, `validation_issues.csv`·`repair_detail.csv`는 `quality_issue`·`repair_detail` 테이블 원천입니다.
+자세히: [01_원본데이터셋.md](./docs/01_원본데이터셋.md) · [11종 데이터 명세서](./data/schema/F1_데이터_명세서.md) · [배포 폴더](./data/f1_recovery/F1_distribution/README.md)
 
-## AI 데이터 표준사전
+### 2.2 데이터 사전
 
-`data/standard_dictionary/`에 표준단어·용어·도메인·코드·컬럼사전·진단코드·조합 규칙이 있습니다.
+- 표준단어·표준용어·도메인·코드·컬럼사전·진단 기준·검증 기준·배점 기준·조합 규칙 9개 기준표로 11종의 컬럼 의미를 통일했습니다.
+- 원본 값은 문자열로 보존하고 계산할 때만 숫자·일시로 해석합니다. 시간 길이는 초, 일시는 UTC 기준입니다.
+- 본경기 기본 포인트는 25-18-15-12-10-8-6-4-2-1을 적용합니다. 원천 포인트의 패스티스트 랩 보너스는 분리해 관리합니다.
 
-## 의존성
+자세히: [02_데이터사전.md](./docs/02_데이터사전.md) · [표준사전 README](./data/standard_dictionary/README.md) · [TO-BE 모델](./data/schema/TO_BE_model_design.md)
 
-```powershell
-pip install -r requirements.txt
-```
+### 2.3 데이터 정제 후
+
+- [pipeline/recovery.py](./pipeline/recovery.py) v0.2.0(실행 ID `3d8d8eebc0fc`)이 원본 보존·구조 검증 → 진단·복구 → 격리·재검증 순서로 처리합니다.
+- 품질 이슈 28,052건을 탐지해 1,335셀을 근거 기반으로 복구했고, 24,824건은 원천 특성으로 허용했습니다. 미해결 1,893건은 검토 대상, 2행은 격리했습니다.
+- 결측은 일괄 대체하지 않으므로 분석할 때 지표별 유효 표본 수와 제외 기준을 함께 확인해야 합니다.
+
+자세히: [03_정제결과.md](./docs/03_정제결과.md) · [품질 리포트](./outputs/f1_recovery/reports/quality_report.html)
+
+### 2.4 데이터 검증
+
+- 정제 결과와 추가 데이터를 같은 기준(VC01~VC71)으로 pandas와 MySQL SQL에서 검사합니다. 두 결과는 일치합니다.
+- 151개 검사 결과는 FAIL 0, PASS 124, WARN 7, INFO 20입니다.
+- 행 수 대사: 원본 120,873행 = 변경 없음 119,579 + 복구 1,292 + 격리 2 + 제거 0.
+
+자세히: [04_데이터검증.md](./docs/04_데이터검증.md) · [validate_cleaned.py](./pipeline/validate_cleaned.py) · [sql/](./sql/) · [웹·DB 실행 안내](./web/README.md)
+
+## 3. 후속 분석: 관찰할 지표와 결과의 해석 방향
+
+아래 항목은 앞으로 탐색할 분석 방향입니다. 지표를 집계한 뒤 차이의 크기와 경기 조건을 확인하고, 관찰된 결과가 뒷받침하는 범위에서 결론과 시사점을 정리합니다.
+
+| 분석 영역 | 관찰할 데이터·지표 | 결과를 바탕으로 해석할 내용 | 현재 상태 |
+|---|---|---|---|
+| 드라이버 비교 | 유효 랩 페이스·일관성, 팀 동료 대비 차이, 비교 집단 백분위 | 비교 조건 안에서 나타나는 드라이버별 주행 특성과 차이 | 기획·정제 기반 준비 |
+| 타이어 사용 | 컴파운드별 스틴트 길이, 타이어 사용에 따른 페이스 변화 | 타이어 사용 양상과 페이스 변화의 관계, 경기 조건에 따른 차이 | 경계 정제 완료, 통합·집계 후속 |
+| 팀 피트 운영 | 경기당 피트 횟수, 레인 체류시간과 정지시간 분포 | 팀별 운영 양상과 시간 편차, 추가 검토가 필요한 기록 | 정제·격리 및 DB 스키마 준비 |
+| 실제 성적 | 출발·최종 순위, 본경기 기본 포인트, 팀 간 격차 | 순위 변화와 포인트 분포에서 드러나는 경쟁 양상 | 추가 데이터·배점표·검증 코드·SQL 뷰 준비 |
+| 결과의 활용 | 앞선 분석에서 확인한 드라이버·팀별 특성과 차이 | 후보 비교·팀 운영의 시사점과 적용 한계, 경제적 기회에 대한 정성적 논의 | 분석 결론 도출 후 검토, Gold·서비스 구현 후속 |
+
+후속 결과는 **사용 데이터와 비교 조건 → 관찰된 패턴·수치 → 도출한 결론 → 의미와 한계** 순서로 기록합니다. 관찰된 관계를 인과관계나 영입 효과로 단정하지 않고, 차이가 뚜렷하지 않은 결과도 함께 남깁니다. 드라이버 순위·추천 결과·영입 효과에 대한 확정 수치는 아직 없으며, 화면 시안은 [design/index.html](./design/index.html)에 있습니다. 서비스에 반영할 내용도 실제 분석 결과를 확인한 뒤 구체화합니다.
