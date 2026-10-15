@@ -14,6 +14,18 @@
 venv\Scripts\python.exe web\manage.py runserver 127.0.0.1:8000
 ```
 
+## 관리자 계정 (`/ops/`·`/admin/` 로그인)
+기본 계정은 없다. 비밀번호를 저장소에 남기지 않도록 **PC마다 각자 한 번 만든다.**
+
+```bash
+venv\Scripts\python.exe web\manage.py createsuperuser
+```
+- 저장소 루트에서 실행. 사용자 이름 → 이메일(비워도 됨) → 비밀번호를 차례로 입력
+- 만든 계정으로 http://127.0.0.1:8000/ops/ (파이프라인 관리자)와 http://127.0.0.1:8000/admin/ 에 로그인
+- 비밀번호 변경: `venv\Scripts\python.exe web\manage.py changepassword <사용자이름>`
+- 다른 사람에게 관리자 권한을 줄 때: `/admin/` → 사용자 → 추가 후 **스태프 권한**(staff status) 체크
+- 계정은 `.env`의 DB(`auth_user` 테이블)에 저장되므로 DB를 새로 만들면 다시 생성한다. 계정·비밀번호를 README나 코드에 적지 않는다
+
 ## 구성
 - 프로젝트 `web/`
 - 앱 `dashboard/`: Decision Board 화면
@@ -27,7 +39,7 @@ venv\Scripts\python.exe web\manage.py runserver 127.0.0.1:8000
   - 오류 분석: 오류 유형·진단코드·파일별 탐지/복구/허용/미해결/격리, 미해결 이슈 샘플, 실패한 실행의 오류 줄
   - 데이터 정합성: pandas·MySQL 검증(VC01~VC71)과 두 결과 비교, 행 수 대사, 적재 대사(스테이징=스키마), 포인트 점검
   - 처음 한 번 관리자 계정 생성: `venv\Scripts\python.exe web\manage.py createsuperuser`
-  - mysql 클라이언트는 PATH 또는 `C:\Program Files\MySQL\MySQL Server *in`에서 찾고, 다른 위치면 `.env`에 `MYSQL_BIN=` 지정
+  - mysql 클라이언트는 PATH 또는 MySQL 기본 설치 폴더(`C:\Program Files\MySQL\MySQL Server 버전\bin`)에서 찾고, 다른 위치면 `.env`에 `MYSQL_BIN=` 지정
 - Gold 갱신: MySQL 데이터가 바뀌면 `venv\Scripts\python.exe web\manage.py build_gold` (약 30초)
   - 결과 테이블: `gold_driver_profile`, `gold_team_profile`, `gold_snapshot`
   - 계산 규칙: `web/dashboard/gold.py` (tools/f1_report 분석 스크립트와 같은 규칙, 원천만 MySQL)
@@ -39,9 +51,9 @@ venv\Scripts\python.exe web\manage.py runserver 127.0.0.1:8000
 2. MySQL root로 DB·계정 생성, `SET PERSIST local_infile = 1;`, `SET PERSIST log_bin_trust_function_creators = 1;`
 3. `.env` 작성 (위 항목)
 4. 저장소 루트에서 순서대로:
-   `sql/01_create_staging.sql` → `sql/02_load_staging.sql` → `sql/02b_reload_repair_detail.sql`
-   → `sql/03_validate_cleaned.mysql84.sql` → `sql/04_create_schema.sql` → `sql/05_insert_schema.sql` (intervals 변환에 약 20분)
-   - `02b`: repair_detail.csv가 CRLF + 마지막 칸 따옴표라 예전 02로는 1,335행 중 3행만 들어갔음 → 02를 `\r\n`으로 고쳐 지금은 선택 실행(스테이징만 재적재, 실행해도 무해)
+   `sql/01_create_staging.sql` → `sql/02_load_staging.sql` → `sql/03_validate_cleaned.mysql84.sql`
+   → `sql/04_create_schema.sql` → `sql/05_insert_schema.sql` (intervals 변환에 약 20분)
+   - `sql/02b_reload_repair_detail.sql`은 **보정용, 평소에는 실행하지 않음**. 수정 이력(repair_detail.csv, 1,335행)을 스테이징에 다시 넣는 파일이다. 예전 02가 이 CSV(CRLF + 마지막 칸 따옴표)를 `\n` 기준으로 읽어 3행만 들어가던 문제를 보정하려고 만들었는데, 02를 `\r\n`으로 고쳐 지금은 02만으로 전부 들어간다. 예전 방식으로 적재한 DB를 고칠 때만 02 뒤에 실행 (실행해도 무해)
    - `03 ... mysql84`: 원본 03이 MySQL 8.4에서 ERROR 1292(빈 값 CAST, STRICT 모드)·ERROR 1137(TEMPORARY 테이블 중복 참조)로 실패해 수정한 사본
    - 실행 예: `mysql --local-infile=1 -u f1user -p f1_db < sql/01_create_staging.sql`
    - 4번은 `/ops/`의 'DB 적재'로 대신 실행할 수 있다

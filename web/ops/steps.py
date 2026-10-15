@@ -31,21 +31,22 @@ STEPS = [
     Step("extract", "추가 데이터 압축 해제", "정제·검증", command=("-m", "pipeline.extra_data")),
     Step("recovery", "오염 6종 진단·복구", "정제·검증", command=("-m", "pipeline.recovery")),
     Step("validate", "정제 후 검증 VC01~VC71 (pandas)", "정제·검증", command=("-m", "pipeline.validate_cleaned")),
-    Step("sql01", "01 스테이징 테이블 생성", "DB 적재", sql="01_create_staging.sql"),
-    Step("sql02", "02 CSV 스테이징 적재", "DB 적재", sql="02_load_staging.sql"),
-    Step("sql02b", "02b repair_detail 재적재", "DB 적재", sql="02b_reload_repair_detail.sql"),
-    Step("sql03", "03 정제 후 검증 (MySQL)", "DB 적재", sql="03_validate_cleaned.mysql84.sql"),
-    Step("sql04", "04 정규화 스키마 생성", "DB 적재", sql="04_create_schema.sql"),
-    Step("sql05", "05 스키마 적재·대사 (약 20분)", "DB 적재", sql="05_insert_schema.sql"),
+    Step("sql01", "스테이징 테이블 생성 (sql/01)", "DB 적재", sql="01_create_staging.sql"),
+    Step("sql02", "정제 결과·추가 데이터 CSV를 스테이징에 적재 (sql/02)", "DB 적재", sql="02_load_staging.sql"),
+    Step("sql03", "적재 데이터 검증 VC01~VC71 (sql/03)", "DB 적재", sql="03_validate_cleaned.mysql84.sql"),
+    Step("sql04", "정규화 스키마 생성 (sql/04)", "DB 적재", sql="04_create_schema.sql"),
+    Step("sql05", "스키마 적재·행 수 대사, 약 20분 (sql/05)", "DB 적재", sql="05_insert_schema.sql"),
+    # 02가 수정 이력 CSV를 1,335행 모두 적재하도록 고쳐져 평소에는 필요 없음. 예전 방식으로 적재한 DB 보정용
+    Step("sql02b", "[보정용] 수정 이력(repair_detail)만 스테이징에 다시 적재 (sql/02b)", "DB 적재", sql="02b_reload_repair_detail.sql"),
     Step("gold", "Gold 마트 갱신", "Gold", command=("web/manage.py", "build_gold")),
 ]
 STEP_BY_KEY = {s.key: s for s in STEPS}
 
 PRESETS = {
     "clean": ("정제·검증", ["extract", "recovery", "validate"]),
-    "load": ("DB 적재", ["extract", "sql01", "sql02", "sql02b", "sql03", "sql04", "sql05"]),
+    "load": ("DB 적재", ["extract", "sql01", "sql02", "sql03", "sql04", "sql05"]),
     "gold": ("Gold 갱신", ["gold"]),
-    "all": ("전체 실행", [s.key for s in STEPS]),
+    "all": ("전체 실행", ["extract", "recovery", "validate", "sql01", "sql02", "sql03", "sql04", "sql05", "gold"]),
 }
 
 

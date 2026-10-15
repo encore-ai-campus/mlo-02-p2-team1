@@ -17,6 +17,12 @@ F1 경기 데이터를 정제·분석해 드라이버와 팀의 특성을 파악
 | `docs/` · `design/` | 데이터셋 상세 문서 · 화면 디자인 시안 | |
 | `F1_P2_Spec.md` | 최종 기획서 | |
 
+### 서비스 실행
+
+1. `run_web.bat` 실행 → http://127.0.0.1:8000 (Decision Board) · `/data/` (적재 테이블 조회) · `/ops/` (파이프라인 관리자). 서버는 하나, 포트도 8000 하나입니다.
+2. `/ops/`는 관리자 계정이 필요합니다. 기본 계정은 없으며 PC마다 한 번 만듭니다: `venv\Scripts\python.exe web\manage.py createsuperuser`
+3. 처음 설치(venv·`.env`·DB 생성)와 계정 관리는 [web/README.md](./web/README.md)를 따릅니다.
+
 ## 1. 데이터에서 출발한 분석 방향
 
 ### 분석의 출발점과 목적

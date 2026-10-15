@@ -22,7 +22,7 @@
   </style>
 </head>
 <body>
-  <nav><a href="{% url 'table_list' %}">F1 Data — 테이블 목록</a> <a href="{% url 'decision_board' %}" style="margin-left:18px;font-weight:normal">Decision Board →</a></nav>
+  <nav><a href="{% url 'table_list' %}">F1 Data — 테이블 목록</a> <a href="{% url 'decision_board' %}" style="margin-left:18px;font-weight:normal">Decision Board →</a> <a href="{% url 'ops:console' %}" style="margin-left:18px;font-weight:normal">파이프라인 관리 →</a></nav>
   <main>{% block content %}{% endblock %}</main>
 </body>
 </html>
