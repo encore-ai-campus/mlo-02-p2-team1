@@ -604,6 +604,13 @@ SELECT 'VC33', 'intervals', SUM(TRIM(`date`) <> '' AND TRIM(`date`) NOT REGEXP '
 INSERT INTO vc_result (check_id, target, fail_count, total_count, note)
 SELECT 'VC34', 'session_result',
        SUM((dnf = 'True') + (dns = 'True') + (dsq = 'True') > 1), COUNT(*), NULL FROM stg_session_result;
+-- VC35 노면온도 단일 튐값 (앞뒤 측정이 3도 이내로 비슷한데 혼자 10도 이상 벗어남, 범위 안의 0.0 등)
+INSERT INTO vc_result (check_id, target, fail_count, total_count, note)
+SELECT 'VC35', 'weather',
+       COALESCE(SUM(prev_v IS NOT NULL AND next_v IS NOT NULL AND ABS(prev_v - next_v) <= 3 AND ABS(v - (prev_v + next_v) / 2) >= 10),0), SUM(v IS NOT NULL), NULL
+FROM (SELECT v, LAG(v) OVER w AS prev_v, LEAD(v) OVER w AS next_v
+      FROM (SELECT session_key, (CASE WHEN TRIM(`date`) REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}[ T][0-9]{2}:[0-9]{2}:[0-9]{2}' THEN CAST(REPLACE(SUBSTRING_INDEX(LEFT(TRIM(`date`),26),'+',1),'T',' ') AS DATETIME(6)) END) AS t, (CASE WHEN TRIM(track_temperature) REGEXP '^-?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?$' THEN CAST(TRIM(track_temperature) AS DECIMAL(18,6)) END) AS v FROM stg_weather) a
+      WINDOW w AS (PARTITION BY session_key ORDER BY t)) b;
 
 -- ===================== 정합성 =====================
 -- VC40 세션별 팀 소속 드라이버 수가 2가 아님
@@ -636,6 +643,25 @@ SELECT 'VC45', 'stints', COALESCE(SUM(lap_start_n < prev_end),0), COUNT(*), NULL
 FROM (SELECT (CASE WHEN TRIM(lap_start) REGEXP '^-?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?$' THEN CAST(TRIM(lap_start) AS DECIMAL(18,6)) END) AS lap_start_n,
              LAG((CASE WHEN TRIM(lap_end) REGEXP '^-?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?$' THEN CAST(TRIM(lap_end) AS DECIMAL(18,6)) END)) OVER (PARTITION BY session_key, driver_number ORDER BY (CASE WHEN TRIM(stint_number) REGEXP '^-?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?$' THEN CAST(TRIM(stint_number) AS DECIMAL(18,6)) END)) AS prev_end
       FROM stg_stints) x;
+-- VC46 랩 시작 시각 = 앞 랩 시작 + 앞 랩 소요시간 (1초 초과 차이, 연속 랩·값이 모두 있을 때만)
+--      격리 행과 정제 단계가 DQ019로 진단해 허용한 행(복구 없이 근거만 남긴 행)은 제외 → 정제가 놓친 불일치만 센다
+INSERT INTO vc_result (check_id, target, fail_count, total_count, note)
+SELECT 'VC46', 'laps', COALESCE(SUM(ABS(diff) > 1 AND quarantine_flag <> 'Y' AND NOT (dq_codes LIKE '%DQ019%' AND repair_method NOT LIKE '%DQ019:%')),0), SUM(diff IS NOT NULL),
+       CONCAT('격리 ', COALESCE(SUM(ABS(diff) > 1 AND quarantine_flag = 'Y'),0), '건·DQ019 허용 ',
+              COALESCE(SUM(ABS(diff) > 1 AND quarantine_flag <> 'Y' AND dq_codes LIKE '%DQ019%' AND repair_method NOT LIKE '%DQ019:%'),0), '건 제외')
+FROM (SELECT quarantine_flag, dq_codes, repair_method,
+             CASE WHEN n = prev_n + 1 THEN TIMESTAMPDIFF(MICROSECOND, DATE_ADD(prev_t, INTERVAL ROUND(prev_d * 1000000) MICROSECOND), t) / 1000000 END AS diff
+      FROM (SELECT quarantine_flag, dq_codes, repair_method, n, t, LAG(n) OVER w AS prev_n, LAG(t) OVER w AS prev_t, LAG(d) OVER w AS prev_d
+            FROM (SELECT session_key, driver_number, quarantine_flag, dq_codes, repair_method, (CASE WHEN TRIM(lap_number) REGEXP '^-?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?$' THEN CAST(TRIM(lap_number) AS DECIMAL(18,6)) END) AS n,
+                         (CASE WHEN TRIM(date_start) REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}[ T][0-9]{2}:[0-9]{2}:[0-9]{2}' THEN CAST(REPLACE(SUBSTRING_INDEX(LEFT(TRIM(date_start),26),'+',1),'T',' ') AS DATETIME(6)) END) AS t, (CASE WHEN TRIM(lap_duration) REGEXP '^-?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?$' THEN CAST(TRIM(lap_duration) AS DECIMAL(18,6)) END) AS d FROM stg_laps) a
+            WINDOW w AS (PARTITION BY session_key, driver_number ORDER BY n)) b) c;
+-- VC47 같은 시즌 앞뒤 세션 소속팀이 같은데 해당 세션만 다름
+INSERT INTO vc_result (check_id, target, fail_count, total_count, note)
+SELECT 'VC47', 'drivers', COALESCE(SUM(before_team IS NOT NULL AND before_team = after_team AND team_name <> before_team),0), COUNT(*), NULL
+FROM (SELECT d.team_name, LAG(d.team_name) OVER w AS before_team, LEAD(d.team_name) OVER w AS after_team
+      FROM stg_drivers d JOIN stg_sessions s ON s.session_key = d.session_key
+      WHERE TRIM(d.team_name) <> ''
+      WINDOW w AS (PARTITION BY s.year, d.full_name ORDER BY (CASE WHEN TRIM(s.date_start) REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}[ T][0-9]{2}:[0-9]{2}:[0-9]{2}' THEN CAST(REPLACE(SUBSTRING_INDEX(LEFT(TRIM(s.date_start),26),'+',1),'T',' ') AS DATETIME(6)) END))) x;
 
 -- ===================== 포인트 =====================
 -- VC50 원천 points와 재계산 race_base_points 차이 (INFO; 2023~2024 최속 랩 +1, 원천 누락 확인용)

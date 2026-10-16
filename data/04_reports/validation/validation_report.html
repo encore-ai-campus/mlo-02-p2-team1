@@ -1,4 +1,4 @@
-<!doctype html><html lang='ko'><head><meta charset='utf-8'><title>F1 정제 후 검증 리포트</title><style>body{font-family:Arial,'Malgun Gothic',sans-serif;margin:32px;color:#17212b}table{border-collapse:collapse;width:100%;margin:12px 0 28px;font-size:12.5px}th,td{border:1px solid #d5dee7;padding:6px;text-align:left;vertical-align:top}th{background:#eaf1f6}.cards{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}.cards div{background:#f1f5f8;padding:14px 18px;border-radius:8px;min-width:90px}.cards strong{display:block;font-size:24px;margin-top:6px}h2{margin-top:36px}.meta{color:#56636f;font-size:13px}.badge{color:#fff;border-radius:4px;padding:2px 6px;font-size:11.5px;font-weight:bold}</style></head><body><h1>F1 정제 후 데이터 검증 리포트</h1><p class='meta'>정제 결과 D:\workspace\mlo-02-p2-team1\data\03_cleaned · 추가 데이터 D:\workspace\mlo-02-p2-team1\data\01_raw\f1_extra_data · 검사 정의 data/02_reference/standard_dictionary/validation_checks.csv · 생성 2026-10-15 19:58</p><div class='cards'><div style='border-top:4px solid #1f7a4d'>PASS<strong>124</strong></div><div style='border-top:4px solid #b42318'>FAIL<strong>0</strong></div><div style='border-top:4px solid #b54708'>WARN<strong>7</strong></div><div style='border-top:4px solid #475467'>INFO<strong>20</strong></div></div><p class='meta'>FAIL = ERROR 등급 위반, WARN = WARNING 등급 위반(검토), INFO = 참고 건수(통과/실패 판정 없음)</p><h2>1. 행 수 대사</h2><p class='meta'>처리 결과를 겹치지 않는 4개 구간으로 나눠 <b>② 원본 유지 + ③ 복구 + ④ 격리 + ⑤ 제거 = ① 원본</b>인지 확인한다. 오염 정제 6종 합계: 119,579 + 1,292 + 2 + 0 = 120,873 (원본 120,873). 복구 행은 값이 하나 이상 바뀐 행이고, 격리 행은 복구 여부와 관계없이 ④로만 센다. 파이프라인은 행을 삭제하지 않고 중복 키(DQ026)는 격리하므로 ⑤ 제거는 0이 정상이다. '남은 키 중복 행'은 정제 후 자연키가 겹치는 행 수(VC10)다.</p><table class="dataframe">
+<!doctype html><html lang='ko'><head><meta charset='utf-8'><title>F1 정제 후 검증 리포트</title><style>body{font-family:Arial,'Malgun Gothic',sans-serif;margin:32px;color:#17212b}table{border-collapse:collapse;width:100%;margin:12px 0 28px;font-size:12.5px}th,td{border:1px solid #d5dee7;padding:6px;text-align:left;vertical-align:top}th{background:#eaf1f6}.cards{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}.cards div{background:#f1f5f8;padding:14px 18px;border-radius:8px;min-width:90px}.cards strong{display:block;font-size:24px;margin-top:6px}h2{margin-top:36px}.meta{color:#56636f;font-size:13px}.badge{color:#fff;border-radius:4px;padding:2px 6px;font-size:11.5px;font-weight:bold}</style></head><body><h1>F1 정제 후 데이터 검증 리포트</h1><p class='meta'>정제 결과 /tmp/claude-0/-home-claude/4f470c5f-de04-5816-a074-46785a04f4a7/scratchpad/w/data/03_cleaned · 추가 데이터 data/01_raw/f1_extra_data.zip · 검사 정의 data/02_reference/standard_dictionary/validation_checks.csv · 생성 2026-10-16 00:39</p><div class='cards'><div style='border-top:4px solid #1f7a4d'>PASS<strong>127</strong></div><div style='border-top:4px solid #b42318'>FAIL<strong>0</strong></div><div style='border-top:4px solid #b54708'>WARN<strong>7</strong></div><div style='border-top:4px solid #475467'>INFO<strong>20</strong></div><div style='border-top:4px solid #b42318'>정제 전 FAIL<strong>12 → 0</strong></div></div><p class='meta'>FAIL = ERROR 등급 위반, WARN = WARNING 등급 위반(검토), INFO = 참고 건수(통과/실패 판정 없음)</p><h2>1. 행 수 대사</h2><p class='meta'>처리 결과를 겹치지 않는 4개 구간으로 나눠 <b>② 원본 유지 + ③ 복구 + ④ 격리 + ⑤ 제거 = ① 원본</b>인지 확인한다. 오염 정제 6종 합계: 119,575 + 1,294 + 4 + 0 = 120,873 (원본 120,873). 복구 행은 값이 하나 이상 바뀐 행이고, 격리 행은 복구 여부와 관계없이 ④로만 센다. 파이프라인은 행을 삭제하지 않고 중복 키(DQ026)는 격리하므로 ⑤ 제거는 0이 정상이다. '남은 키 중복 행'은 정제 후 자연키가 겹치는 행 수(VC10)다.</p><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>파일</th>
@@ -57,15 +57,15 @@
       <td>laps</td>
       <td>오염 정제 6종</td>
       <td>97,018</td>
-      <td>96,493</td>
-      <td>525</td>
-      <td>0</td>
-      <td>0</td>
-      <td>97,018</td>
+      <td>96,489</td>
+      <td>527</td>
+      <td>2</td>
       <td>0</td>
       <td>97,018</td>
-      <td>97,018</td>
       <td>0</td>
+      <td>97,018</td>
+      <td>97,016</td>
+      <td>2</td>
       <td>0</td>
       <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
       <td>원본 행 수는 04_reports/quality/bronze_manifest.csv</td>
@@ -210,21 +210,256 @@
       <td>합계(오염 정제 6종)</td>
       <td></td>
       <td>120,873</td>
-      <td>119,579</td>
-      <td>1,292</td>
-      <td>2</td>
+      <td>119,575</td>
+      <td>1,294</td>
+      <td>4</td>
       <td>0</td>
       <td>120,873</td>
       <td>0</td>
       <td>120,873</td>
-      <td>120,871</td>
-      <td>2</td>
+      <td>120,869</td>
+      <td>4</td>
       <td>0</td>
       <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
       <td></td>
     </tr>
   </tbody>
-</table><h2>2. 분류별 요약</h2><table class="dataframe">
+</table><h2>2. 정제 전후 비교</h2><p class='meta'>같은 검사를 정제 전 값(original_* = 오염 원본)과 정제 후 값에 각각 실행한 결과. status는 정제 후 상태다. 정제 전후 모두 PASS인 항목과 INFO는 뺐다(전체는 validation_before_after.csv).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>check_id</th>
+      <th>target</th>
+      <th>check_name</th>
+      <th>severity</th>
+      <th>정제 전 위반</th>
+      <th>정제 전</th>
+      <th>정제 후 위반</th>
+      <th>status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>VC22</td>
+      <td>drivers</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>ERROR</td>
+      <td>40</td>
+      <td>FAIL</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>laps</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>ERROR</td>
+      <td>1,942</td>
+      <td>FAIL</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>stints</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>ERROR</td>
+      <td>89</td>
+      <td>FAIL</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>weather</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>ERROR</td>
+      <td>307</td>
+      <td>FAIL</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>pit</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>ERROR</td>
+      <td>48</td>
+      <td>FAIL</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>session_result</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>ERROR</td>
+      <td>40</td>
+      <td>FAIL</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>position</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>ERROR</td>
+      <td>777</td>
+      <td>FAIL</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>race_control</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>ERROR</td>
+      <td>91</td>
+      <td>FAIL</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC22</td>
+      <td>intervals</td>
+      <td>MEETING_KEY_CONSISTENT</td>
+      <td>ERROR</td>
+      <td>45,072</td>
+      <td>FAIL</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC32</td>
+      <td>stints</td>
+      <td>CODE_DOMAIN</td>
+      <td>ERROR</td>
+      <td>7</td>
+      <td>FAIL</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC43</td>
+      <td>pit</td>
+      <td>PIT_DURATION_SPLIT</td>
+      <td>ERROR</td>
+      <td>2</td>
+      <td>FAIL</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC46</td>
+      <td>laps</td>
+      <td>LAP_START_CONSISTENT</td>
+      <td>ERROR</td>
+      <td>116</td>
+      <td>FAIL</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC04</td>
+      <td>session_result</td>
+      <td>UNCLASSIFIED_WITHOUT_STATUS</td>
+      <td>WARNING</td>
+      <td>4</td>
+      <td>WARN</td>
+      <td>4</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+    </tr>
+    <tr>
+      <td>VC24</td>
+      <td>starting_grid</td>
+      <td>GRID_WITHOUT_RESULT</td>
+      <td>WARNING</td>
+      <td>4</td>
+      <td>WARN</td>
+      <td>2</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+    </tr>
+    <tr>
+      <td>VC26</td>
+      <td>pit</td>
+      <td>PIT_LAP_IN_RANGE</td>
+      <td>WARNING</td>
+      <td>1</td>
+      <td>WARN</td>
+      <td>1</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+    </tr>
+    <tr>
+      <td>VC27</td>
+      <td>laps</td>
+      <td>LAP_COVERED_BY_STINT</td>
+      <td>WARNING</td>
+      <td>303</td>
+      <td>WARN</td>
+      <td>280</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+    </tr>
+    <tr>
+      <td>VC40</td>
+      <td>drivers</td>
+      <td>TEAM_DRIVER_COUNT</td>
+      <td>WARNING</td>
+      <td>3</td>
+      <td>WARN</td>
+      <td>3</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+    </tr>
+    <tr>
+      <td>VC42</td>
+      <td>laps</td>
+      <td>SECTOR_SUM</td>
+      <td>WARNING</td>
+      <td>20</td>
+      <td>WARN</td>
+      <td>20</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+    </tr>
+    <tr>
+      <td>VC45</td>
+      <td>stints</td>
+      <td>STINT_OVERLAP</td>
+      <td>WARNING</td>
+      <td>3</td>
+      <td>WARN</td>
+      <td>3</td>
+      <td><span class='badge' style='background:#b54708'>WARN</span></td>
+    </tr>
+    <tr>
+      <td>VC35</td>
+      <td>weather</td>
+      <td>TRACK_TEMP_SPIKE</td>
+      <td>WARNING</td>
+      <td>5</td>
+      <td>WARN</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC41</td>
+      <td>drivers</td>
+      <td>SEASON_NUMBER_IDENTITY</td>
+      <td>WARNING</td>
+      <td>4</td>
+      <td>WARN</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+    <tr>
+      <td>VC47</td>
+      <td>drivers</td>
+      <td>TEAM_SEQUENCE</td>
+      <td>WARNING</td>
+      <td>6</td>
+      <td>WARN</td>
+      <td>0</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+    </tr>
+  </tbody>
+</table><h2>3. 분류별 요약</h2><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>category</th>
@@ -240,8 +475,8 @@
     <tr>
       <td>CONSISTENCY</td>
       <td>정합성</td>
-      <td>6</td>
-      <td>3</td>
+      <td>8</td>
+      <td>5</td>
       <td>0</td>
       <td>3</td>
       <td>0</td>
@@ -285,8 +520,8 @@
     <tr>
       <td>RANGE</td>
       <td>범위·형식</td>
-      <td>37</td>
-      <td>37</td>
+      <td>38</td>
+      <td>38</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
@@ -310,7 +545,7 @@
       <td>1</td>
     </tr>
   </tbody>
-</table><h2>3. FAIL·WARN 항목</h2><table class="dataframe">
+</table><h2>4. FAIL·WARN 항목</h2><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>check_id</th>
@@ -411,7 +646,7 @@
       <td></td>
     </tr>
   </tbody>
-</table><h2>4. 전체 검사 결과</h2><table class="dataframe">
+</table><h2>5. 전체 검사 결과</h2><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>check_id</th>
@@ -709,11 +944,11 @@
       <td>QUARANTINE_FLAG</td>
       <td>laps</td>
       <td>INFO</td>
-      <td>0</td>
+      <td>2</td>
       <td>97,018</td>
       <td><span class='badge' style='background:#475467'>INFO</span></td>
       <td>quarantine_flag=Y 행 수(격리 대상 참고)</td>
-      <td>quarantine/laps.csv 0행</td>
+      <td>quarantine/laps.csv 2행</td>
     </tr>
     <tr>
       <td>VC61</td>
@@ -1964,6 +2199,18 @@
       <td></td>
     </tr>
     <tr>
+      <td>VC35</td>
+      <td>범위·형식</td>
+      <td>TRACK_TEMP_SPIKE</td>
+      <td>weather</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>13,928</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>노면온도가 앞뒤 측정(서로 3도 이내)보다 10도 이상 튀는 단일값(범위 안의 0.0 등)</td>
+      <td></td>
+    </tr>
+    <tr>
       <td>VC34</td>
       <td>범위·형식</td>
       <td>RESULT_STATUS_EXCLUSIVE</td>
@@ -2009,6 +2256,30 @@
       <td>1,759</td>
       <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
       <td>session_result.number_of_laps와 laps 최대 랩 차이 1랩 초과</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>VC46</td>
+      <td>정합성</td>
+      <td>LAP_START_CONSISTENT</td>
+      <td>laps</td>
+      <td>ERROR</td>
+      <td>0</td>
+      <td>95,155</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>랩 시작 시각이 앞 랩 시작+소요시간과 1초 초과 차이(격리 행·정제 단계 DQ019 허용 행 제외)</td>
+      <td>격리 2건·DQ019 허용 42건 제외</td>
+    </tr>
+    <tr>
+      <td>VC47</td>
+      <td>정합성</td>
+      <td>TEAM_SEQUENCE</td>
+      <td>drivers</td>
+      <td>WARNING</td>
+      <td>0</td>
+      <td>1,771</td>
+      <td><span class='badge' style='background:#1f7a4d'>PASS</span></td>
+      <td>같은 시즌 앞뒤 세션 소속팀이 같은데 해당 세션만 다름</td>
       <td></td>
     </tr>
     <tr>
@@ -2240,7 +2511,7 @@
       <td>1771→1771</td>
     </tr>
   </tbody>
-</table><h2>5. 위반 샘플</h2><p class='meta'>검사·대상별 최대 샘플 행 (전체는 validation_samples.csv)</p><h3>VC04 session_result — session_result 순위 공백인데 dnf·dns·dsq 모두 False</h3><table class="dataframe">
+</table><h2>6. 위반 샘플</h2><p class='meta'>검사·대상별 최대 샘플 행 (전체는 validation_samples.csv)</p><h3>VC04 session_result — session_result 순위 공백인데 dnf·dns·dsq 모두 False</h3><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>detail</th>
@@ -2540,6 +2811,20 @@
       <td>year=2023; session_key=9213; driver_number=10; position=6; points=0.0; race_base_points=8.0</td>
     </tr>
   </tbody>
+</table><h3>VC61 laps — quarantine_flag=Y 행 수(격리 대상 참고)</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>session_key=9181; driver_number=11; lap_number=2; dq_codes=DQ003;DQ004;DQ005;DQ018;DQ019</td>
+    </tr>
+    <tr>
+      <td>session_key=11353; driver_number=41; lap_number=6; dq_codes=DQ003;DQ019</td>
+    </tr>
+  </tbody>
 </table><h3>VC61 pit — quarantine_flag=Y 행 수(격리 대상 참고)</h3><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -2622,7 +2907,7 @@
       <td>session_key=7787; driver_number=81; lap_number=8</td>
     </tr>
   </tbody>
-</table><h2>6. 결측 프로파일</h2><p class='meta'>공백이 있는 컬럼만 표시 (전체는 null_profile.csv)</p><table class="dataframe">
+</table><h2>7. 결측 프로파일</h2><p class='meta'>공백이 있는 컬럼만 표시 (전체는 null_profile.csv)</p><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>table</th>

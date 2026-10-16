@@ -370,6 +370,13 @@ def check_ranges(T, R, codes):
                 sample.append(df.loc[bad, ["session_key", "date_start", "date_end"]])
         R.add("VC33", name, fail, len(df), pd.concat(sample) if sample else None)
 
+    # 노면온도 단일 튐값: 앞뒤 측정이 3도 이내로 비슷한데 혼자 10도 이상 벗어남 (범위 안의 0.0 같은 값)
+    w = T["weather"].assign(_t=ts(T["weather"]["date"]), _v=num(T["weather"]["track_temperature"])).sort_values(["session_key", "_t"])
+    prev, nxt = w.groupby("session_key")["_v"].shift(), w.groupby("session_key")["_v"].shift(-1)
+    mask = prev.notna() & nxt.notna() & ((prev - nxt).abs() <= 3) & ((w["_v"] - (prev + nxt) / 2).abs() >= 10)
+    R.add("VC35", "weather", mask.sum(), int(w["_v"].notna().sum()),
+          w.loc[mask, ["session_key", "date", "track_temperature"]].assign(prev=prev[mask], next=nxt[mask]))
+
     if "session_result" in T:
         sr = T["session_result"]
         flags = (sr[["dnf", "dns", "dsq"]] == "True").sum(axis=1)
@@ -419,6 +426,33 @@ def check_consistency(T, R):
     prev_end = st.groupby(["session_key", "driver_number"])["le"].shift()
     mask = st["ls"] < prev_end
     R.add("VC45", "stints", mask.sum(), len(st), st.loc[mask, ["session_key", "driver_number", "stint_number", "lap_start"]].assign(prev_lap_end=prev_end[mask]))
+
+    # 랩 시작 시각 = 앞 랩 시작 + 앞 랩 소요시간 (1초 초과 차이, 연속 랩·값이 모두 있을 때만)
+    # 격리 행과 정제 단계가 DQ019로 진단해 허용한 행(세션 공통 사건·타이밍 오차)은 제외 → 정제가 놓친 불일치만 센다
+    lp = laps.assign(_n=num(laps["lap_number"]), _t=ts(laps["date_start"]), _d=num(laps["lap_duration"]))
+    lp = lp.sort_values(["session_key", "driver_number", "_n"])
+    g = lp.groupby(["session_key", "driver_number"])
+    expected = g["_t"].shift() + pd.to_timedelta(g["_d"].shift(), unit="s")
+    diff = (lp["_t"] - expected).dt.total_seconds()
+    consecutive = lp["_n"] == g["_n"].shift() + 1
+    q = lp["quarantine_flag"] == "Y" if "quarantine_flag" in lp else pd.Series(False, index=lp.index)
+    # 허용 행 = DQ019로 진단됐지만 DQ019 복구는 없는 행 (복구한 행은 결과가 맞는지 그대로 검사)
+    known = (lp["dq_codes"].str.contains("DQ019", regex=False) & ~lp["repair_method"].str.contains("DQ019:", regex=False) & ~q) \
+        if "dq_codes" in lp else pd.Series(False, index=lp.index)
+    off = consecutive & diff.notna() & (diff.abs() > 1)
+    mask = off & ~q & ~known
+    R.add("VC46", "laps", mask.sum(), int((consecutive & diff.notna()).sum()),
+          lp.loc[mask, ["session_key", "driver_number", "lap_number", "date_start"]].assign(diff_sec=diff[mask].round(3)),
+          note=f"격리 {int((off & q).sum())}건·DQ019 허용 {int((off & known).sum())}건 제외")
+
+    # 소속팀 단독 변경: 같은 시즌·드라이버의 앞뒤 세션 팀이 같은데 이 세션만 다름
+    d = drivers.assign(_y=drivers["session_key"].map(year), _s=drivers["session_key"].map(ts(sessions.set_index("session_key")["date_start"])))
+    d = d[~blank(d["team_name"])].sort_values(["_y", "full_name", "_s"])
+    g = d.groupby(["_y", "full_name"])["team_name"]
+    before, after = g.shift(), g.shift(-1)
+    mask = before.notna() & (before == after) & (d["team_name"] != before)
+    R.add("VC47", "drivers", mask.sum(), len(d),
+          d.loc[mask, ["session_key", "driver_number", "full_name", "team_name"]].assign(adjacent_team=before[mask]))
 
 
 def race_points(T):
@@ -556,7 +590,7 @@ def check_join_fanout(T, R):
 
 
 # ---------- 실행 ----------
-def run(cleaned, extra, out, samples=20, reports=None):
+def run(cleaned, extra, out, samples=20, reports=None, baseline=True):
     cleaned, out = Path(cleaned), Path(out)
     reports = Path(reports) if reports else cleaned / "reports"
     repaired = cleaned / "repaired"
@@ -567,6 +601,26 @@ def run(cleaned, extra, out, samples=20, reports=None):
     codes = pd.read_csv(DICT / "codes.csv", dtype=str, keep_default_na=False)
     R = Result(catalogue, samples)
 
+    profile = run_checks(T, R, codes, cleaned, reports)
+    result = R.frame()
+    # 같은 검사를 정제 전(original_* 값 = 오염 원본)에도 돌려 정제로 FAIL이 얼마나 사라졌는지 남긴다
+    before = run_checks(as_original(T), Result(catalogue, 0), codes, cleaned, reports, frame_only=True) if baseline else None
+    compare = before_after(before, result) if before is not None else None
+
+    out.mkdir(parents=True, exist_ok=True)
+    result.to_csv(out / "validation_result.csv", index=False, encoding="utf-8-sig")
+    R.sample_frame().to_csv(out / "validation_samples.csv", index=False, encoding="utf-8-sig")
+    profile.to_csv(out / "null_profile.csv", index=False, encoding="utf-8-sig")
+    recon = row_reconciliation(T, cleaned, reports)
+    recon.to_csv(out / "row_reconciliation.csv", index=False, encoding="utf-8-sig")
+    if compare is not None:
+        compare.to_csv(out / "validation_before_after.csv", index=False, encoding="utf-8-sig")
+    write_report(result, T, out / "validation_report.md", recon, compare)
+    write_html(result, R.sample_frame(), profile, T, cleaned, extra, out / "validation_report.html", recon, compare)
+    return result
+
+
+def run_checks(T, R, codes, cleaned, reports, frame_only=False):
     profile = check_missing(T, R)
     check_duplicates(T, R)
     check_references(T, R)
@@ -575,20 +629,41 @@ def run(cleaned, extra, out, samples=20, reports=None):
     check_points(T, R)
     check_reconcile(T, R, cleaned, reports)
     check_join_fanout(T, R)
-
-    out.mkdir(parents=True, exist_ok=True)
-    result = R.frame()
-    result.to_csv(out / "validation_result.csv", index=False, encoding="utf-8-sig")
-    R.sample_frame().to_csv(out / "validation_samples.csv", index=False, encoding="utf-8-sig")
-    profile.to_csv(out / "null_profile.csv", index=False, encoding="utf-8-sig")
-    recon = row_reconciliation(T, cleaned, reports)
-    recon.to_csv(out / "row_reconciliation.csv", index=False, encoding="utf-8-sig")
-    write_report(result, T, out / "validation_report.md", recon)
-    write_html(result, R.sample_frame(), profile, T, cleaned, extra, out / "validation_report.html", recon)
-    return result
+    return R.frame() if frame_only else profile
 
 
-def write_report(result, T, path, recon):
+def as_original(T):
+    """정제 결과의 original_* 값으로 되돌린 오염 원본 (복구·격리·진단 표시는 비움, 추가 5종은 그대로)."""
+    raw = dict(T)
+    for name in ORIGINAL:
+        df = T[name].copy()
+        for col in [c for c in df.columns if c.startswith("original_")]:
+            df[col[len("original_"):]] = df[col]
+        df["repair_status"], df["repair_method"], df["dq_codes"], df["quarantine_flag"] = "UNCHANGED", "NONE", "", "N"
+        raw[name] = df
+    return raw
+
+
+def before_after(before, after):
+    """검사·대상별 정제 전후 위반 건수와 상태. 정제 전후 어느 쪽이든 PASS가 아닌 항목만 남긴다."""
+    keys = ["check_id", "target"]
+    b = before[keys + ["fail_count", "status"]].rename(columns={"fail_count": "before_fail_count", "status": "before_status"})
+    a = after[keys + ["korean_category", "check_name", "severity", "fail_count", "status", "description"]].rename(
+        columns={"fail_count": "after_fail_count", "status": "after_status"})
+    m = a.merge(b, on=keys, how="left")
+    m = m[(m["before_status"] != "PASS") | (m["after_status"] != "PASS")]
+    m = m[~((m["before_status"] == "INFO") & (m["after_status"] == "INFO"))]
+    order = {"FAIL": 0, "WARN": 1, "INFO": 2, "PASS": 3}
+    m = m.sort_values(["before_status", "after_status", "check_id"], key=lambda s: s.map(order) if s.name != "check_id" else s, kind="stable")
+    return m[keys + ["korean_category", "check_name", "severity", "before_fail_count", "before_status", "after_fail_count", "after_status", "description"]]
+
+
+def status_counts(result):
+    counts = result["status"].value_counts()
+    return {s: int(counts.get(s, 0)) for s in ["PASS", "FAIL", "WARN", "INFO"]}
+
+
+def write_report(result, T, path, recon, compare=None):
     counts = result["status"].value_counts()
     fmt = lambda v: "-" if v is None or pd.isna(v) else f"{int(v):,}"
     lines = ["# 정제 후 데이터 검증 결과", "", "## 행 수 대사: 원본 = 원본 유지 + 복구 + 격리 + 제거", "",
@@ -599,6 +674,12 @@ def write_report(result, T, path, recon):
               for r in recon.itertuples()]
     lines += ["", "| 상태 | 건수 |", "|---|---:|"]
     lines += [f"| {s} | {int(counts.get(s, 0))} |" for s in ["PASS", "FAIL", "WARN", "INFO"]]
+    if compare is not None:
+        lines += ["", "## 정제 전후 비교", "",
+                  "같은 검사를 정제 전 값(`original_*` = 오염 원본)과 정제 후 값에 각각 실행한 결과입니다. 정제 전후 모두 PASS인 항목과 INFO는 뺐습니다.", "",
+                  "| 검사 | 대상 | 검사명 | 등급 | 정제 전 위반 | 정제 전 | 정제 후 위반 | 정제 후 |", "|---|---|---|---|---:|---|---:|---|"]
+        lines += [f"| {r.check_id} | {r.target} | {r.check_name} | {r.severity} | {int(r.before_fail_count):,} | {r.before_status} | "
+                  f"{int(r.after_fail_count):,} | {r.after_status} |" for r in compare.itertuples()]
     lines += ["", "## FAIL·WARN 항목", "", "| 검사 | 대상 | 등급 | 위반 | 전체 | 설명 | 비고 |", "|---|---|---|---:|---:|---|---|"]
     bad = result[result["status"].isin(["FAIL", "WARN"])]
     lines += [f"| {r.check_id} | {r.target} | {r.severity} | {r.fail_count:,} | {r.total_count:,} | {r.description} | {r.note} |"
@@ -624,10 +705,21 @@ def html_table(df):
     return out.to_html(index=False, escape=False, border=0)
 
 
-def write_html(result, samples, profile, T, cleaned, extra, path, recon):
+def write_html(result, samples, profile, T, cleaned, extra, path, recon, compare=None):
     counts = result["status"].value_counts()
     cards = "".join(f"<div style='border-top:4px solid {STATUS_COLOR[s]}'>{s}<strong>{int(counts.get(s, 0))}</strong></div>"
                     for s in ["PASS", "FAIL", "WARN", "INFO"])
+    compare_html = ""
+    if compare is not None:
+        fails_before = int((compare["before_status"] == "FAIL").sum())
+        cards += (f"<div style='border-top:4px solid {STATUS_COLOR['FAIL']}'>정제 전 FAIL<strong>{fails_before} → "
+                  f"{int(counts.get('FAIL', 0))}</strong></div>")
+        view = compare.copy()
+        view["status"] = view["after_status"]
+        view = view.rename(columns={"before_fail_count": "정제 전 위반", "before_status": "정제 전", "after_fail_count": "정제 후 위반"})
+        compare_html = ("<h2>2. 정제 전후 비교</h2><p class='meta'>같은 검사를 정제 전 값(original_* = 오염 원본)과 정제 후 값에 각각 실행한 결과. "
+                        "status는 정제 후 상태다. 정제 전후 모두 PASS인 항목과 INFO는 뺐다(전체는 validation_before_after.csv).</p>" +
+                        html_table(view[["check_id", "target", "check_name", "severity", "정제 전 위반", "정제 전", "정제 후 위반", "status"]]))
     recon_view = recon.astype(object).where(recon.notna(), "-").rename(columns=RECON_LABELS)
     totals = recon[recon["group"] == "오염 정제 6종"][["raw_rows", "unchanged_rows", "repaired_rows", "quarantined_rows", "removed_rows", "processed_sum"]].sum()
     cols = ["check_id", "korean_category", "check_name", "target", "severity", "fail_count", "total_count", "status", "description", "note"]
@@ -636,6 +728,7 @@ def write_html(result, samples, profile, T, cleaned, extra, path, recon):
         WARN=("status", lambda s: int((s == "WARN").sum())), INFO=("status", lambda s: int((s == "INFO").sum()))).reset_index()
     order = {"FAIL": 0, "WARN": 1, "INFO": 2, "PASS": 3}
     issues = result[result["status"].isin(["FAIL", "WARN"])]
+    sec = iter(range(3 if compare is not None else 2, 10))  # 정제 전후 비교가 있으면 2절로 들어가 뒤 번호가 밀린다
     sample_html = []
     for (check, target), group in samples.groupby(["check_id", "target"], sort=True):
         meta = result[(result["check_id"] == check) & (result["target"] == target)]
@@ -658,11 +751,12 @@ def write_html(result, samples, profile, T, cleaned, extra, path, recon):
             f"오염 정제 6종 합계: {int(totals['unchanged_rows']):,} + {int(totals['repaired_rows']):,} + {int(totals['quarantined_rows']):,} + {int(totals['removed_rows']):,} "
             f"= {int(totals['processed_sum']):,} (원본 {int(totals['raw_rows']):,}). 복구 행은 값이 하나 이상 바뀐 행이고, 격리 행은 복구 여부와 관계없이 ④로만 센다. "
             "파이프라인은 행을 삭제하지 않고 중복 키(DQ026)는 격리하므로 ⑤ 제거는 0이 정상이다. '남은 키 중복 행'은 정제 후 자연키가 겹치는 행 수(VC10)다.</p>" + html_table(recon_view) +
-            "<h2>2. 분류별 요약</h2>" + html_table(by_category) +
-            "<h2>3. FAIL·WARN 항목</h2>" + html_table(issues[cols]) +
-            "<h2>4. 전체 검사 결과</h2>" + html_table(result.sort_values("status", key=lambda s: s.map(order), kind="stable")[cols]) +
-            "<h2>5. 위반 샘플</h2><p class='meta'>검사·대상별 최대 샘플 행 (전체는 validation_samples.csv)</p>" + "".join(sample_html) +
-            "<h2>6. 결측 프로파일</h2><p class='meta'>공백이 있는 컬럼만 표시 (전체는 null_profile.csv)</p>" + html_table(blanks))
+            compare_html +
+            f"<h2>{next(sec)}. 분류별 요약</h2>" + html_table(by_category) +
+            f"<h2>{next(sec)}. FAIL·WARN 항목</h2>" + html_table(issues[cols]) +
+            f"<h2>{next(sec)}. 전체 검사 결과</h2>" + html_table(result.sort_values("status", key=lambda s: s.map(order), kind="stable")[cols]) +
+            f"<h2>{next(sec)}. 위반 샘플</h2><p class='meta'>검사·대상별 최대 샘플 행 (전체는 validation_samples.csv)</p>" + "".join(sample_html) +
+            f"<h2>{next(sec)}. 결측 프로파일</h2><p class='meta'>공백이 있는 컬럼만 표시 (전체는 null_profile.csv)</p>" + html_table(blanks))
     path.write_text(f"<!doctype html><html lang='ko'><head><meta charset='utf-8'><title>F1 정제 후 검증 리포트</title>"
                     f"<style>{style}</style></head><body>{body}</body></html>", encoding="utf-8")
 
@@ -674,16 +768,21 @@ def main():
     parser.add_argument("--extra", default=None, help="추가 데이터 5종 폴더 또는 zip (기본: data/01_raw/f1_extra_data, 없으면 zip)")
     parser.add_argument("--out", default=None, help="검증 결과 폴더 (기본: data/04_reports/validation)")
     parser.add_argument("--samples", type=int, default=20, help="검사·대상별 위반 샘플 행 수")
+    parser.add_argument("--no-baseline", action="store_true", help="정제 전(original_*) 비교 검사를 건너뜀")
     args = parser.parse_args()
     extra = args.extra
     if extra is None:
         folder, archive = ROOT / "data" / "01_raw" / "f1_extra_data", ROOT / "data" / "01_raw" / "f1_extra_data.zip"
         extra = folder if (folder / "session_result.csv").exists() else archive if archive.exists() else None
     out = Path(args.out) if args.out else ROOT / "data" / "04_reports" / "validation"
-    result = run(args.cleaned, extra, out, args.samples, args.reports)
+    result = run(args.cleaned, extra, out, args.samples, args.reports, baseline=not args.no_baseline)
     shown = result[result["status"] != "PASS"][["check_id", "target", "status", "fail_count", "total_count", "note"]]
     print(shown.to_string(index=False))
     print(result["status"].value_counts().to_string())
+    compare = out / "validation_before_after.csv"
+    if not args.no_baseline and compare.exists():
+        c = pd.read_csv(compare, encoding="utf-8-sig")
+        print(f"정제 전 FAIL {int((c['before_status'] == 'FAIL').sum())}건 → 정제 후 FAIL {int((result['status'] == 'FAIL').sum())}건")
     print(f"결과: {out}")
     sys.exit(1 if (result["status"] == "FAIL").any() else 0)
 

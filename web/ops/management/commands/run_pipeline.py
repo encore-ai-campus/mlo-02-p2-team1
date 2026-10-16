@@ -76,6 +76,8 @@ class Command(BaseCommand):
                     failed = f"{step.label} 단계 실패 (종료 코드 {rc})"
                     if key == "validate" and rc == 1:
                         failed += " — ERROR 등급 검증 위반이 있습니다"
+                    elif key == "recovery" and rc == 1:
+                        failed += " — 원본 불일치 또는 격리되지 않은 ERROR 등급 결함이 있습니다(repair_summary.csv의 fail_reason)"
                     break
 
         for r in run.results:

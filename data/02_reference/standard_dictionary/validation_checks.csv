@@ -20,12 +20,15 @@ VC31,RANGE,범위·형식,VALUE_RANGE,허용 범위 위반(랩타임·섹터>0·
 VC32,RANGE,범위·형식,CODE_DOMAIN,허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위),ERROR,0,5.1
 VC33,RANGE,범위·형식,DATETIME_PARSE,일시 변환 실패 또는 세션 종료<시작,ERROR,0,5.1
 VC34,RANGE,범위·형식,RESULT_STATUS_EXCLUSIVE,dnf·dns·dsq 중 2개 이상 True,ERROR,0,7.1
+VC35,RANGE,범위·형식,TRACK_TEMP_SPIKE,노면온도가 앞뒤 측정(서로 3도 이내)보다 10도 이상 튀는 단일값(범위 안의 0.0 등),WARNING,0,5.1
 VC40,CONSISTENCY,정합성,TEAM_DRIVER_COUNT,세션별 팀 소속 드라이버 수가 2가 아님,WARNING,0,11
 VC41,CONSISTENCY,정합성,SEASON_NUMBER_IDENTITY,같은 시즌 driver_number에 full_name이 여러 개,WARNING,0,11
 VC42,CONSISTENCY,정합성,SECTOR_SUM,섹터 3개 합과 랩타임 차이 0.5초 초과(잔여 검토),WARNING,0,5.1
 VC43,CONSISTENCY,정합성,PIT_DURATION_SPLIT,lane_duration과 pit_duration 불일치(격리 행 제외),ERROR,0,6.2·11
 VC44,CONSISTENCY,정합성,RESULT_LAPS_VS_LAPS,session_result.number_of_laps와 laps 최대 랩 차이 1랩 초과,WARNING,0,5.2
 VC45,CONSISTENCY,정합성,STINT_OVERLAP,다음 스틴트 시작 < 이전 스틴트 종료,WARNING,0,5.1
+VC46,CONSISTENCY,정합성,LAP_START_CONSISTENT,랩 시작 시각이 앞 랩 시작+소요시간과 1초 초과 차이(격리 행·정제 단계 DQ019 허용 행 제외),ERROR,0,5.1
+VC47,CONSISTENCY,정합성,TEAM_SEQUENCE,같은 시즌 앞뒤 세션 소속팀이 같은데 해당 세션만 다름,WARNING,0,11
 VC50,POINTS,포인트,SOURCE_POINTS_DIFF,원천 points와 재계산 race_base_points 차이(최속 랩 보너스·원천 누락 확인용),INFO,-,7.1
 VC51,POINTS,포인트,DRIVER_TEAM_POINTS_SUM,Race별 드라이버 기본 포인트 합 ≠ 팀 기본 포인트 합,ERROR,0,7.3·11
 VC52,POINTS,포인트,RACE_TOTAL_101,Race별 기본 포인트 합계가 101점이 아님,WARNING,0,7.1

@@ -1,0 +1,23 @@
+﻿check_id,target,korean_category,check_name,severity,before_fail_count,before_status,after_fail_count,after_status,description
+VC22,drivers,참조,MEETING_KEY_CONSISTENT,ERROR,40,FAIL,0,PASS,같은 session_key의 meeting_key가 sessions와 다름
+VC22,laps,참조,MEETING_KEY_CONSISTENT,ERROR,1942,FAIL,0,PASS,같은 session_key의 meeting_key가 sessions와 다름
+VC22,stints,참조,MEETING_KEY_CONSISTENT,ERROR,89,FAIL,0,PASS,같은 session_key의 meeting_key가 sessions와 다름
+VC22,weather,참조,MEETING_KEY_CONSISTENT,ERROR,307,FAIL,0,PASS,같은 session_key의 meeting_key가 sessions와 다름
+VC22,pit,참조,MEETING_KEY_CONSISTENT,ERROR,48,FAIL,0,PASS,같은 session_key의 meeting_key가 sessions와 다름
+VC22,session_result,참조,MEETING_KEY_CONSISTENT,ERROR,40,FAIL,0,PASS,같은 session_key의 meeting_key가 sessions와 다름
+VC22,position,참조,MEETING_KEY_CONSISTENT,ERROR,777,FAIL,0,PASS,같은 session_key의 meeting_key가 sessions와 다름
+VC22,race_control,참조,MEETING_KEY_CONSISTENT,ERROR,91,FAIL,0,PASS,같은 session_key의 meeting_key가 sessions와 다름
+VC22,intervals,참조,MEETING_KEY_CONSISTENT,ERROR,45072,FAIL,0,PASS,같은 session_key의 meeting_key가 sessions와 다름
+VC32,stints,범위·형식,CODE_DOMAIN,ERROR,7,FAIL,0,PASS,허용 코드 위반(컴파운드·세션유형·불리언·관제 분류·깃발·범위)
+VC43,pit,정합성,PIT_DURATION_SPLIT,ERROR,2,FAIL,0,PASS,lane_duration과 pit_duration 불일치(격리 행 제외)
+VC46,laps,정합성,LAP_START_CONSISTENT,ERROR,116,FAIL,0,PASS,랩 시작 시각이 앞 랩 시작+소요시간과 1초 초과 차이(격리 행·정제 단계 DQ019 허용 행 제외)
+VC04,session_result,결측,UNCLASSIFIED_WITHOUT_STATUS,WARNING,4,WARN,4,WARN,session_result 순위 공백인데 dnf·dns·dsq 모두 False
+VC24,starting_grid,참조,GRID_WITHOUT_RESULT,WARNING,4,WARN,2,WARN,starting_grid(meeting_key+driver_number)가 Race 결과에 없음(예선 후 기권 확인)
+VC26,pit,참조,PIT_LAP_IN_RANGE,WARNING,1,WARN,1,WARN,피트 랩이 해당 드라이버 최대 랩보다 큼
+VC27,laps,참조,LAP_COVERED_BY_STINT,WARNING,303,WARN,280,WARN,어느 스틴트 구간에도 속하지 않는 랩
+VC40,drivers,정합성,TEAM_DRIVER_COUNT,WARNING,3,WARN,3,WARN,세션별 팀 소속 드라이버 수가 2가 아님
+VC42,laps,정합성,SECTOR_SUM,WARNING,20,WARN,20,WARN,섹터 3개 합과 랩타임 차이 0.5초 초과(잔여 검토)
+VC45,stints,정합성,STINT_OVERLAP,WARNING,3,WARN,3,WARN,다음 스틴트 시작 < 이전 스틴트 종료
+VC35,weather,범위·형식,TRACK_TEMP_SPIKE,WARNING,5,WARN,0,PASS,노면온도가 앞뒤 측정(서로 3도 이내)보다 10도 이상 튀는 단일값(범위 안의 0.0 등)
+VC41,drivers,정합성,SEASON_NUMBER_IDENTITY,WARNING,4,WARN,0,PASS,같은 시즌 driver_number에 full_name이 여러 개
+VC47,drivers,정합성,TEAM_SEQUENCE,WARNING,6,WARN,0,PASS,같은 시즌 앞뒤 세션 소속팀이 같은데 해당 세션만 다름

@@ -17,7 +17,8 @@ REPORTS = ROOT / "data" / "04_reports" / "quality"
 VALIDATION = ROOT / "data" / "04_reports" / "validation"
 INT_COLS = {"rows", "issue_count", "repaired_cells", "repaired_rows", "open_issues", "quarantined_rows", "detected",
             "repaired", "accepted", "open", "residual_after_repair", "fail_count", "total_count", "raw_rows",
-            "unchanged_rows", "removed_rows", "processed_sum", "difference", "cleaned_rows", "analysis_rows"}
+            "unchanged_rows", "removed_rows", "processed_sum", "difference", "cleaned_rows", "analysis_rows",
+            "before_fail_count", "after_fail_count", "error_detected", "quarantined", "remaining"}
 SEVERITY_ORDER = {"ERROR": 0, "WARNING": 1, "INFO": 2}
 
 
@@ -54,7 +55,13 @@ def _guard(fn):
 def recovery_summary():
     path = REPORTS / "run_result.json"
     data = json.loads(path.read_text(encoding="utf-8"))
-    return {"data": data, "updated": _mtime(path), "report": REPORTS / "quality_report.html"}
+    fails = REPORTS / "fail_before_after.csv"
+    fail = None
+    if fails.exists():  # 0.3.0 이후 리포트에만 있음
+        rows = _read_csv(fails)
+        fail = {"before": sum(r["before_status"] == "FAIL" for r in rows), "after": sum(r["after_status"] == "FAIL" for r in rows),
+                "files": len(rows)}
+    return {"data": data, "fail": fail, "updated": _mtime(path), "report": REPORTS / "quality_report.html"}
 
 
 @_guard
@@ -90,7 +97,10 @@ def error_analysis():
 def pandas_validation():
     rows = _read_csv(VALIDATION / "validation_result.csv")
     recon = _read_csv(VALIDATION / "row_reconciliation.csv")
+    compare = VALIDATION / "validation_before_after.csv"
+    before = _read_csv(compare) if compare.exists() else []
     return {"counts": _status_counts(rows), "issues": [r for r in rows if r["status"] in ("FAIL", "WARN")],
+            "before_fail": sum(r["before_status"] == "FAIL" for r in before) if before else None, "before_after": before,
             "recon": recon, "rows": rows, "updated": _mtime(VALIDATION / "validation_result.csv"),
             "report": VALIDATION / "validation_report.html"}
 

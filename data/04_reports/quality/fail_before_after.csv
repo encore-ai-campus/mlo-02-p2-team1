@@ -1,0 +1,7 @@
+﻿file,error_detected,repaired,accepted,quarantined,remaining,before_status,after_status,codes
+sessions.csv,2,2,0,0,0,FAIL,PASS,DQ015 2
+drivers.csv,24,24,0,0,0,FAIL,REVIEW,"DQ016 20, DQ017 4"
+laps.csv,102,58,42,2,0,FAIL,REVIEW,DQ019 102
+stints.csv,11,0,11,0,0,FAIL,REVIEW,DQ010 11
+weather.csv,0,0,0,0,0,PASS,PASS,
+pit.csv,2,0,0,2,0,FAIL,REVIEW,DQ021 2

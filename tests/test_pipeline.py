@@ -25,6 +25,28 @@ def read(path):
     return pd.read_csv(path, dtype=str, keep_default_na=False)
 
 
+class FileStatusTest(unittest.TestCase):
+    """파일 판정 규칙: FAIL(체크섬·명세 불일치, 격리 안 된 ERROR 미해결) > REVIEW(그 밖의 미해결) > PASS."""
+    MANIFEST_OK = {"checksum": "MATCH", "spec_row_count": "MATCH", "schema": "OK"}
+
+    def issues(self, *rows):
+        return pd.DataFrame(rows, columns=["diagnostic_code", "severity", "status", "action"])
+
+    def test_pass_and_review(self):
+        self.assertEqual(rp.file_status(self.issues(("DQ001", "WARNING", "REPAIRED", "AUTO_FIX")), self.MANIFEST_OK), ("PASS", ""))
+        self.assertEqual(rp.file_status(self.issues(("DQ001", "WARNING", "OPEN", "REVIEW")), self.MANIFEST_OK)[0], "REVIEW")
+
+    def test_open_error_fails_unless_quarantined(self):
+        status, reason = rp.file_status(self.issues(("DQ019", "ERROR", "OPEN", "REVIEW"), ("DQ019", "ERROR", "OPEN", "REVIEW")), self.MANIFEST_OK)
+        self.assertEqual((status, reason), ("FAIL", "DQ019 ERROR 미해결 2건"))
+        self.assertEqual(rp.file_status(self.issues(("DQ021", "ERROR", "OPEN", "QUARANTINE")), self.MANIFEST_OK)[0], "REVIEW")
+
+    def test_manifest_mismatch_fails(self):
+        status, reason = rp.file_status(self.issues(), dict(self.MANIFEST_OK, checksum="MISMATCH"))
+        self.assertEqual((status, reason), ("FAIL", "원본 체크섬 불일치"))
+        self.assertEqual(rp.file_status(self.issues(), dict(self.MANIFEST_OK, schema="MISSING"))[0], "FAIL")
+
+
 @unittest.skipUnless(INPUT.is_file() or (INPUT / "all_years" / "laps.csv").exists() or (INPUT / "laps.csv").exists(), "입력 데이터 없음")
 class PipelineReportTest(unittest.TestCase):
     @classmethod
@@ -98,6 +120,20 @@ class PipelineReportTest(unittest.TestCase):
         verstappen = self.repaired["drivers.csv"].query("full_name == 'Max VERSTAPPEN'")["country_code"]
         self.assertEqual(set(verstappen) - {""}, {"NED"})
 
+    def test_lap_row_swap_repaired(self):
+        # 9912 #87 랩 3·4는 기록 전체가 바뀌어 들어옴 → 교환 후 앞뒤 랩 시각·랩타임이 이어져야 한다
+        laps = self.repaired["laps.csv"].set_index(["session_key", "driver_number", "lap_number"])
+        self.assertEqual(laps.at[("9912", "87", "3"), "lap_duration"], "85.42")
+        self.assertTrue(laps.at[("9912", "87", "3"), "date_start"].startswith("2025-09-07 13:06:32.849"))
+        self.assertEqual(laps.at[("9912", "87", "4"), "lap_duration"], "84.885")
+
+    def test_no_unquarantined_open_error(self):
+        # ERROR 등급 미해결 이슈는 격리되거나 없어야 하고, 그렇지 않으면 실행 결과가 FAIL이어야 한다
+        open_error = self.issues[(self.issues["status"] == "OPEN") & (self.issues["severity"] == "ERROR") & (self.issues["action"] != "QUARANTINE")]
+        self.assertEqual(len(open_error), 0, open_error.head().to_string())
+        self.assertNotIn("FAIL", set(self.files["status"]))
+        self.assertNotEqual(self.info["status"], "FAIL")
+
     def test_no_statistical_imputation(self):
         # 기획서 4.2: 결측은 임의 보정하지 않는다 → 속도 결측은 그대로 남아야 한다
         laps = self.repaired["laps.csv"]
@@ -109,6 +145,41 @@ class PipelineReportTest(unittest.TestCase):
         for sub in ["repaired", "reports"]:
             for path in (self.out / sub).glob("*.csv"):
                 self.assertEqual(path.read_bytes(), (out2 / sub / path.name).read_bytes(), path.name)
+
+
+
+EXTRA = ROOT / "data" / "01_raw" / "f1_extra_data"
+CLEANED = ROOT / "data" / "03_cleaned" / "repaired" / "laps.csv"
+
+
+@unittest.skipUnless(CLEANED.exists() and (EXTRA.exists() or EXTRA.with_suffix(".zip").exists()), "정제 결과·추가 데이터 없음")
+class DriverSwapTest(unittest.TestCase):
+    """드라이버 교체 시뮬레이션: 확률 범위, 실제 결과 재현력, 재실행 동일성."""
+
+    @classmethod
+    def setUpClass(cls):
+        from pipeline import driver_swap as ds
+        cls.ds = ds
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.meta, cls.sc, cls.cal = ds.run(2025, "Aston Martin", "Lance STROLL", sims=400, out=Path(cls.tmp.name) / "a")
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def test_probabilities_in_range(self):
+        for col in ["p_win_any", "p_podium_any", "p_driver_title", "p_team_rank_le_6"]:
+            self.assertTrue(self.sc[col].between(0, 1).all(), col)
+        self.assertEqual(self.sc["scenario"].iat[0], "실제 라인업")
+        self.assertGreater(len(self.sc), 10)
+
+    def test_reproduces_actual_team_points(self):
+        team = pd.read_csv(Path(self.tmp.name) / "a" / "calibration_team_points.csv")
+        self.assertGreater(team["expected_points"].corr(team["actual_points"]), 0.9)
+
+    def test_rerun_is_identical(self):
+        _, sc2, _ = self.ds.run(2025, "Aston Martin", "Lance STROLL", sims=400, out=Path(self.tmp.name) / "b")
+        pd.testing.assert_frame_equal(self.sc, sc2)
 
 
 if __name__ == "__main__":

@@ -117,6 +117,7 @@ VC33,RANGE,범위·형식,DATETIME_PARSE,weather,ERROR,0,13928,PASS,일시 변�
 VC33,RANGE,범위·형식,DATETIME_PARSE,position,ERROR,0,42952,PASS,일시 변환 실패 또는 세션 종료<시작,
 VC33,RANGE,범위·형식,DATETIME_PARSE,race_control,ERROR,0,9499,PASS,일시 변환 실패 또는 세션 종료<시작,
 VC33,RANGE,범위·형식,DATETIME_PARSE,intervals,ERROR,0,2107568,PASS,일시 변환 실패 또는 세션 종료<시작,
+VC35,RANGE,범위·형식,TRACK_TEMP_SPIKE,weather,WARNING,0,13928,PASS,노면온도가 앞뒤 측정(서로 3도 이내)보다 10도 이상 튀는 단일값(범위 안의 0.0 등),
 VC34,RANGE,범위·형식,RESULT_STATUS_EXCLUSIVE,session_result,ERROR,0,1771,PASS,dnf·dns·dsq 중 2개 이상 True,
 VC40,CONSISTENCY,정합성,TEAM_DRIVER_COUNT,drivers,WARNING,3,887,WARN,세션별 팀 소속 드라이버 수가 2가 아님,
 VC41,CONSISTENCY,정합성,SEASON_NUMBER_IDENTITY,drivers,WARNING,0,91,PASS,같은 시즌 driver_number에 full_name이 여러 개,
@@ -124,6 +125,8 @@ VC42,CONSISTENCY,정합성,SECTOR_SUM,laps,WARNING,20,96597,WARN,섹터 3개 합
 VC43,CONSISTENCY,정합성,PIT_DURATION_SPLIT,pit,ERROR,0,3029,PASS,lane_duration과 pit_duration 불일치(격리 행 제외),격리 행 2건 제외
 VC44,CONSISTENCY,정합성,RESULT_LAPS_VS_LAPS,session_result,WARNING,0,1759,PASS,session_result.number_of_laps와 laps 최대 랩 차이 1랩 초과,
 VC45,CONSISTENCY,정합성,STINT_OVERLAP,stints,WARNING,3,5040,WARN,다음 스틴트 시작 < 이전 스틴트 종료,
+VC46,CONSISTENCY,정합성,LAP_START_CONSISTENT,laps,ERROR,0,95155,PASS,랩 시작 시각이 앞 랩 시작+소요시간과 1초 초과 차이(격리 행·정제 단계 DQ019 허용 행 제외),격리 2건·DQ019 허용 42건 제외
+VC47,CONSISTENCY,정합성,TEAM_SEQUENCE,drivers,WARNING,0,1771,PASS,같은 시즌 앞뒤 세션 소속팀이 같은데 해당 세션만 다름,
 VC50,POINTS,포인트,SOURCE_POINTS_DIFF,session_result,INFO,47,1771,INFO,원천 points와 재계산 race_base_points 차이(최속 랩 보너스·원천 누락 확인용),"-18점 2건, -15점 1건, -12점 1건, -10점 1건, -8점 1건, -6점 1건, -4점 1건, -2점 1건, -1점 1건, +1점 37건"
 VC51,POINTS,포인트,DRIVER_TEAM_POINTS_SUM,session_result×drivers,ERROR,0,91,PASS,Race별 드라이버 기본 포인트 합 ≠ 팀 기본 포인트 합,"Race 87개·시즌 4개 대조, 행 수 1771→1771"
 VC52,POINTS,포인트,RACE_TOTAL_101,session_result,WARNING,0,87,PASS,Race별 기본 포인트 합계가 101점이 아님,
@@ -135,7 +138,7 @@ VC60,RECONCILE,대사,ROW_RECONCILE,drivers,ERROR,0,1771,PASS,원본(bronze_mani
 VC61,RECONCILE,대사,QUARANTINE_FLAG,drivers,INFO,0,1771,INFO,quarantine_flag=Y 행 수(격리 대상 참고),quarantine/drivers.csv 0행
 VC62,RECONCILE,대사,CHANGE_WITHOUT_RECORD,drivers,ERROR,0,1771,PASS,original_* 와 값이 다른데 repair_status가 REPAIRED가 아님,
 VC60,RECONCILE,대사,ROW_RECONCILE,laps,ERROR,0,97018,PASS,원본(bronze_manifest) 행 수와 정제 후 행 수 불일치,원본 97018 / 정제 97018
-VC61,RECONCILE,대사,QUARANTINE_FLAG,laps,INFO,0,97018,INFO,quarantine_flag=Y 행 수(격리 대상 참고),quarantine/laps.csv 0행
+VC61,RECONCILE,대사,QUARANTINE_FLAG,laps,INFO,2,97018,INFO,quarantine_flag=Y 행 수(격리 대상 참고),quarantine/laps.csv 2행
 VC62,RECONCILE,대사,CHANGE_WITHOUT_RECORD,laps,ERROR,0,97018,PASS,original_* 와 값이 다른데 repair_status가 REPAIRED가 아님,
 VC60,RECONCILE,대사,ROW_RECONCILE,stints,ERROR,0,5040,PASS,원본(bronze_manifest) 행 수와 정제 후 행 수 불일치,원본 5040 / 정제 5040
 VC61,RECONCILE,대사,QUARANTINE_FLAG,stints,INFO,0,5040,INFO,quarantine_flag=Y 행 수(격리 대상 참고),quarantine/stints.csv 0행

@@ -1,11 +1,11 @@
 # F1 오염 데이터 검증·복구 리포트
 
-파이프라인 0.2.0 · 입력 `data\01_raw\F1_distribution.zip` · run_id `3d8d8eebc0fc`  
+파이프라인 0.3.0 · 입력 `data/01_raw/F1_distribution.zip` · run_id `32197d11756d`  
 전체 샘플과 원자료: [quality_report.html](./quality_report.html) (내려받아 브라우저로 열기) · `validation_issues.csv` · `repair_detail.csv`
 
 | 탐지 | 자동 복구 | 허용(원천 특성) | 검토 필요 | 격리 행 |
 |---:|---:|---:|---:|---:|
-| 28,052 | 1,335 | 24,824 | 1,893 | 2 |
+| 28,071 | 1,357 | 24,866 | 1,848 | 4 |
 
 ## 1. Bronze 매니페스트
 
@@ -20,16 +20,31 @@
 | weather.csv | 13,928 | 10 | 13,928 | 10 | MATCH | OK | OK | MATCH | utf-8 | 1,053,799 |
 | pit.csv | 3,029 | 8 | 3,029 | 8 | MATCH | OK | OK | MATCH | utf-8 | 192,135 |
 
-## 2. 파일별 처리 결과
+## 2. FAIL 정제 전후 (ERROR 등급)
 
-| file | rows | issue_count | repaired_cells | repaired_rows | open_issues | quarantined_rows | status |
-|---|---|---|---|---|---|---|---|
-| sessions.csv | 87 | 2 | 2 | 2 | 0 | 0 | PASS |
-| drivers.csv | 1,771 | 928 | 742 | 724 | 137 | 0 | REVIEW |
-| laps.csv | 97,018 | 26,814 | 527 | 525 | 1,523 | 0 | REVIEW |
-| stints.csv | 5,040 | 79 | 59 | 36 | 9 | 0 | REVIEW |
-| weather.csv | 13,928 | 5 | 5 | 5 | 0 | 0 | PASS |
-| pit.csv | 3,029 | 224 | 0 | 0 | 224 | 2 | REVIEW |
+ERROR 등급 결함은 남아 있으면 FAIL이다. 정제 전에는 탐지된 ERROR가 모두 FAIL 사유이고, 정제 후에는 복구·허용·격리되지 않고 남은 ERROR만 FAIL 사유다. 정제 전 FAIL 파일 5개 → 정제 후 0개.
+
+| file | error_detected | repaired | accepted | quarantined | remaining | before_status | after_status | codes |
+|---|---|---|---|---|---|---|---|---|
+| sessions.csv | 2 | 2 | 0 | 0 | 0 | FAIL | PASS | DQ015 2 |
+| drivers.csv | 24 | 24 | 0 | 0 | 0 | FAIL | REVIEW | DQ016 20, DQ017 4 |
+| laps.csv | 102 | 58 | 42 | 2 | 0 | FAIL | REVIEW | DQ019 102 |
+| stints.csv | 11 | 0 | 11 | 0 | 0 | FAIL | REVIEW | DQ010 11 |
+| weather.csv | 0 | 0 | 0 | 0 | 0 | PASS | PASS |  |
+| pit.csv | 2 | 0 | 0 | 2 | 0 | FAIL | REVIEW | DQ021 2 |
+
+## 2-1. 파일별 처리 결과
+
+판정: FAIL = 원본 체크섬·명세 불일치 또는 격리되지 않은 ERROR 등급 미해결 이슈(종료 코드 1), REVIEW = 그 밖의 미해결(OPEN) 이슈, PASS = 미해결 없음.
+
+| file | rows | issue_count | repaired_cells | repaired_rows | open_issues | quarantined_rows | status | fail_reason |
+|---|---|---|---|---|---|---|---|---|
+| sessions.csv | 87 | 2 | 2 | 2 | 0 | 0 | PASS |  |
+| drivers.csv | 1,771 | 928 | 742 | 724 | 137 | 0 | REVIEW |  |
+| laps.csv | 97,018 | 26,833 | 549 | 527 | 1,478 | 2 | REVIEW |  |
+| stints.csv | 5,040 | 79 | 59 | 36 | 9 | 0 | REVIEW |  |
+| weather.csv | 13,928 | 5 | 5 | 5 | 0 | 0 | PASS |  |
+| pit.csv | 3,029 | 224 | 0 | 0 | 224 | 2 | REVIEW |  |
 
 ## 3. 오류 유형별 집계
 
@@ -37,7 +52,7 @@
 |---|---|---|---|---|---|---|
 | INCONSISTENT | 파일 간 불일치 | 2 | 2 | 0 | 0 | 0 |
 | INCONSISTENT | 파일 내 불일치 | 22 | 0 | 0 | 22 | 2 |
-| INVALID | 값 오류 | 99 | 41 | 11 | 47 | 0 |
+| INVALID | 값 오류 | 118 | 63 | 53 | 2 | 2 |
 | MISSING | 결측 | 27,485 | 1,268 | 24,813 | 1,404 | 0 |
 | OUTLIER | 이상치 | 416 | 0 | 0 | 416 | 0 |
 | OVERLAP | 구간 중첩 | 3 | 0 | 0 | 3 | 0 |
@@ -60,7 +75,7 @@ residual_after_repair: 복구 후 같은 규칙으로 다시 검사했을 때 �
 | laps.csv | DQ005 | MISSING_SEGMENT_STATUS | 미니 섹터 상태 결측 | MISSING | 결측 | INFO | 498 | 0 | 498 | 0 | 0 | 498 |
 | laps.csv | DQ006 | LONG_LAP_DURATION | 비정상 장시간 랩 | OUTLIER | 이상치 | WARNING | 195 | 0 | 0 | 195 | 0 | 195 |
 | laps.csv | DQ018 | MISSING_LAP_DURATION | 랩 소요시간 결측 | MISSING | 결측 | WARNING | 373 | 2 | 110 | 261 | 0 | 371 |
-| laps.csv | DQ019 | LAP_DATE_INCONSISTENT | 랩 시작 시각 불일치 | INVALID | 값 오류 | ERROR | 83 | 36 | 0 | 47 | 0 | 47 |
+| laps.csv | DQ019 | LAP_DATE_INCONSISTENT | 랩 시작 시각 불일치 | INVALID | 값 오류 | ERROR | 102 | 58 | 42 | 2 | 2 | 44 |
 | laps.csv | DQ020 | SECTOR_SUM_MISMATCH | 섹터 합계 불일치 | INCONSISTENT | 파일 내 불일치 | WARNING | 20 | 0 | 0 | 20 | 0 | 20 |
 | pit.csv | DQ007 | LONG_PIT_DURATION | 비정상 장시간 피트 | OUTLIER | 이상치 | WARNING | 164 | 0 | 0 | 164 | 0 | 164 |
 | pit.csv | DQ021 | PIT_DURATION_CONFLICT | 피트 시간 컬럼 충돌 | INCONSISTENT | 파일 내 불일치 | ERROR | 2 | 0 | 0 | 2 | 2 | 2 |
@@ -195,17 +210,17 @@ _20건 중 5건 표시_
 
 _263건 중 5건 표시_
 
-#### DQ019 랩 시작 시각 불일치 (83건)
+#### DQ019 랩 시작 시각 불일치 (60건)
 
 | severity | file | row_key | field | observed_value | expected_value | evidence | action | status |
 |---|---|---|---|---|---|---|---|---|
-| ERROR | laps.csv | 10014\|14\|22 | date_start | 2025-04-13 15:39:12.402000+00:00 | 2025-04-13 15:39:14.348000+00:00 | 앞 랩 기준 예상과 -1.946초 차이(적기·세이프티카·체커 이후 등 원천 특성 가능, 근거 부족으로 미수정) | REVIEW | OPEN |
 | ERROR | laps.csv | 10014\|22\|2 | date_start | 2025-04-13 15:07:13.477000+00:00 | 2025-04-13 15:05:34.495000+00:00 | 다음 랩과 시작 시각이 서로 바뀜(교환 시 앞뒤 랩타임과 일치) | AUTO_FIX | REPAIRED |
 | ERROR | laps.csv | 10014\|22\|3 | date_start | 2025-04-13 15:05:34.495000+00:00 | 2025-04-13 15:07:13.477000+00:00 | 이전 랩과 시작 시각이 서로 바뀜(교환 시 앞뒤 랩타임과 일치) | AUTO_FIX | REPAIRED |
 | ERROR | laps.csv | 10014\|63\|7 | date_start | 2025-04-13 15:15:19.418000+00:00 | 2025-04-13 15:13:40.701000+00:00 | 다음 랩과 시작 시각이 서로 바뀜(교환 시 앞뒤 랩타임과 일치) | AUTO_FIX | REPAIRED |
 | ERROR | laps.csv | 10014\|63\|8 | date_start | 2025-04-13 15:13:40.701000+00:00 | 2025-04-13 15:15:19.418000+00:00 | 이전 랩과 시작 시각이 서로 바뀜(교환 시 앞뒤 랩타임과 일치) | AUTO_FIX | REPAIRED |
+| ERROR | laps.csv | 10014\|63\|38 | date_start | 2025-04-13 16:08:36.135000+00:00 | 2025-04-13 16:07:25.751000+00:00 | 앞 랩 시작+소요시간과 다음 랩 시작-소요시간이 0.5초 이내로 일치 | AUTO_FIX | REPAIRED |
 
-_83건 중 5건 표시_
+_60건 중 5건 표시_
 
 #### DQ020 섹터 합계 불일치 (20건)
 
@@ -296,4 +311,4 @@ _57건 중 5건 표시_
 | DQ001 | drivers.csv | 9693\|7 | country_code |  | AUS | driver_consensus | HIGH | 같은 드라이버의 다른 1개 세션 값이 모두 AUS |
 | DQ001 | drivers.csv | 9693\|10 | country_code |  | FRA | driver_consensus | HIGH | 같은 드라이버의 다른 46개 세션 값이 모두 FRA |
 
-_1,335건 중 30건 표시_
+_1,357건 중 30건 표시_

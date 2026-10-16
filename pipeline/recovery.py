@@ -8,12 +8,12 @@
 """
 from __future__ import annotations
 
-import argparse, hashlib, html, io, json, os, re, zipfile
+import argparse, hashlib, html, io, json, os, re, sys, zipfile
 from pathlib import Path
 
 import pandas as pd
 
-PIPELINE_VERSION = "0.2.0"
+PIPELINE_VERSION = "0.3.0"
 FILES = ["sessions.csv", "drivers.csv", "laps.csv", "stints.csv", "weather.csv", "pit.csv"]
 SCHEMA = {
     "drivers.csv": "broadcast_name country_code driver_number first_name full_name headshot_url last_name meeting_key name_acronym session_key team_colour team_name".split(),
@@ -378,40 +378,77 @@ def lap_frame(laps):
     return frame.sort_values(["sk", "dn", "ln"])
 
 
+LAP_ROW_FIELDS = [c for c in SCHEMA["laps.csv"] if c not in ("session_key", "driver_number", "lap_number", "meeting_key")]
+LAP_DATE_JITTER = 3          # 앞 랩 기준 1~3초 차이는 원천 타이밍 오차로 허용
+LAP_DATE_SHARED_DRIVERS = 2  # 같은 세션·같은 랩(±1)에서 이만큼 이상 드라이버가 함께 어긋나면 세션 공통 사건
+
+
 def check_lap_dates(data, lg):
-    """앞 랩 시작+소요시간과 맞지 않는 시작 시각을 찾아 인접 교환 또는 앞뒤 근거로 복구."""
+    """앞 랩 시작+소요시간과 맞지 않는 시작 시각을 찾아 인접 교환 또는 앞뒤 근거로 복구.
+
+    복구 근거가 없으면: 여러 드라이버가 같은 랩에서 함께 어긋나면 적기·체커 이후 등 세션 공통 사건으로,
+    3초 이내 차이는 원천 타이밍 오차로 허용(ACCEPTED). 그 밖의 행은 분석에서 빼도록 격리한다.
+    """
     laps = data["laps.csv"]
     frame = lap_frame(laps)
-    one = pd.Timedelta(seconds=1)
+    one, half = pd.Timedelta(seconds=1), pd.Timedelta(seconds=0.5)
+    unresolved = []
     for _, group in frame.groupby(["sk", "dn"], sort=False):
         idx = list(group.index)
         t = {i: frame.at[i, "t"] for i in idx}
+        ld = {i: frame.at[i, "ld"] for i in idx}
         for pos in range(1, len(idx)):
             i, prev = idx[pos], idx[pos - 1]
-            if frame.at[i, "ln"] != frame.at[prev, "ln"] + 1 or pd.isna(t[i]) or pd.isna(t[prev]) or pd.isna(frame.at[prev, "ld"]):
+            if frame.at[i, "ln"] != frame.at[prev, "ln"] + 1 or pd.isna(t[i]) or pd.isna(t[prev]) or pd.isna(ld[prev]):
                 continue
-            expected = t[prev] + pd.Timedelta(seconds=float(frame.at[prev, "ld"]))
+            expected = t[prev] + pd.Timedelta(seconds=float(ld[prev]))
             if abs(t[i] - expected) <= one:
                 continue
             nxt = idx[pos + 1] if pos + 1 < len(idx) else None
-            if nxt is not None and pd.notna(t[nxt]) and abs(t[nxt] - expected) <= pd.Timedelta(seconds=0.5) and pd.notna(frame.at[i, "ld"]) \
-                    and abs(t[i] - (t[nxt] + pd.Timedelta(seconds=float(frame.at[i, "ld"])))) <= pd.Timedelta(seconds=0.5):
+            if nxt is not None and pd.notna(t[nxt]) and abs(t[nxt] - expected) <= half and pd.notna(ld[i]) \
+                    and abs(t[i] - (t[nxt] + pd.Timedelta(seconds=float(ld[i])))) <= half:
                 old_i, old_n = laps.at[i, "date_start"], laps.at[nxt, "date_start"]
                 lg.repair("laps.csv", "DQ019", i, "date_start", old_n, "adjacent_swap", "HIGH", "다음 랩과 시작 시각이 서로 바뀜(교환 시 앞뒤 랩타임과 일치)")
                 lg.repair("laps.csv", "DQ019", nxt, "date_start", old_i, "adjacent_swap", "HIGH", "이전 랩과 시작 시각이 서로 바뀜(교환 시 앞뒤 랩타임과 일치)")
                 if lg.fix:
                     t[i], t[nxt] = t[nxt], t[i]
                 continue
-            if nxt is not None and pd.notna(t[nxt]) and pd.notna(frame.at[i, "ld"]):
-                from_next = t[nxt] - pd.Timedelta(seconds=float(frame.at[i, "ld"]))
-                if abs(from_next - expected) <= pd.Timedelta(seconds=0.5):
+            # 두 랩의 기록 전체(시각·랩타임·섹터 등)가 랩 번호만 바뀐 채 들어간 경우: 교환하면 앞뒤 랩과 모두 맞는다
+            if nxt is not None and pd.notna(t[nxt]) and abs(t[nxt] - expected) <= half and pd.notna(ld[nxt]) \
+                    and abs(t[i] - (t[nxt] + pd.Timedelta(seconds=float(ld[nxt])))) <= half:
+                evidence = f"랩 {fmt_num(frame.at[i, 'ln'], 0)}·{fmt_num(frame.at[nxt, 'ln'], 0)}의 기록 전체가 서로 바뀜(교환 시 시작 시각과 랩타임이 앞뒤 랩과 일치)"
+                pairs = [(f, laps.at[i, f], laps.at[nxt, f]) for f in LAP_ROW_FIELDS if laps.at[i, f] != laps.at[nxt, f]]
+                for field, vi, vn in pairs:
+                    lg.repair("laps.csv", "DQ019", i, field, vn, "adjacent_row_swap", "HIGH", evidence)
+                    lg.repair("laps.csv", "DQ019", nxt, field, vi, "adjacent_row_swap", "HIGH", evidence)
+                if lg.fix:
+                    t[i], t[nxt], ld[i], ld[nxt] = t[nxt], t[i], ld[nxt], ld[i]
+                continue
+            if nxt is not None and pd.notna(t[nxt]) and pd.notna(ld[i]):
+                from_next = t[nxt] - pd.Timedelta(seconds=float(ld[i]))
+                if abs(from_next - expected) <= half:
                     lg.repair("laps.csv", "DQ019", i, "date_start", fmt_ts(expected), "prev_lap_plus_duration", "MEDIUM",
                               "앞 랩 시작+소요시간과 다음 랩 시작-소요시간이 0.5초 이내로 일치")
                     if lg.fix:
                         t[i] = expected
                     continue
-            lg.issue("laps.csv", "DQ019", i, "date_start", expected=fmt_ts(expected),
-                     evidence=f"앞 랩 기준 예상과 {(t[i] - expected).total_seconds():+.3f}초 차이(적기·세이프티카·체커 이후 등 원천 특성 가능, 근거 부족으로 미수정)", action="REVIEW")
+            unresolved.append((i, expected, (t[i] - expected).total_seconds()))
+
+    # 근거가 없는 행 분류: 세션 공통 사건 → 타이밍 오차 → 격리
+    rows = pd.DataFrame([(i, frame.at[i, "sk"], frame.at[i, "dn"], frame.at[i, "ln"]) for i, _, _ in unresolved], columns=["i", "sk", "dn", "ln"])
+    for i, expected, diff in unresolved:
+        me = rows[rows["i"] == i].iloc[0]
+        shared = rows[(rows["sk"] == me["sk"]) & ((rows["ln"] - me["ln"]).abs() <= 1)]["dn"].nunique()
+        base = f"앞 랩 기준 예상과 {diff:+.3f}초 차이"
+        if shared >= LAP_DATE_SHARED_DRIVERS:
+            lg.issue("laps.csv", "DQ019", i, "date_start", expected=fmt_ts(expected), action="ACCEPT", status="ACCEPTED",
+                     evidence=f"{base}, 같은 세션 {fmt_num(me['ln'], 0)}랩 전후로 드라이버 {shared}명이 함께 어긋남(적기·체커 이후 등 세션 공통 사건)")
+        elif abs(diff) <= LAP_DATE_JITTER:
+            lg.issue("laps.csv", "DQ019", i, "date_start", expected=fmt_ts(expected), action="ACCEPT", status="ACCEPTED",
+                     evidence=f"{base}, {LAP_DATE_JITTER}초 이내 원천 타이밍 오차")
+        else:
+            lg.issue("laps.csv", "DQ019", i, "date_start", expected=fmt_ts(expected), action="QUARANTINE",
+                     evidence=f"{base}, 단독 발생이고 복구 근거가 없어 분석에서 제외")
 
 
 def check_lap_missing(data, lg):
@@ -601,17 +638,54 @@ def summarize(data, ledger, residual, catalogue):
                                        "detected", "repaired", "accepted", "open", "quarantined_rows", "residual_after_repair"])
 
 
-def file_summary(annotated, ledger):
+def file_status(part, manifest_row):
+    """FAIL: 원본 체크섬·명세 불일치 또는 격리되지 않은 ERROR 등급 미해결 이슈. REVIEW: 그 밖의 미해결 이슈. PASS: 미해결 없음."""
+    reasons = []
+    if manifest_row is not None:
+        if manifest_row["checksum"] == "MISMATCH":
+            reasons.append("원본 체크섬 불일치")
+        if manifest_row["spec_row_count"] == "MISMATCH" or manifest_row["schema"] != "OK":
+            reasons.append("명세서 행·컬럼 불일치")
+    if len(part):
+        open_ = part[part["status"] == "OPEN"]
+        error = open_[(open_["severity"] == "ERROR") & (open_["action"] != "QUARANTINE")]
+        for code, n in error["diagnostic_code"].value_counts().sort_index().items():
+            reasons.append(f"{code} ERROR 미해결 {n}건")
+        if reasons:
+            return "FAIL", "; ".join(reasons)
+        return ("REVIEW" if len(open_) else "PASS"), ""
+    return ("FAIL" if reasons else "PASS"), "; ".join(reasons)
+
+
+def file_summary(annotated, ledger, manifest=None):
     issues = pd.DataFrame(ledger.issues)
+    by_file = manifest.set_index("file") if manifest is not None and len(manifest) else None
     rows = []
     for name, df in annotated.items():
         part = issues[issues["file"] == name] if not issues.empty else issues
+        status, reason = file_status(part, by_file.loc[name] if by_file is not None and name in by_file.index else None)
         rows.append({"file": name, "rows": len(df), "issue_count": len(part),
                      "repaired_cells": int((part["status"] == "REPAIRED").sum()) if len(part) else 0,
                      "repaired_rows": int((df["repair_status"] == "REPAIRED").sum()),
                      "open_issues": int((part["status"] == "OPEN").sum()) if len(part) else 0,
                      "quarantined_rows": int((df["quarantine_flag"] == "Y").sum()),
-                     "status": "PASS" if not len(part) or not (part["status"] == "OPEN").any() else "REVIEW"})
+                     "status": status, "fail_reason": reason})
+    return pd.DataFrame(rows)
+
+
+def fail_before_after(issues, files_df):
+    """ERROR 등급 결함의 정제 전후: 정제 전에는 탐지된 ERROR가 모두 FAIL 사유, 정제 후에는 격리되지 않은 미해결만 FAIL 사유."""
+    err = issues[issues["severity"] == "ERROR"]
+    rows = []
+    for name in files_df["file"]:
+        part = err[err["file"] == name]
+        after = part[(part["status"] == "OPEN") & (part["action"] != "QUARANTINE")]
+        rows.append({"file": name, "error_detected": len(part), "repaired": int((part["status"] == "REPAIRED").sum()),
+                     "accepted": int((part["status"] == "ACCEPTED").sum()),
+                     "quarantined": int(((part["status"] == "OPEN") & (part["action"] == "QUARANTINE")).sum()),
+                     "remaining": len(after), "before_status": "FAIL" if len(part) else "PASS",
+                     "after_status": files_df.loc[files_df["file"] == name, "status"].iat[0],
+                     "codes": ", ".join(f"{c} {n}" for c, n in part["diagnostic_code"].value_counts().sort_index().items())})
     return pd.DataFrame(rows)
 
 
@@ -646,6 +720,10 @@ def build_report(report_dir, annotated, ledger, manifest, dq_summary, files_df, 
     dq_summary.to_csv(report_dir / "dq_summary.csv", index=False, encoding="utf-8-sig")
     manifest.to_csv(report_dir / "bronze_manifest.csv", index=False, encoding="utf-8-sig")
 
+    fails = fail_before_after(issues, files_df)
+    fails.to_csv(report_dir / "fail_before_after.csv", index=False, encoding="utf-8-sig")
+    fail_note = ("ERROR 등급 결함은 남아 있으면 FAIL이다. 정제 전에는 탐지된 ERROR가 모두 FAIL 사유이고, 정제 후에는 복구·허용·격리되지 않고 남은 ERROR만 FAIL 사유다. "
+                 f"정제 전 FAIL 파일 {int((fails['before_status'] == 'FAIL').sum())}개 → 정제 후 {int((fails['after_status'] == 'FAIL').sum())}개.")
     by_type = dq_summary.groupby(["error_type", "error_type_korean"], as_index=False)[["detected", "repaired", "accepted", "open", "quarantined_rows"]].sum() \
         if len(dq_summary) else dq_summary
     cards = "".join(f"<div>{html.escape(label)}<strong>{value:,}</strong></div>" for label, value in [
@@ -666,7 +744,8 @@ def build_report(report_dir, annotated, ledger, manifest, dq_summary, files_df, 
             "판정 컬럼(spec_row_count·schema·column_order·checksum)이 모두 MATCH/OK이면 정상이다. 해시 값은 증빙용이라 맨 뒤에 앞 12자리만 표시한다(전체 값은 bronze_manifest.csv).</p>" + table(manifest.assign(
                 sha256=manifest["sha256"].str[:12] + "…", sha256_expected=manifest["sha256_expected"].astype(str).str[:12] + "…")) +
             "<details open><summary>컬럼 설명</summary>" + table(pd.DataFrame(MANIFEST_COLUMNS, columns=["컬럼", "의미"])) + "</details>" +
-            "<h2>2. 파일별 처리 결과</h2>" + table(files_df) +
+            f"<h2>2. FAIL 정제 전후 (ERROR 등급)</h2><p class='meta'>{fail_note}</p>" + table(fails) +
+            "<h2>2-1. 파일별 처리 결과</h2><p class='meta'>판정: FAIL = 원본 체크섬·명세 불일치 또는 격리되지 않은 ERROR 등급 미해결 이슈(종료 코드 1), REVIEW = 그 밖의 미해결(OPEN) 이슈, PASS = 미해결 없음.</p>" + table(files_df) +
             "<h2>3. 오류 유형별 집계</h2>" + table(by_type) +
             "<h2>4. 진단코드별 집계</h2><p class='meta'>residual_after_repair: 복구 후 같은 규칙으로 다시 검사했을 때 남은 건수 (= accepted + open 이어야 함)</p>" + table(dq_summary) +
             "<h2>5. 진단코드별 상세 샘플 (허용 제외, 코드당 20건)</h2>" + "".join(samples) +
@@ -689,7 +768,8 @@ def build_report(report_dir, annotated, ledger, manifest, dq_summary, files_df, 
           "## 1. Bronze 매니페스트\n\n원본 파일이 배포본 그대로인지(체크섬)와 명세서의 행·컬럼 구성과 같은지 확인한다. "
           "판정 컬럼(spec_row_count·schema·column_order·checksum)이 모두 MATCH/OK이면 정상이다.\n\n" +
           md_table(manifest.drop(columns=["sha256", "sha256_expected"], errors="ignore")) +
-          "\n## 2. 파일별 처리 결과\n\n" + md_table(files_df) +
+          f"\n## 2. FAIL 정제 전후 (ERROR 등급)\n\n{fail_note}\n\n" + md_table(fails) +
+          "\n## 2-1. 파일별 처리 결과\n\n판정: FAIL = 원본 체크섬·명세 불일치 또는 격리되지 않은 ERROR 등급 미해결 이슈(종료 코드 1), REVIEW = 그 밖의 미해결(OPEN) 이슈, PASS = 미해결 없음.\n\n" + md_table(files_df) +
           "\n## 3. 오류 유형별 집계\n\n" + md_table(by_type) +
           "\n## 4. 진단코드별 집계\n\nresidual_after_repair: 복구 후 같은 규칙으로 다시 검사했을 때 남은 건수 (= accepted + open 이어야 함)\n\n" + md_table(dq_summary) +
           "\n## 5. 진단코드별 상세 샘플 (허용 제외, 코드당 5건)\n" + md_samples +
@@ -718,7 +798,7 @@ def run(input_path: Path, out: Path, catalogue_path: Path = DICT_PATH, report_di
         df.drop(columns=["source_row"]).to_csv(out / "repaired" / name, index=False, encoding="utf-8-sig")
         df[df["quarantine_flag"] == "Y"].to_csv(out / "quarantine" / name, index=False, encoding="utf-8-sig")
     dq_summary = summarize(data, ledger, residual, catalogue)
-    files_df = file_summary(annotated, ledger)
+    files_df = file_summary(annotated, ledger, manifest)
     run_id = hashlib.sha256(("".join(manifest["sha256"]) + PIPELINE_VERSION).encode()).hexdigest()[:12]
     run_info = {"run_id": run_id, "pipeline_version": PIPELINE_VERSION, "input": str(input_path), "output": str(out), "report_output": str(report_dir),
                 "issues": len(ledger.issues), "repaired_cells": len(ledger.repairs),
@@ -726,7 +806,9 @@ def run(input_path: Path, out: Path, catalogue_path: Path = DICT_PATH, report_di
                 "accepted_issues": sum(r["status"] == "ACCEPTED" for r in ledger.issues),
                 "quarantined_rows": int(files_df["quarantined_rows"].sum()),
                 "checksum_ok": bool((manifest["checksum"] != "MISMATCH").all()),
-                "spec_ok": bool((manifest["spec_row_count"] != "MISMATCH").all() and (manifest["schema"] == "OK").all())}
+                "spec_ok": bool((manifest["spec_row_count"] != "MISMATCH").all() and (manifest["schema"] == "OK").all()),
+                "status": "FAIL" if (files_df["status"] == "FAIL").any() else ("REVIEW" if (files_df["status"] == "REVIEW").any() else "PASS"),
+                "fail_files": dict(files_df.loc[files_df["status"] == "FAIL", ["file", "fail_reason"]].itertuples(index=False))}
     build_report(report_dir, annotated, ledger, manifest, dq_summary, files_df, run_info)
     return run_info
 
@@ -742,6 +824,10 @@ def main():
     reports = config.get("report_directory")
     info = run(Path(source), Path(config["output_directory"]), report_dir=Path(reports) if reports else None)
     print(json.dumps(info, ensure_ascii=False))
+    if info["status"] == "FAIL":
+        # 결과·리포트는 모두 쓴 뒤 실패로 끝낸다 (관리자 페이지 실행은 여기서 멈춤)
+        print("[FAIL] " + " / ".join(f"{name}: {reason}" for name, reason in info["fail_files"].items()), file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -33,6 +33,7 @@ python -m unittest discover -s tests -v   # 결과·리포트 로직 검증 (약
 - 원천 특성으로 판단되는 항목(1랩 랩타임·시작 시각 결측, 속도 결측, 빈 스틴트 등)은 `ACCEPTED`로 남깁니다.
 - 근거가 부족한 결함은 `OPEN`(검토)으로, 분석을 왜곡하는 미해결 결함은 `quarantine/`으로 격리합니다.
 - 복구 후 같은 규칙으로 다시 검사해 잔여 건수(`residual_after_repair`)를 리포트에 남깁니다.
+- 파일 판정: 원본 체크섬·명세 불일치나 격리되지 않은 ERROR 등급 미해결 결함이 있으면 `FAIL`(리포트를 모두 쓴 뒤 종료 코드 1), 그 밖의 미해결이 있으면 `REVIEW`, 없으면 `PASS`입니다.
 
 주요 탐지·복구 규칙
 
@@ -42,7 +43,7 @@ python -m unittest discover -s tests -v   # 결과·리포트 로직 검증 (약
 | DQ016 | 드라이버 신원(이름·약어) 행 간 뒤바뀜 | 시즌 차량번호 합의값으로 교환 |
 | DQ017 | 소속팀 뒤바뀜 | 앞뒤 세션 소속팀 + 팀 색상 근거로 복구 |
 | DQ001 | 국가 코드 결측 | 같은 드라이버의 다른 세션 값 |
-| DQ019 | 랩 시작 시각 불일치(인접 랩 교환 등) | 인접 교환 또는 앞뒤 랩 기준 복구 |
+| DQ019 | 랩 시작 시각 불일치(인접 랩 교환 등) | 시각 교환·랩 기록 전체 교환·앞뒤 랩 기준 복구, 여러 드라이버 공통(적기 등)·3초 이내는 허용, 그 밖은 격리 |
 | DQ002·DQ018·DQ004 | 시작 시각·랩타임·섹터 결측 | 다음 랩 시각, 섹터 역산으로 복구 |
 | DQ021 | `lane_duration`≠`pit_duration` | 격리 |
 | DQ023 | 노면온도 단일 튐값 | 앞뒤 측정 평균 |
@@ -58,10 +59,11 @@ reports/bronze_manifest.csv   파일별 SHA256·행·열·명세서 일치 여�
 reports/validation_issues.csv 진단 이슈 전체 (코드·오류유형·심각도·조치·상태·근거)
 reports/repair_detail.csv     값 변경 이력 (issue_id로 이슈와 연결)
 reports/dq_summary.csv        파일×진단코드별 탐지/복구/허용/미해결/격리/잔여
-reports/repair_summary.csv    파일별 요약
+reports/repair_summary.csv    파일별 요약 (status: PASS/REVIEW/FAIL, fail_reason)
+reports/fail_before_after.csv 파일별 ERROR 등급 결함의 정제 전후 FAIL 판정
 reports/quality_report.md     위 내용을 묶은 리포트 (GitHub에서 표로 보임, 샘플 축약)
 reports/quality_report.html   같은 리포트의 HTML판 (전체 샘플)
-reports/run_result.json       실행 요약 (run_id는 입력 체크섬+버전 기반, 재실행 시 동일)
+reports/run_result.json       실행 요약 (status·fail_files 포함, run_id는 입력 체크섬+버전 기반, 재실행 시 동일)
 ```
 
 복구 CSV 관리 컬럼: `original_*`, `repair_status`, `repair_method`(코드:컬럼 목록), `repair_confidence`(행 내 최저), `repair_reason`, `dq_codes`, `quarantine_flag`.
@@ -75,7 +77,7 @@ python -m pipeline.validate_cleaned               # 기본: data/03_cleaned + da
 python -m pipeline.validate_cleaned --extra data/01_raw/f1_extra_data.zip
 ```
 
-출력은 `data/04_reports/validation/`의 `validation_report.html`(첫 표가 행 수 대사: 원본 = 원본 유지 + 복구 + 격리 + 제거), `row_reconciliation.csv`, `validation_result.csv`, `validation_samples.csv`, `null_profile.csv`, `validation_report.md`입니다. ERROR 등급 위반이 있으면 종료 코드 1을 반환합니다.
+출력은 `data/04_reports/validation/`의 `validation_report.html`(첫 표가 행 수 대사: 원본 = 원본 유지 + 복구 + 격리 + 제거), `row_reconciliation.csv`, `validation_result.csv`, `validation_samples.csv`, `null_profile.csv`, `validation_report.md`, `validation_before_after.csv`입니다. 같은 검사를 정제 전 값(`original_*`)에도 돌려 정제 전후 FAIL을 비교합니다(`--no-baseline`으로 생략). ERROR 등급 위반이 있으면 종료 코드 1을 반환합니다.
 
 ## MySQL 적재 (sql/)
 
@@ -105,3 +107,14 @@ mysql -u <user> -p <db> < sql/06_create_gold_board.sql                  # Decisi
 ```powershell
 pip install -r requirements.txt
 ```
+
+## 드라이버 교체 시나리오 (driver_swap)
+
+한 팀의 한 자리에 다른 드라이버를 앉히면 우승·포디움·포인트·팀 순위 확률이 어떻게 바뀌는지 정제 결과로 시뮬레이션합니다. 방법·결과·한계는 [docs/05_드라이버교체_우승확률.md](../docs/05_드라이버교체_우승확률.md)에 있습니다.
+
+```powershell
+python -m pipeline.driver_swap                                   # 기본: 2025 Aston Martin Lance STROLL 자리
+python -m pipeline.driver_swap --year 2024 --team Ferrari --driver "Carlos SAINZ" --sims 5000
+```
+
+출력: `data/05_gold/driver_swap/` (`scenarios.csv`, `race_detail.csv`, `calibration*.csv`, `driver_effects.csv`, `report.md`)

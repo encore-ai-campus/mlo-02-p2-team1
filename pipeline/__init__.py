@@ -3,5 +3,6 @@
 - extra_data: 추가 데이터 5종 압축 해제 (python -m pipeline.extra_data, run_web.bat이 자동 실행)
 - recovery: 오염 6종 진단·복구·격리 (python -m pipeline.recovery)
 - validate_cleaned: 정제 결과 + 추가 5종 검증 VC01~VC71 (python -m pipeline.validate_cleaned)
+- driver_swap: 드라이버 교체 시 우승·포디움·포인트 확률 시뮬레이션 (python -m pipeline.driver_swap)
 - dictionary_pdf: 표준사전 PDF 생성 (python -m pipeline.dictionary_pdf)
 """

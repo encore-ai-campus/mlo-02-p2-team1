@@ -82,13 +82,14 @@
       {% else %}<div class="v muted" style="font-size:18px">기록 없음</div>{% endif %}</div>
     <div class="card kpi"><div class="l">정제 이슈 탐지 → 복구 셀</div>
       {% if recovery.data %}<div class="v">{{ recovery.data.issues|num }} → {{ recovery.data.repaired_cells|num }}</div>
-      <div class="s muted">미해결 {{ recovery.data.open_issues|num }} · 격리 {{ recovery.data.quarantined_rows|num }}행</div>
+      <div class="s muted">미해결 {{ recovery.data.open_issues|num }} · 격리 {{ recovery.data.quarantined_rows|num }}행{% if recovery.fail %} · FAIL 파일 {{ recovery.fail.before }} → {{ recovery.fail.after }}{% endif %}</div>
       {% else %}<div class="v muted" style="font-size:18px">결과 없음</div>{% endif %}</div>
     <div class="card kpi"><div class="l">정제 후 검증 (pandas · MySQL)</div>
       <div style="margin-top:4px">
         <div class="row small"><span class="muted" style="width:44px">pandas</span>{% if pandas_v.counts %}{% for s, c in pandas_v.counts %}{% if s == "FAIL" or s == "WARN" %}<span class="badge b-{{ s }}">{{ s }} {{ c }}</span>{% endif %}{% endfor %}{% else %}<span class="muted">결과 없음</span>{% endif %}</div>
         <div class="row small" style="margin-top:4px"><span class="muted" style="width:44px">MySQL</span>{% if mysql_v.counts %}{% for s, c in mysql_v.counts %}{% if s == "FAIL" or s == "WARN" %}<span class="badge b-{{ s }}">{{ s }} {{ c }}</span>{% endif %}{% endfor %}{% else %}<span class="muted">결과 없음</span>{% endif %}</div>
       </div>
+      {% if pandas_v.before_fail is not None %}<div class="s small">정제 전 FAIL {{ pandas_v.before_fail }} → 정제 후 {% for s, c in pandas_v.counts %}{% if s == "FAIL" %}{{ c }}{% endif %}{% endfor %}</div>{% endif %}
       <div class="s muted">{% if compare %}{% if compare.diffs %}두 결과 불일치 {{ compare.diffs|length }}건{% else %}두 결과 일치 ({{ compare.total }}개 검사){% endif %}{% else %}비교 불가{% endif %}</div></div>
     <div class="card kpi"><div class="l">MySQL 적재 대사</div>
       {% if mysql_v.load %}<div class="v" style="font-size:18px"><span class="badge {% if mysql_v.load_ok %}b-ok{% else %}b-FAIL{% endif %}">{% if mysql_v.load_ok %}13개 테이블 일치{% else %}불일치·누락 있음{% endif %}</span></div>
@@ -181,7 +182,7 @@
       <div class="card kpi"><div class="l">실행 ID · 버전</div><div class="v" style="font-size:18px">{{ recovery.data.run_id }}</div><div class="s muted">v{{ recovery.data.pipeline_version }} · 생성 {{ recovery.updated|date:"Y-m-d H:i" }}</div></div>
       <div class="card kpi"><div class="l">탐지 이슈</div><div class="v">{{ recovery.data.issues|num }}</div><div class="s muted">허용 {{ recovery.data.accepted_issues|num }} · 미해결 {{ recovery.data.open_issues|num }}</div></div>
       <div class="card kpi"><div class="l">복구 셀 · 격리 행</div><div class="v">{{ recovery.data.repaired_cells|num }} · {{ recovery.data.quarantined_rows|num }}</div><div class="s muted">근거 기반 복구만 (통계 대체 없음)</div></div>
-      <div class="card kpi"><div class="l">원본 체크섬 · 명세 일치</div><div class="v" style="font-size:18px"><span class="badge {% if recovery.data.checksum_ok %}b-ok{% else %}b-FAIL{% endif %}">체크섬 {% if recovery.data.checksum_ok %}OK{% else %}불일치{% endif %}</span> <span class="badge {% if recovery.data.spec_ok %}b-ok{% else %}b-FAIL{% endif %}">명세 {% if recovery.data.spec_ok %}OK{% else %}불일치{% endif %}</span></div></div>
+      <div class="card kpi"><div class="l">원본 체크섬 · 명세 일치 · 판정</div><div class="v" style="font-size:18px">{% if recovery.data.status %}<span class="badge b-{{ recovery.data.status }}">{{ recovery.data.status }}</span> {% endif %}<span class="badge {% if recovery.data.checksum_ok %}b-ok{% else %}b-FAIL{% endif %}">체크섬 {% if recovery.data.checksum_ok %}OK{% else %}불일치{% endif %}</span> <span class="badge {% if recovery.data.spec_ok %}b-ok{% else %}b-FAIL{% endif %}">명세 {% if recovery.data.spec_ok %}OK{% else %}불일치{% endif %}</span></div></div>
     </div>
     {% endif %}
 
@@ -247,6 +248,16 @@
     <div class="tbl"><table><thead><tr><th>검사</th><th>대상</th><th class="n">pandas</th><th class="n">MySQL</th></tr></thead><tbody>
       {% for d in compare.diffs %}<tr><td>{{ d.check_id }}</td><td>{{ d.target }}</td><td class="n">{{ d.pandas|default_if_none:"없음" }}</td><td class="n">{{ d.mysql|default_if_none:"없음" }}</td></tr>{% endfor %}
     </tbody></table></div>
+    {% endif %}
+
+    {% if pandas_v.before_after %}
+    <h3>정제 전후 비교 (pandas) · FAIL {{ pandas_v.before_fail }} → {% for s, c in pandas_v.counts %}{% if s == "FAIL" %}{{ c }}{% endif %}{% endfor %}</h3>
+    <div class="tbl"><table><thead><tr><th>검사</th><th>규칙</th><th>대상</th><th class="n">정제 전 위반</th><th>정제 전</th><th class="n">정제 후 위반</th><th>정제 후</th></tr></thead><tbody>
+      {% for r in pandas_v.before_after %}<tr><td>{{ r.check_id }}</td><td>{{ r.check_name }}</td><td>{{ r.target }}</td>
+        <td class="n">{{ r.before_fail_count|num }}</td><td><span class="badge b-{{ r.before_status }}">{{ r.before_status }}</span></td>
+        <td class="n">{{ r.after_fail_count|num }}</td><td><span class="badge b-{{ r.after_status }}">{{ r.after_status }}</span></td></tr>{% endfor %}
+    </tbody></table></div>
+    <p class="small muted">같은 검사를 정제 전 값(original_* = 오염 원본)과 정제 후 값에 각각 실행한 결과입니다. 두 쪽 모두 PASS인 항목은 뺐습니다.</p>
     {% endif %}
 
     <h3>FAIL·WARN 검사 항목</h3>

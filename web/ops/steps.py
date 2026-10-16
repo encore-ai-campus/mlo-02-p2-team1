@@ -41,14 +41,15 @@ STEPS = [
     Step("sql06", "Decision Board Gold 테이블 생성 (sql/06)", "Gold", sql="06_create_gold_board.sql"),
     Step("board", "Decision Board Gold 적재·검증 (gold_board_*)", "Gold", command=("web/manage.py", "load_board_gold")),
     Step("gold", "이전 시안용 Gold 계산 (gold_driver/team_profile)", "Gold", command=("web/manage.py", "build_gold")),
+    Step("swap", "드라이버 교체 우승확률 시뮬레이션 (data/05_gold/driver_swap)", "Gold", command=("-m", "pipeline.driver_swap")),
 ]
 STEP_BY_KEY = {s.key: s for s in STEPS}
 
 PRESETS = {
     "clean": ("정제·검증", ["extract", "recovery", "validate"]),
     "load": ("DB 적재", ["extract", "sql01", "sql02", "sql03", "sql04", "sql05"]),
-    "gold": ("Gold 갱신", ["sql06", "board", "gold"]),
-    "all": ("전체 실행", ["extract", "recovery", "validate", "sql01", "sql02", "sql03", "sql04", "sql05", "sql06", "board", "gold"]),
+    "gold": ("Gold 갱신", ["sql06", "board", "gold", "swap"]),
+    "all": ("전체 실행", ["extract", "recovery", "validate", "sql01", "sql02", "sql03", "sql04", "sql05", "sql06", "board", "gold", "swap"]),
 }
 
 
