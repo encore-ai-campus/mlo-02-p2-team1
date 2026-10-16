@@ -32,64 +32,9 @@
 
 ## 전체 흐름: 수집 → 오염 검사 → 정제 → 검증 → MySQL 적재
 
-```mermaid
-flowchart TD
-    subgraph S1["① 수집 · Bronze (data/01_raw, 원본 수정 금지)"]
-        A1["오염 데이터 6종<br/>F1_distribution.zip<br/>sessions · drivers · laps · stints · weather · pit"]
-        A2["OpenF1 API 추가 5종<br/>f1_extra_data.zip<br/>starting_grid · session_result · position · race_control · intervals"]
-        A2 --> X1["pipeline.extra_data<br/>압축 해제"]
-        A1 --> M["Bronze 매니페스트<br/>체크섬 · 명세 행 수 · 스키마 대조"]
-    end
+![F1 데이터 파이프라인: Bronze 수집 → Silver 오염 검사·정제·검증·MySQL 적재 → Gold 분석·화면](./docs/images/f1_pipeline_flow.png)
 
-    subgraph S2["② 오염 검사 · pipeline.recovery"]
-        D["진단 DQ001~DQ027<br/>28,071건 탐지"]
-        D --> C1["수리 1,357셀<br/>근거 있는 것만"]
-        D --> C2["허용 24,866건<br/>실제 경기 상황"]
-        D --> C3["격리 4행<br/>quarantine/"]
-        D --> C4["미해결 1,848건<br/>REVIEW로 공개"]
-        C1 & C2 & C3 & C4 --> J{"파일 판정<br/>FAIL 5 → 0"}
-    end
-
-    subgraph S3["③ 정제 결과 · Silver"]
-        CL["data/03_cleaned<br/>repaired/ 전체 행 + 복구 이력<br/>quarantine/ 격리 행"]
-        QR["품질 리포트<br/>quality_report · fail_before_after"]
-    end
-
-    subgraph S4["④ 검증 · pipeline.validate_cleaned"]
-        V["VC01~VC71 · 154개 검사<br/>정제 전 FAIL 12 → 정제 후 0"]
-        RC["행 대사 120,873행<br/>그대로 + 수리 + 격리 = 원본"]
-    end
-
-    subgraph S5["⑤ MySQL 적재 · sql/01~06"]
-        Q1["sql/01 스테이징 테이블 stg_*"] --> Q2["sql/02 CSV 11종 적재"]
-        Q2 --> Q3["sql/03 같은 154개 검사<br/>pandas 결과와 일치"]
-        Q3 --> Q4["sql/04 정규화 스키마 13개 테이블"]
-        Q4 --> Q5["sql/05 스키마 적재 · 행 수 대사 차이 0"]
-        Q5 --> Q6["sql/06 + load_board_gold<br/>gold_board_* 11개"]
-    end
-
-    subgraph S6["⑥ Gold · 화면 (Django)"]
-        G1["Decision Board /"]
-        G2["적재 테이블 조회 /data/"]
-        G3["파이프라인 관리 /ops/"]
-        G4["교체 시뮬레이션<br/>data/05_gold/driver_swap"]
-    end
-
-    M --> D
-    X1 --> V
-    J -- "PASS · REVIEW" --> CL
-    J -- "FAIL" --> STOP1["중단 · 종료 코드 1"]
-    CL --> QR
-    CL --> V
-    V --> RC
-    V -- "FAIL" --> STOP2["중단 · 종료 코드 1"]
-    RC -- "FAIL 0" --> Q1
-    Q6 --> G1 & G2 & G3
-    CL --> G4
-
-    classDef stop fill:#fde2e2,stroke:#c0392b,color:#7b1d1d
-    class STOP1,STOP2 stop
-```
+실선은 처리 흐름, 점선은 보조 입력·리포트, 빨강은 FAIL이면 종료 코드 1로 멈추는 지점입니다.
 
 | 단계 | 하는 일 | 통과 기준 | 결과물 |
 |---|---|---|---|
