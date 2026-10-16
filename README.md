@@ -207,7 +207,7 @@ STROLL은 후보 누구와도 같은 차를 탄 적이 없어서, 한 번의 비
 
 ![같은 환경 두 가지로 본 후보](./docs/images/selection_scatter.png)
 
-- **오른쪽 위**(차도 빠르고 같은 차 동료도 이김)에 95% 구간이 0 위에 있는 선수는 **RUSSELL·LECLERC 둘**입니다.
+- 오른쪽으로 갈수록 STROLL보다 빠르고, 위로 갈수록 같은 차 동료보다 빠릅니다. **둘 다 빠르고 11가지 조건에서 모두 반복된 선수는 LECLERC·RUSSELL 둘**입니다.
 - NORRIS·PIASTRI는 서로를 거의 못 이깁니다(±0.02초/랩). 둘의 빠름은 McLaren 차의 몫일 수 있습니다.
 - VERSTAPPEN은 동료 대비 차이가 가장 크지만 11개 조건 중 10개에서만 반복돼 기준에 한 칸 못 미칩니다.
 - HAMILTON·ANTONELLI는 각자 동료(LECLERC·RUSSELL)에게 11개 조건 모두 졌습니다.
