@@ -44,6 +44,10 @@ PAIRS = [
     ("STROLL vs ALONSO (Aston Martin)", [2025], "Lance STROLL", "Fernando ALONSO"),
     ("STROLL vs ALONSO (Aston Martin)", [2023, 2024], "Lance STROLL", "Fernando ALONSO"),
 ]
+# 시즌별 동료 비교(2025 한 시즌 결과가 다른 시즌에도 유지되는지): 2025 같은 경기 비교 통과 7명 + 기준 선수
+SEASON_DRIVERS = ["Charles LECLERC", "George RUSSELL", "Lando NORRIS", "Oscar PIASTRI", "Max VERSTAPPEN",
+                  "Lewis HAMILTON", "Kimi ANTONELLI", "Lance STROLL"]
+SEASONS, MIN_SEASON_RACES = [2023, 2024, 2025, 2026], 3
 TYRE_DRIVERS = ["George RUSSELL", "Charles LECLERC", "Lance STROLL", "Lewis HAMILTON", "Fernando ALONSO", "Kimi ANTONELLI"]
 
 
@@ -180,6 +184,18 @@ def main(argv=None):
     tm = pd.DataFrame(rows)
     tm.to_csv(out / "teammate.csv", index=False, encoding="utf-8-sig")
     pd.concat(races).to_csv(out / "teammate_races.csv", index=False, encoding="utf-8-sig")
+
+    by_season = []
+    for y in SEASONS:
+        x = j[j["year"] == y]
+        for d in SEASON_DRIVERS:
+            for team in x.loc[x["full_name"] == d, "team_name"].dropna().unique():
+                for mate in sorted(set(x.loc[x["team_name"] == team, "full_name"]) - {d}):
+                    r, _ = teammate(j, [y], d, mate, rng)
+                    if r["races"] >= MIN_SEASON_RACES:
+                        by_season.append({"driver": d, "year": y, "teammate": mate, **r,
+                                          "clear": "faster" if r["high"] < 0 else ("slower" if r["low"] > 0 else "unclear")})
+    pd.DataFrame(by_season).to_csv(out / "teammate_by_season.csv", index=False, encoding="utf-8-sig")
 
     t = tyre(j)
     t.to_csv(out / "tyre_stints.csv", index=False, encoding="utf-8-sig")

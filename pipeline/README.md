@@ -127,4 +127,4 @@ Gold 후보 지표 중 선정의 핵심인 같은 차 동료 비교와 타이어
 python -m pipeline.driver_check
 ```
 
-출력: `data/05_gold/driver_check/` (`teammate.csv`, `teammate_races.csv`, `tyre_stints.csv`, `tyre_season.csv`, `tyre_2023_2025.csv`)
+출력: `data/05_gold/driver_check/` (`teammate.csv`, `teammate_races.csv`, `teammate_by_season.csv`(2023~2026 시즌별 동료 비교), `tyre_stints.csv`, `tyre_season.csv`, `tyre_2023_2025.csv`)
