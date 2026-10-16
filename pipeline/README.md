@@ -118,3 +118,13 @@ python -m pipeline.driver_swap --year 2024 --team Ferrari --driver "Carlos SAINZ
 ```
 
 출력: `data/05_gold/driver_swap/` (`scenarios.csv`, `race_detail.csv`, `calibration*.csv`, `driver_effects.csv`, `report.md`)
+
+## 후보 선정 근거 재계산 (driver_check)
+
+Gold 후보 지표 중 선정의 핵심인 같은 차 동료 비교와 타이어 유지를 정제 결과에서 같은 규칙으로 다시 계산합니다. 두 후보를 같은 동료(HAMILTON) 기준으로 재고, 2026 시즌으로 독립 확인합니다. 방법·결과는 [docs/06_후보선정근거.md](../docs/06_후보선정근거.md) §6에 있습니다.
+
+```powershell
+python -m pipeline.driver_check
+```
+
+출력: `data/05_gold/driver_check/` (`teammate.csv`, `teammate_races.csv`, `tyre_stints.csv`, `tyre_season.csv`, `tyre_2023_2025.csv`)
