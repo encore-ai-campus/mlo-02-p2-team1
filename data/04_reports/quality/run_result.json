@@ -1,9 +1,9 @@
 {
   "run_id": "32197d11756d",
   "pipeline_version": "0.3.0",
-  "input": "data/01_raw/F1_distribution.zip",
-  "output": "data/03_cleaned",
-  "report_output": "data/04_reports/quality",
+  "input": "data\\01_raw\\F1_distribution.zip",
+  "output": "data\\03_cleaned",
+  "report_output": "data\\04_reports\\quality",
   "issues": 28071,
   "repaired_cells": 1357,
   "open_issues": 1848,

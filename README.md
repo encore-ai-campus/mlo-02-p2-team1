@@ -2,7 +2,7 @@
 
 **어떤 드라이버가 우리 팀의 약점을 메울 수 있는가.** 오염 데이터 6종과 분석 중 추가한 5종, 2023 ~ 2026-10-14에 끝난 본경기 87경기를 정제·검증해 직접 분석한 프로젝트입니다.
 
-이 README는 [발표자료(PPT, 26장)](./docs/F1_TeamBuilder_발표자료.pptx)와 같은 순서로 구성했습니다. **결론 → 한 장 요약 → ① 숫자를 믿을 수 있게 → ② 우리 팀은 어디가 약한가 → ③ 누가 메울 수 있나(+ 교체하면 우승확률은?) → ④ 무엇을 할 것인가 → 한계 → 부록(재현 방법)** 순서입니다. 전체 기획은 [F1_P2_Spec.md](./F1_P2_Spec.md)에 있습니다.
+이 README는 [발표자료(PPT, 26장)](./docs/F1_TeamBuilder_발표자료.pptx)와 같은 순서로 구성했습니다. **결론 → 한 장 요약 → 전체 흐름(수집 → 적재) → ① 숫자를 믿을 수 있게 → ② 우리 팀은 어디가 약한가 → ③ 누가 메울 수 있나(+ 교체하면 우승확률은?) → ④ 무엇을 할 것인가 → 한계 → 부록(재현 방법)** 순서입니다. 전체 기획은 [F1_P2_Spec.md](./F1_P2_Spec.md)에 있습니다.
 
 ## 결론
 
@@ -27,6 +27,80 @@
 2. **2025 Aston Martin의 약점은 페이스와 피트 운영입니다.** 필드 상대 페이스는 10팀 중 7위(+0.46%)이고, 피트레인은 같은 경기 타 팀보다 0.28초 깁니다. 본경기 기본 포인트는 7위인데, 6~9위가 18점 안에 모인 접전 구간입니다.
 3. **우선 검토 후보는 RUSSELL과 LECLERC입니다.** 후보 19명 중 7명이 기준 선수보다 빨랐지만, 자기 팀 동료 대비 우위까지 11/11 조건에서 반복된 것은 두 명뿐입니다.
 4. **교체해도 우승은 어렵습니다.** 현재 라인업의 시즌 1승 이상 확률은 0.1%이고, LECLERC로 바꿔도 3.1%입니다. 대신 팀 6위 이내 확률은 9%에서 65%로 오릅니다.
+
+---
+
+## 전체 흐름: 수집 → 오염 검사 → 정제 → 검증 → MySQL 적재
+
+```mermaid
+flowchart TD
+    subgraph S1["① 수집 · Bronze (data/01_raw, 원본 수정 금지)"]
+        A1["오염 데이터 6종<br/>F1_distribution.zip<br/>sessions · drivers · laps · stints · weather · pit"]
+        A2["OpenF1 API 추가 5종<br/>f1_extra_data.zip<br/>starting_grid · session_result · position · race_control · intervals"]
+        A2 --> X1["pipeline.extra_data<br/>압축 해제"]
+        A1 --> M["Bronze 매니페스트<br/>체크섬 · 명세 행 수 · 스키마 대조"]
+    end
+
+    subgraph S2["② 오염 검사 · pipeline.recovery"]
+        D["진단 DQ001~DQ027<br/>28,071건 탐지"]
+        D --> C1["수리 1,357셀<br/>근거 있는 것만"]
+        D --> C2["허용 24,866건<br/>실제 경기 상황"]
+        D --> C3["격리 4행<br/>quarantine/"]
+        D --> C4["미해결 1,848건<br/>REVIEW로 공개"]
+        C1 & C2 & C3 & C4 --> J{"파일 판정<br/>FAIL 5 → 0"}
+    end
+
+    subgraph S3["③ 정제 결과 · Silver"]
+        CL["data/03_cleaned<br/>repaired/ 전체 행 + 복구 이력<br/>quarantine/ 격리 행"]
+        QR["품질 리포트<br/>quality_report · fail_before_after"]
+    end
+
+    subgraph S4["④ 검증 · pipeline.validate_cleaned"]
+        V["VC01~VC71 · 154개 검사<br/>정제 전 FAIL 12 → 정제 후 0"]
+        RC["행 대사 120,873행<br/>그대로 + 수리 + 격리 = 원본"]
+    end
+
+    subgraph S5["⑤ MySQL 적재 · sql/01~06"]
+        Q1["sql/01 스테이징 테이블 stg_*"] --> Q2["sql/02 CSV 11종 적재"]
+        Q2 --> Q3["sql/03 같은 154개 검사<br/>pandas 결과와 일치"]
+        Q3 --> Q4["sql/04 정규화 스키마 13개 테이블"]
+        Q4 --> Q5["sql/05 스키마 적재 · 행 수 대사 차이 0"]
+        Q5 --> Q6["sql/06 + load_board_gold<br/>gold_board_* 11개"]
+    end
+
+    subgraph S6["⑥ Gold · 화면 (Django)"]
+        G1["Decision Board /"]
+        G2["적재 테이블 조회 /data/"]
+        G3["파이프라인 관리 /ops/"]
+        G4["교체 시뮬레이션<br/>data/05_gold/driver_swap"]
+    end
+
+    M --> D
+    X1 --> V
+    J -- "PASS · REVIEW" --> CL
+    J -- "FAIL" --> STOP1["중단 · 종료 코드 1"]
+    CL --> QR
+    CL --> V
+    V --> RC
+    V -- "FAIL" --> STOP2["중단 · 종료 코드 1"]
+    RC -- "FAIL 0" --> Q1
+    Q6 --> G1 & G2 & G3
+    CL --> G4
+
+    classDef stop fill:#fde2e2,stroke:#c0392b,color:#7b1d1d
+    class STOP1,STOP2 stop
+```
+
+| 단계 | 하는 일 | 통과 기준 | 결과물 |
+|---|---|---|---|
+| ① 수집 | 오염 6종 zip과 OpenF1 추가 5종 zip을 받은 그대로 보관하고, 체크섬·명세 행 수·스키마를 대조합니다. | 체크섬·행 수·스키마 일치 | `data/01_raw`, `bronze_manifest.csv` |
+| ② 오염 검사 | 진단코드 27종으로 셀 단위 오염을 찾고, 수리·허용·격리·미해결로 나눕니다. 통계값으로 채우지 않습니다. | 격리 안 된 ERROR 미해결 0건(있으면 FAIL, 종료 코드 1) | `validation_issues.csv`, `repair_detail.csv` |
+| ③ 정제 | 수리한 값과 복구 이력 컬럼을 붙여 전체 행을 쓰고, 근거가 없는 행만 따로 격리합니다. | 파일 판정 FAIL 0 | `data/03_cleaned`, [품질 리포트](./data/04_reports/quality/quality_report.md) |
+| ④ 검증 | 같은 154개 규칙을 원본과 정제본에 돌려 전후를 비교하고, 행 수를 대사합니다. | 정제 후 FAIL 0, 대사 차이 0 | [검증 리포트](./data/04_reports/validation/validation_report.md), `validation_before_after.csv` |
+| ⑤ MySQL 적재 | 스테이징에 문자열로 적재 → SQL로 같은 검사 → 정규화 스키마 13개 테이블 → Gold 11개 테이블. | pandas = SQL, 13개 테이블 대사 차이 0 | `stg_*`, 정규화 스키마, `gold_board_*` |
+| ⑥ 화면 | Django가 MySQL Gold를 읽어 Decision Board와 관리자 화면을 보여줍니다. | Gold 값 = 원천 값 | `/`, `/data/`, `/ops/` |
+
+`/ops/` 관리자 화면에서 '전체 실행'을 한 번 누르면(약 9분) ①부터 ⑥까지 다시 만들고, 단계마다 대사 결과와 정제 전후 FAIL을 확인할 수 있습니다. 명령으로 직접 돌리는 순서는 [부록](#부록-이-숫자를-다시-만드는-방법)에 있습니다.
 
 ---
 
@@ -135,14 +209,6 @@ FAIL 판정을 처음 넣었을 때 랩 시작 시각 불일치(DQ019) 47건이 
 남은 WARN 7건(스틴트 밖 랩 280건, 섹터 합 불일치 20건 등)은 오류가 아니라 원천 특성이며, 분석의 제외·보류 기준으로 관리합니다.
 
 자세히: [04_데이터검증.md](./docs/04_데이터검증.md) · [검증 리포트](./data/04_reports/validation/validation_report.md) · [validation_before_after.csv](./data/04_reports/validation/validation_before_after.csv)
-
-### 원본 → 정제 → 지표 → 화면
-
-| BRONZE · 원본 보존 | SILVER · 정제·연결 | GOLD · 의사결정 지표 | 화면 · Django |
-|---|---|---|---|
-| `data/01_raw`: zip 원본, 체크섬·명세 대조 · MySQL 문자열 스테이징 `stg_*` | `data/03_cleaned`: 복구·격리 CSV · `data/04_reports`: 품질·검증 리포트 · MySQL 정규화 스키마 13개 테이블 | `data/05_gold` → MySQL `gold_board_*` 11개: 프로필·팀·경기 결과·후보 판정·품질 · 교체 시뮬레이션 `driver_swap/` | Decision Board(`/`) · 적재 테이블 조회(`/data/`) · 파이프라인 관리(`/ops/`) |
-
-관리자 화면에서 '전체 실행'을 한 번 누르면(약 9분) 원본에서 화면까지 다시 만들고, 단계마다 대사 결과와 정제 전후 FAIL을 확인할 수 있습니다.
 
 ---
 

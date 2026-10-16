@@ -1,6 +1,6 @@
 # F1 오염 데이터 검증·복구 리포트
 
-파이프라인 0.3.0 · 입력 `data/01_raw/F1_distribution.zip` · run_id `32197d11756d`  
+파이프라인 0.3.0 · 입력 `data\01_raw\F1_distribution.zip` · run_id `32197d11756d`  
 전체 샘플과 원자료: [quality_report.html](./quality_report.html) (내려받아 브라우저로 열기) · `validation_issues.csv` · `repair_detail.csv`
 
 | 탐지 | 자동 복구 | 허용(원천 특성) | 검토 필요 | 격리 행 |
